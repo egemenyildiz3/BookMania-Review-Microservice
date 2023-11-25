@@ -1,0 +1,335 @@
+openapi: 3.0.3
+info:
+  title: BookMania-ReviewMicroservice
+  description: Specifications about all endpoints of the review microservices for the BookMania application
+  version: 1.0.0
+servers:
+  - url: 'https://bookmania.tudelft.nl/api'
+tags:
+  - name: review
+    description: actions for reviews
+  - name: comment
+    description: actions for comments
+  - name: report
+    description: hand out report
+paths:
+  /writeReview:
+    post:
+      tags:
+        - review
+      summary: create a new review to a specific book
+      description: creates and stores a new review in the database that is associated with the user who created it and the book it was created to
+      parameters:
+        - name: user
+          in: query
+          description: user who creates the review
+          required: true
+          schema:
+            type: string
+        - name: book
+          in: query
+          description: the book for which the review is created
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Create a new review for a book
+        content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+        required: true
+      responses:
+          '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Review'
+          '405':
+            description: Internal server error - cannot save review
+          '400':
+            description: Invalid book or user
+
+  /updateReview/{user}:
+    put:
+      tags:
+        - review
+      summary: updates a review
+      description: applies the changes made to the review
+      parameters:
+        - name: user
+          in: path
+          description: user who tries to edit review
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: updates a review for the book
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+        '405':
+          description: Invalid input
+        '400':
+         description: cannot find user
+        '403':
+          description: permission denied - not owner or admin
+  /deleteReview/{reviewId}/{user}:
+    delete:
+      tags:
+        - review
+      summary: deletes a review
+      description: deletes the review from review database, book and user
+      parameters:
+        - name: reviewId
+          in: path
+          description: id of review to be deleted
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: user
+          in: path
+          description: user who tries to delete review
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: cannot find review
+        '403':
+          description: permission denied - not owner or admin
+
+
+  /addComment/{user}/{reviewId}:
+    post:
+      tags:
+        - comment
+      summary: create a new comment to a specific review
+      description: creates and stores a new comment in the database that is associated with the user who created it and the review it was created to
+      parameters:
+        - name: user
+          in: query
+          description: user who creates the review
+          required: true
+          schema:
+            type: string
+        - name: reviewId
+          in: path
+          description: the book for which the review is created
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Create a new comment to a review
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Comment'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '405':
+          description: Internal server error - cannot save comment
+        '400':
+          description: Invalid review or user
+
+  /editComment/{user}:
+    put:
+      tags:
+        - comment
+      summary: updates a comment
+      description: applies the changes made to the comment
+      parameters:
+        - name: user
+          in: path
+          description: user who tries to edit comment
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: updates a comment for a review
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Comment'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '405':
+          description: Invalid input
+        '400':
+          description: cannot find comment
+        '403':
+          description: permission denied - not owner or admin
+  /deleteComment/{commentId}/{user}:
+    delete:
+      tags:
+        - comment
+      summary: deletes a comment
+      description: deletes the comment from comment database, book and user
+      parameters:
+        - name: commentId
+          in: path
+          description: id of review to be deleted
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: user
+          in: path
+          description: user who tries to delete review
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: cannot find comment
+        '403':
+          description: permission denied - not owner or admin
+
+
+
+
+
+components:
+  schemas:
+    Review:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        bookId:
+          type: integer
+          format: int64
+          example: 1234
+        user:
+          type: string
+          example: John
+        title:
+          type: string
+          example: wow
+        text:
+          type: string
+          example: nice book
+        rating:
+          type: integer
+          format: int64
+          example: 4
+        commentList:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+        upvote:
+          type: integer
+          format: int64
+          example: 453
+        downvote:
+          type: integer
+          format: int64
+          example: 345
+        latestUpvoteTime:
+          type: string
+          format: date
+          example: '2013-10-24'
+        spoiler:
+          type: boolean
+          example: true
+        bookNotion:
+          type: string
+          enum:
+            - POSITIVE
+            - NEGATIVE
+            - NEUTRAL
+        timeCreated:
+          type: string
+          format: date
+          example: '2013-10-24'
+        lastEditTime:
+          type: string
+          format: date
+          example: '2013-10-24'
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 3
+        reviewId:
+          type: integer
+          format: int64
+          example: 3
+        user:
+          type: string
+          example: Ivan
+        text:
+          type: string
+          example: bad review
+        upvote:
+          type: integer
+          format: int64
+          example: 453
+        downvote:
+          type: integer
+          format: int64
+          example: 345
+        timeCreated:
+          type: string
+          format: date
+          example: '2013-10-24'
+        lastEditTime:
+          type: string
+          format: date
+          example: '2013-10-24'
+    Report:
+      type: object
+      properties:
+        bookId:
+          type: integer
+          format: int64
+          example: 23
+        avrRating:
+          type: integer
+          format: int64
+          example: 4.3
+        mostRelevantReview:
+          $ref: '#/components/schemas/Review'
+        positiveRev:
+          type: integer
+          format: int32
+          example: 20
+        negativeRev:
+          type: integer
+          format: int32
+          example: 15
+        neutralRev:
+          type: integer
+          format: int32
+          example: 4
