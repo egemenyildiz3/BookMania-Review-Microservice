@@ -111,7 +111,68 @@ paths:
           description: cannot find review
         '403':
           description: permission denied - not owner or admin
-
+  /seeAllReviews/{bookId}:
+    get:
+      tags:
+        - review
+      summary: get reviews for book
+      description: searches the database for the reviews that are made to that bookId (with other api, gets the book and its list of reviews from the other database)
+      parameters:
+        - name: bookId
+          in: path
+          description: the book for which we are getting reviews
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: filter
+          in: query
+          description: how to sort the reviews
+          required: true
+          schema:
+            type: string
+            enum:
+              - mostRelevant
+              - mostRecent
+              - mostHelpful
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+        '400':
+          description: cannot find book
+  /voteReview/{reviewId}:
+    put:
+      tags:
+        - review
+      summary: upvoting or downvoting a review
+      description: sending either a 0 or 1 to server for downvoting or upvoting a review respectfully
+      parameters:
+        - name: reviewId
+          in: path
+          description: the reviewId of the desired review for upvote or downvote
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: 1 for upvote or 0 for downvote
+        content:
+          application/json:
+            schema:
+              type: integer
+              format: int32
+              example: 0
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid review
 
   /addComment/{user}/{reviewId}:
     post:
@@ -211,10 +272,6 @@ paths:
           description: cannot find comment
         '403':
           description: permission denied - not owner or admin
-
-
-
-
 
 components:
   schemas:
