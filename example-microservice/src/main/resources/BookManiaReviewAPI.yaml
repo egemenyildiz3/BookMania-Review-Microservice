@@ -11,7 +11,9 @@ tags:
   - name: comment
     description: actions for comments
   - name: report
-    description: hand out report
+    description: hand out report (only for authors)
+  - name: public book statistics
+    description: provide statistics for books that are visible to all users
 paths:
   /writeReview:
     post:
@@ -111,6 +113,29 @@ paths:
           description: cannot find review
         '403':
           description: permission denied - not owner or admin
+  /getReview/{reviewId}:
+    get:
+      tags:
+        - review
+      summary: getting a review
+      description: display the review with this reviewId from the database
+      parameters:
+        - name: reviewId
+          in: path
+          description: the reviewId we are searching for
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Review'
+        '400':
+          description: cannot find review
   /seeAllReviews/{bookId}:
     get:
       tags:
@@ -173,6 +198,175 @@ paths:
           description: Successful operation
         '400':
           description: Invalid review
+  /pinReview/{reviewId}:
+    put:
+      tags:
+        - review
+      summary: pinning a review
+      description: places the review at the start of the list of reviews for the book
+      parameters:
+        - name: reviewId
+          in: path
+          description: the reviewId of the desired review to pin, set pinned boolean to true
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid review
+  /unpinReview/{reviewId}:
+    put:
+      tags:
+        - review
+      summary: unpinning a review
+      description: places the review at its original position based on the current filter, sets pinned boolean to false
+      parameters:
+        - name: reviewId
+          in: path
+          description: the reviewId of the desired review to unpin
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid review
+  /mostUpvoted/{user}:
+    get:
+      tags:
+        - review
+      summary: get the top reviews for the user
+      description: searches the database for the reviews that are made by that user and returns top three most recent ones
+      parameters:
+        - name: user
+          in: path
+          description: the user for which we are getting top reviews
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+        '400':
+          description: cannot find user
+  /reportReview/{reviewId}:
+    put:
+      tags:
+        - review
+      summary: reporting a review
+      description: the review is set as reported and can be assessed by the admin for deletion or user ban
+      parameters:
+        - name: reviewId
+          in: path
+          description: the reviewId of the desired review to report
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid review
+  /reported:
+    get:
+      tags:
+         - review
+      summary: see reported reviews
+      description: shows all of the reported reviews to the admin
+      responses:
+        '200':
+          description: Successful operation
+          content:
+           application/json:
+             schema:
+               type: array
+               items:
+                 $ref: '#/components/schemas/Review'
+        '400':
+          description: No reported reviews
+  /addSpoilerReview/{reviewId}:
+    put:
+      tags:
+        - review
+      summary: adding a spoiler flag to the review
+      description: setting the spoiler value in the review to true
+      parameters:
+        - name: reviewId
+          in: path
+          description: the reviewId of the desired review to add a spoiler warning to
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid review
+  /getAvrRating/{bookId}:
+    get:
+      tags:
+        - public book statistics
+      summary: the average rating for the book
+      description: returns the average rating for this bookId
+      parameters:
+        - name: bookId
+          in: path
+          description: the bookId of the book to get the average rating of
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+                example: 4.4
+        '400':
+          description: cannot find book
+  /getPublicInteractions/{bookId}:
+    get:
+      tags:
+        - public book statistics
+      summary: how many reviews and comment
+      description: returns the amount of reviews and comments, so that users can quickly see the interactions and popularity of the book
+      parameters:
+        - name: bookId
+          in: path
+          description: the bookId of the book to get the average rating of
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+                example: 250
+        '400':
+          description: cannot find book
+
 
   /addComment/{user}/{reviewId}:
     post:
@@ -272,6 +466,147 @@ paths:
           description: cannot find comment
         '403':
           description: permission denied - not owner or admin
+  /getComment/{commentId}:
+    get:
+      tags:
+        - comment
+      summary: getting a comment
+      description: display the comment with this commentId from the database
+      parameters:
+        - name: commentId
+          in: path
+          description: the commentId we are searching for
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: cannot find comment
+
+  /pinComment/{commentId}:
+    put:
+      tags:
+        - comment
+      summary: pinning a comment
+      description: places the comment at the start of the list of reviews for the book
+      parameters:
+        - name: commentId
+          in: path
+          description: the commentId of the desired comment to pin, set pinned boolean to true
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid comment
+  /unpinComment/{commentId}:
+    put:
+      tags:
+        - comment
+      summary: unpinning a comment
+      description: places the comment at its original position, sets pinned boolean to false
+      parameters:
+        - name: commentId
+          in: path
+          description: the reviewId of the desired review to unpin
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid review
+  /voteComment/{commentId}:
+    put:
+      tags:
+        - comment
+      summary: upvoting or downvoting a comment
+      description: sending either a 0 or 1 to server for downvoting or upvoting a comment respectfully
+      parameters:
+        - name: commentId
+          in: path
+          description: the commentId of the desired comment for upvote or downvote
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: 1 for upvote or 0 for downvote
+        content:
+          application/json:
+            schema:
+              type: integer
+              format: int32
+              example: 0
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid comment
+  /addSpoilerComment/{commentId}:
+    put:
+      tags:
+        - comment
+      summary: adding a spoiler flag to the comment
+      description: setting the spoiler value in the comment to true
+      parameters:
+        - name: commentId
+          in: path
+          description: the commentId of the desired comment to add a spoiler warning to
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid comment
+  /getReport/{bookId}/{user}:
+    get:
+      tags:
+        - report
+      summary: report about a book
+      description: generates and returns a report about the reviews and interactions of the book
+      parameters:
+        - name: bookId
+          in: path
+          description: the bookId of the book to generate a report for
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: user
+          in: path
+          description: the user that requests the report - should be checked if it is the author of the book
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+        '400':
+          description: cannot find book
+        '401':
+          description: cannot find user
+        '402':
+          description: user not an author
 
 components:
   schemas:
@@ -324,6 +659,12 @@ components:
             - POSITIVE
             - NEGATIVE
             - NEUTRAL
+        pinned:
+          type: boolean
+          example: false
+        reported:
+          type: boolean
+          example: true
         timeCreated:
           type: string
           format: date
@@ -349,6 +690,12 @@ components:
         text:
           type: string
           example: bad review
+        pinned:
+          type: boolean
+          example: true
+        spoiler:
+          type: boolean
+          example: true
         upvote:
           type: integer
           format: int64
