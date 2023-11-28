@@ -10,7 +10,7 @@ tags:
     description: actions for reviews
   - name: comment
     description: actions for comments
-  - name: bookReport
+  - name: bookData
     description: hand out report (only for authors)
   - name: public book statistics
     description: provide statistics for books that are visible to all users
@@ -303,16 +303,23 @@ paths:
           description: Successful operation
         '400':
           description: Invalid review
-  /getAvrRating/{bookId}:
+  /getAvrRating/{bookId}/{user}:
     get:
       tags:
         - public book statistics
       summary: the average rating for the book
-      description: returns the average rating for this bookId
+      description: returns the average rating for this bookId, calls report with a user that is not the author of the book
       parameters:
         - name: bookId
           in: path
           description: the bookId of the book to get the average rating of
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: user
+          in: path
+          description: the user that requests the average rating of
           required: true
           schema:
             type: integer
@@ -328,16 +335,23 @@ paths:
                 example: 4.4
         '400':
           description: cannot find book
-  /getPublicInteractions/{bookId}:
+  /getPublicInteractions/{bookId}/{user}:
     get:
       tags:
         - public book statistics
-      summary: how many reviews and comment
-      description: returns the amount of reviews and comments, so that users can quickly see the interactions and popularity of the book
+      summary: how many reviews the book has
+      description: returns the amount of reviews, so that users can quickly see the interactions and popularity of the book
       parameters:
         - name: bookId
           in: path
-          description: the bookId of the book to get the average rating of
+          description: the book to return number of reviews
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: user
+          in: path
+          description: the user that requests number of reviews
           required: true
           schema:
             type: integer
@@ -475,45 +489,6 @@ paths:
                 $ref: '#/components/schemas/Comment'
         '400':
           description: cannot find comment
-
-  /comment/pin/{commentId}:
-    put:
-      tags:
-        - comment
-      summary: pinning a comment
-      description: places the comment at the start of the list of reviews for the book
-      parameters:
-        - name: commentId
-          in: path
-          description: the commentId of the desired comment to pin, set pinned boolean to true
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: Successful operation
-        '400':
-          description: Invalid comment
-  /comment/unpin/{commentId}:
-    put:
-      tags:
-        - comment
-      summary: unpinning a comment
-      description: places the comment at its original position, sets pinned boolean to false
-      parameters:
-        - name: commentId
-          in: path
-          description: the reviewId of the desired review to unpin
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: Successful operation
-        '400':
-          description: Invalid review
   /comment/vote/{commentId}:
     put:
       tags:
@@ -541,31 +516,12 @@ paths:
           description: Successful operation
         '400':
           description: Invalid comment
-  /comment/spoiler/{commentId}:
-    put:
-      tags:
-        - comment
-      summary: adding a spoiler flag to the comment
-      description: setting the spoiler value in the comment to true
-      parameters:
-        - name: commentId
-          in: path
-          description: the commentId of the desired comment to add a spoiler warning to
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: Successful operation
-        '400':
-          description: Invalid comment
   /getReport/{bookId}/{user}:
     get:
       tags:
-        - bookReport
+        - bookData
       summary: report about a book
-      description: generates and returns a report about the reviews and interactions of the book
+      description: generates and returns a report about the reviews and interactions of the book; if the user is not the author, you get partial data
       parameters:
         - name: bookId
           in: path
@@ -586,13 +542,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BookReport'
+                $ref: '#/components/schemas/BookData'
         '400':
           description: cannot find book
         '401':
           description: cannot find user
-        '402':
-          description: user not an author
 
 components:
   schemas:
@@ -687,7 +641,7 @@ components:
           type: string
           format: date
           example: '2013-10-24'
-    BookReport:
+    BookData:
       type: object
       properties:
         bookId:
@@ -698,7 +652,10 @@ components:
           type: integer
           format: int64
           example: 4.3
-        mostRelevantReview:
+        mostUpvotedReview:
+          type: integer
+          format: int64
+        mostUpvotedComment:
           type: integer
           format: int64
         positiveRev:
