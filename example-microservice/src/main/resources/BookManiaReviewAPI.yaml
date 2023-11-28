@@ -15,7 +15,7 @@ tags:
   - name: public book statistics
     description: provide statistics for books that are visible to all users
 paths:
-  /writeReview:
+  /review/{user}/{book}:
     post:
       tags:
         - review
@@ -23,7 +23,7 @@ paths:
       description: creates and stores a new review in the database that is associated with the user who created it and the book it was created to
       parameters:
         - name: user
-          in: query
+          in: path
           description: user who creates the review
           required: true
           schema:
@@ -33,8 +33,7 @@ paths:
           description: the book for which the review is created
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
       requestBody:
         description: Create a new review for a book
         content:
@@ -54,7 +53,7 @@ paths:
           '400':
             description: Invalid book or user
 
-  /updateReview/{user}:
+  /review/update/{user}:
     put:
       tags:
         - review
@@ -87,7 +86,7 @@ paths:
          description: cannot find user
         '403':
           description: permission denied - not owner or admin
-  /deleteReview/{reviewId}/{user}:
+  /review/delete/{reviewId}/{user}:
     delete:
       tags:
         - review
@@ -113,7 +112,7 @@ paths:
           description: cannot find review
         '403':
           description: permission denied - not owner or admin
-  /getReview/{reviewId}:
+  /review/{reviewId}:
     get:
       tags:
         - review
@@ -171,7 +170,7 @@ paths:
                   $ref: '#/components/schemas/Review'
         '400':
           description: cannot find book
-  /voteReview/{reviewId}:
+  /review/vote/{reviewId}:
     put:
       tags:
         - review
@@ -198,7 +197,7 @@ paths:
           description: Successful operation
         '400':
           description: Invalid review
-  /pinReview/{reviewId}:
+  /review/pin/{reviewId}:
     put:
       tags:
         - review
@@ -217,7 +216,7 @@ paths:
           description: Successful operation
         '400':
           description: Invalid review
-  /unpinReview/{reviewId}:
+  /review/unpin/{reviewId}:
     put:
       tags:
         - review
@@ -236,7 +235,7 @@ paths:
           description: Successful operation
         '400':
           description: Invalid review
-  /mostUpvoted/{user}:
+  /review/mostUpvoted/{user}:
     get:
       tags:
         - review
@@ -261,7 +260,7 @@ paths:
                   $ref: '#/components/schemas/Review'
         '400':
           description: cannot find user
-  /reportReview/{reviewId}:
+  /review/report/{reviewId}:
     put:
       tags:
         - review
@@ -297,7 +296,7 @@ paths:
                  $ref: '#/components/schemas/Review'
         '400':
           description: No reported reviews
-  /addSpoilerReview/{reviewId}:
+  /review/spoiler/{reviewId}:
     put:
       tags:
         - review
@@ -367,8 +366,7 @@ paths:
         '400':
           description: cannot find book
 
-
-  /addComment/{user}/{reviewId}:
+  /comment/add/{user}/{reviewId}:
     post:
       tags:
         - comment
@@ -407,7 +405,7 @@ paths:
         '400':
           description: Invalid review or user
 
-  /editComment/{user}:
+  /comment/edit/{user}:
     put:
       tags:
         - comment
@@ -440,7 +438,7 @@ paths:
           description: cannot find comment
         '403':
           description: permission denied - not owner or admin
-  /deleteComment/{commentId}/{user}:
+  /comment/delete/{commentId}/{user}:
     delete:
       tags:
         - comment
@@ -466,7 +464,7 @@ paths:
           description: cannot find comment
         '403':
           description: permission denied - not owner or admin
-  /getComment/{commentId}:
+  /comment/{commentId}:
     get:
       tags:
         - comment
@@ -490,7 +488,7 @@ paths:
         '400':
           description: cannot find comment
 
-  /pinComment/{commentId}:
+  /comment/pin/{commentId}:
     put:
       tags:
         - comment
@@ -509,7 +507,7 @@ paths:
           description: Successful operation
         '400':
           description: Invalid comment
-  /unpinComment/{commentId}:
+  /comment/unpin/{commentId}:
     put:
       tags:
         - comment
@@ -528,7 +526,7 @@ paths:
           description: Successful operation
         '400':
           description: Invalid review
-  /voteComment/{commentId}:
+  /comment/vote/{commentId}:
     put:
       tags:
         - comment
@@ -555,7 +553,7 @@ paths:
           description: Successful operation
         '400':
           description: Invalid comment
-  /addSpoilerComment/{commentId}:
+  /comment/spoiler/{commentId}:
     put:
       tags:
         - comment
