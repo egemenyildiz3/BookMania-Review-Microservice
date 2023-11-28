@@ -278,6 +278,10 @@ paths:
       responses:
         '200':
           description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
         '400':
           description: No reported reviews
   /review/spoiler/{reviewId}:
@@ -709,3 +713,11 @@ components:
           type: integer
           format: int32
           example: 4
+    Report:
+      type: object
+      properties:
+        object:
+          type: object
+        text:
+          type: string
+          example: offensive
