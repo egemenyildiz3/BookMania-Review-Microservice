@@ -10,30 +10,19 @@ tags:
     description: actions for reviews
   - name: comment
     description: actions for comments
-  - name: report
+  - name: bookReport
     description: hand out report (only for authors)
   - name: public book statistics
     description: provide statistics for books that are visible to all users
+  - name: both
+    description: functions for both review and comment
 paths:
-  /review/{user}/{book}:
+  /review:
     post:
       tags:
         - review
       summary: create a new review to a specific book
       description: creates and stores a new review in the database that is associated with the user who created it and the book it was created to
-      parameters:
-        - name: user
-          in: path
-          description: user who creates the review
-          required: true
-          schema:
-            type: string
-        - name: book
-          in: query
-          description: the book for which the review is created
-          required: true
-          schema:
-            type: string
       requestBody:
         description: Create a new review for a book
         content:
@@ -65,7 +54,8 @@ paths:
           description: user who tries to edit review
           required: true
           schema:
-            type: string
+            type: integer
+            format: int64
       requestBody:
         description: updates a review for the book
         content:
@@ -104,7 +94,8 @@ paths:
           in: path
           description: user who tries to delete review
           schema:
-            type: string
+            type: integer
+            format: int64
       responses:
         '200':
           description: Successful operation
@@ -135,7 +126,7 @@ paths:
                   $ref: '#/components/schemas/Review'
         '400':
           description: cannot find review
-  /seeAllReviews/{bookId}:
+  /seeAllReviews/{bookId}/{filter}:
     get:
       tags:
         - review
@@ -150,7 +141,7 @@ paths:
             type: integer
             format: int64
         - name: filter
-          in: query
+          in: path
           description: how to sort the reviews
           required: true
           schema:
@@ -158,7 +149,7 @@ paths:
             enum:
               - mostRelevant
               - mostRecent
-              - mostHelpful
+              - highestRated
       responses:
         '200':
           description: Successful operation
@@ -235,14 +226,14 @@ paths:
           description: Successful operation
         '400':
           description: Invalid review
-  /review/mostUpvoted/{user}:
+  /review/mostUpvoted/{userId}:
     get:
       tags:
         - review
       summary: get the top reviews for the user
       description: searches the database for the reviews that are made by that user and returns top three most recent ones
       parameters:
-        - name: user
+        - name: userId
           in: path
           description: the user for which we are getting top reviews
           required: true
@@ -260,20 +251,19 @@ paths:
                   $ref: '#/components/schemas/Review'
         '400':
           description: cannot find user
-  /review/report/{reviewId}:
+  /report:
     put:
       tags:
-        - review
-      summary: reporting a review
-      description: the review is set as reported and can be assessed by the admin for deletion or user ban
-      parameters:
-        - name: reviewId
-          in: path
-          description: the reviewId of the desired review to report
-          required: true
-          schema:
-            type: integer
-            format: int64
+        - both
+      summary: reporting a review/comment
+      description: the review/comment is set as reported and can be assessed by the admin for deletion or user ban
+      requestBody:
+        description: the comment/review that is reported
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+        required: true
       responses:
         '200':
           description: Successful operation
@@ -282,18 +272,12 @@ paths:
   /reported:
     get:
       tags:
-         - review
-      summary: see reported reviews
+         - both
+      summary: see reported reviews/comments
       description: shows all of the reported reviews to the admin
       responses:
         '200':
           description: Successful operation
-          content:
-           application/json:
-             schema:
-               type: array
-               items:
-                 $ref: '#/components/schemas/Review'
         '400':
           description: No reported reviews
   /review/spoiler/{reviewId}:
@@ -575,7 +559,7 @@ paths:
   /getReport/{bookId}/{user}:
     get:
       tags:
-        - report
+        - bookReport
       summary: report about a book
       description: generates and returns a report about the reviews and interactions of the book
       parameters:
@@ -598,7 +582,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Report'
+                $ref: '#/components/schemas/BookReport'
         '400':
           description: cannot find book
         '401':
@@ -619,9 +603,10 @@ components:
           type: integer
           format: int64
           example: 1234
-        user:
-          type: string
-          example: John
+        userId:
+          type: integer
+          format: int64
+          example: 10
         title:
           type: string
           example: wow
@@ -635,7 +620,8 @@ components:
         commentList:
           type: array
           items:
-            $ref: '#/components/schemas/Comment'
+            type: integer
+            format: int64
         upvote:
           type: integer
           format: int64
@@ -644,10 +630,6 @@ components:
           type: integer
           format: int64
           example: 345
-        latestUpvoteTime:
-          type: string
-          format: date
-          example: '2013-10-24'
         spoiler:
           type: boolean
           example: true
@@ -682,18 +664,13 @@ components:
           type: integer
           format: int64
           example: 3
-        user:
-          type: string
-          example: Ivan
+        userId:
+          type: integer
+          format: int64
+          example: 10
         text:
           type: string
           example: bad review
-        pinned:
-          type: boolean
-          example: true
-        spoiler:
-          type: boolean
-          example: true
         upvote:
           type: integer
           format: int64
@@ -706,11 +683,7 @@ components:
           type: string
           format: date
           example: '2013-10-24'
-        lastEditTime:
-          type: string
-          format: date
-          example: '2013-10-24'
-    Report:
+    BookReport:
       type: object
       properties:
         bookId:
@@ -722,7 +695,8 @@ components:
           format: int64
           example: 4.3
         mostRelevantReview:
-          $ref: '#/components/schemas/Review'
+          type: integer
+          format: int64
         positiveRev:
           type: integer
           format: int32
