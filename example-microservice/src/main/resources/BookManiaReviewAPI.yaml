@@ -269,12 +269,19 @@ paths:
           description: Successful operation
         '400':
           description: Invalid review
-  /reported:
+  /reported/{user}:
     get:
       tags:
          - both
       summary: see reported reviews/comments
       description: shows all of the reported reviews to the admin
+      parameters:
+        - name: user
+          in: path
+          description: user that is trying to get reported content, check if he is admin
+          schema:
+            type: integer
+            format: int64
       responses:
         '200':
           description: Successful operation
@@ -284,6 +291,10 @@ paths:
                 $ref: '#/components/schemas/Report'
         '400':
           description: No reported reviews
+        '401':
+          description: No found user
+        '402':
+          description: User not an admin
   /review/spoiler/{reviewId}:
     put:
       tags:
@@ -335,6 +346,8 @@ paths:
                 example: 4.4
         '400':
           description: cannot find book
+        '401':
+          description: cannot find user
   /getPublicInteractions/{bookId}/{user}:
     get:
       tags:
@@ -380,7 +393,8 @@ paths:
           description: user who creates the review
           required: true
           schema:
-            type: string
+            type: integer
+            format: int64
         - name: reviewId
           in: path
           description: the book for which the review is created
@@ -419,7 +433,8 @@ paths:
           description: user who tries to edit comment
           required: true
           schema:
-            type: string
+            type: integer
+            format: int64
       requestBody:
         description: updates a comment for a review
         content:
@@ -458,7 +473,8 @@ paths:
           in: path
           description: user who tries to delete review
           schema:
-            type: string
+            type: integer
+            format: int64
       responses:
         '200':
           description: Successful operation
@@ -535,7 +551,8 @@ paths:
           description: the user that requests the report - should be checked if it is the author of the book
           required: true
           schema:
-            type: string
+            type: integer
+            format: int64
       responses:
         '200':
           description: Successful operation
