@@ -22,7 +22,7 @@ paths:
       tags:
         - review
       summary: create a new review to a specific book
-      description: creates and stores a new review in the database that is associated with the user who created it and the book it was created to
+      description: creates and stores a new review in the database that is associated with the user who created it and the book it was created to - only adds review when there are no profanities
       requestBody:
         description: Create a new review for a book
         content:
@@ -41,13 +41,15 @@ paths:
             description: Internal server error - cannot save review
           '400':
             description: Invalid book or user
+          '406':
+              description: profanities detected
 
   /review/update/{userId}:
     put:
       tags:
         - review
       summary: updates a review
-      description: applies the changes made to the review
+      description: applies the changes made to the review, check for profanities in text
       parameters:
         - name: userId
           in: path
@@ -76,6 +78,8 @@ paths:
          description: cannot find user
         '403':
           description: permission denied - not owner or admin
+        '406':
+          description: profanities detected
   /review/delete/{reviewId}/{userId}:
     delete:
       tags:
@@ -241,7 +245,7 @@ paths:
         '400':
           description: cannot find user
   /report:
-    put:
+    post:
       tags:
         - report
       summary: reporting a review/comment
@@ -403,7 +407,7 @@ paths:
       tags:
         - comment
       summary: create a new comment to a specific review
-      description: creates and stores a new comment in the database that is associated with the user who created it and the review it was created to
+      description: creates and stores a new comment in the database that is associated with the user who created it and the review it was created to, check for profanities
       parameters:
         - name: userId
           in: query
@@ -437,13 +441,15 @@ paths:
           description: Internal server error - cannot save comment
         '400':
           description: Invalid review or user
+        '406':
+          description: profanities detected
 
   /comment/edit/{userId}:
     put:
       tags:
         - comment
       summary: updates a comment
-      description: applies the changes made to the comment
+      description: applies the changes made to the comment, check for profanities
       parameters:
         - name: userId
           in: path
@@ -472,6 +478,8 @@ paths:
           description: cannot find comment
         '403':
           description: permission denied - not owner or admin
+        '406':
+          description: profanities detected
   /comment/delete/{commentId}/{userId}:
     delete:
       tags:
