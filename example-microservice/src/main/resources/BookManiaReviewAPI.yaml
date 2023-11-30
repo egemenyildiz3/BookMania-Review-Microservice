@@ -14,8 +14,8 @@ tags:
     description: hand out report (only for authors)
   - name: public book statistics
     description: provide statistics for books that are visible to all users
-  - name: both
-    description: functions for both review and comment
+  - name: report
+    description: reporting inappropriate reviews and comments
 paths:
   /review:
     post:
@@ -42,14 +42,14 @@ paths:
           '400':
             description: Invalid book or user
 
-  /review/update/{user}:
+  /review/update/{userId}:
     put:
       tags:
         - review
       summary: updates a review
       description: applies the changes made to the review
       parameters:
-        - name: user
+        - name: userId
           in: path
           description: user who tries to edit review
           required: true
@@ -76,7 +76,7 @@ paths:
          description: cannot find user
         '403':
           description: permission denied - not owner or admin
-  /review/delete/{reviewId}/{user}:
+  /review/delete/{reviewId}/{userId}:
     delete:
       tags:
         - review
@@ -90,7 +90,7 @@ paths:
           schema:
             type: integer
             format: int64
-        - name: user
+        - name: userId
           in: path
           description: user who tries to delete review
           schema:
@@ -202,25 +202,14 @@ paths:
           schema:
             type: integer
             format: int64
-      responses:
-        '200':
-          description: Successful operation
-        '400':
-          description: Invalid review
-  /review/unpin/{reviewId}:
-    put:
-      tags:
-        - review
-      summary: unpinning a review
-      description: places the review at its original position based on the current filter, sets pinned boolean to false
-      parameters:
-        - name: reviewId
-          in: path
-          description: the reviewId of the desired review to unpin
-          required: true
-          schema:
-            type: integer
-            format: int64
+      requestBody:
+        description: the value to which we set the pinned boolean of the review
+        content:
+          application/json:
+            schema:
+              type: boolean
+              example: true
+        required: true
       responses:
         '200':
           description: Successful operation
@@ -254,7 +243,7 @@ paths:
   /report:
     put:
       tags:
-        - both
+        - report
       summary: reporting a review/comment
       description: the review/comment is set as reported and can be assessed by the admin for deletion or user ban
       requestBody:
@@ -269,14 +258,14 @@ paths:
           description: Successful operation
         '400':
           description: Invalid review
-  /reported/{user}:
+  /reported/{userId}:
     get:
       tags:
-         - both
+         - report
       summary: see reported reviews/comments
       description: shows all of the reported reviews to the admin
       parameters:
-        - name: user
+        - name: userId
           in: path
           description: user that is trying to get reported content, check if he is admin
           schema:
@@ -291,6 +280,34 @@ paths:
                 $ref: '#/components/schemas/Report'
         '400':
           description: No reported reviews
+        '401':
+          description: No found user
+        '402':
+          description: User not an admin
+  /report/delete/{reportId}/{userId}:
+    delete:
+      tags:
+        - report
+      summary: delete a report
+      description: deletes the report with this reportId if the userId is an admin
+      parameters:
+        - name: userId
+          in: path
+          description: user that is trying to delete the report
+          schema:
+            type: integer
+            format: int64
+        - name: reportId
+          in: path
+          description: the id of the report that is requested for deletion
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: No report with this id
         '401':
           description: No found user
         '402':
@@ -314,7 +331,7 @@ paths:
           description: Successful operation
         '400':
           description: Invalid review
-  /getAvrRating/{bookId}/{user}:
+  /getAvrRating/{bookId}/{userId}:
     get:
       tags:
         - public book statistics
@@ -328,7 +345,7 @@ paths:
           schema:
             type: integer
             format: int64
-        - name: user
+        - name: userId
           in: path
           description: the user that requests the average rating of
           required: true
@@ -348,7 +365,7 @@ paths:
           description: cannot find book
         '401':
           description: cannot find user
-  /getPublicInteractions/{bookId}/{user}:
+  /getPublicInteractions/{bookId}/{userId}:
     get:
       tags:
         - public book statistics
@@ -362,7 +379,7 @@ paths:
           schema:
             type: integer
             format: int64
-        - name: user
+        - name: userId
           in: path
           description: the user that requests number of reviews
           required: true
@@ -381,23 +398,23 @@ paths:
         '400':
           description: cannot find book
 
-  /comment/add/{user}/{reviewId}:
+  /comment/add/{reviewId}/{userId}:
     post:
       tags:
         - comment
       summary: create a new comment to a specific review
       description: creates and stores a new comment in the database that is associated with the user who created it and the review it was created to
       parameters:
-        - name: user
+        - name: userId
           in: query
-          description: user who creates the review
+          description: user who creates the comment
           required: true
           schema:
             type: integer
             format: int64
         - name: reviewId
           in: path
-          description: the book for which the review is created
+          description: the review for which the comment is created
           required: true
           schema:
             type: integer
@@ -421,14 +438,14 @@ paths:
         '400':
           description: Invalid review or user
 
-  /comment/edit/{user}:
+  /comment/edit/{userId}:
     put:
       tags:
         - comment
       summary: updates a comment
       description: applies the changes made to the comment
       parameters:
-        - name: user
+        - name: userId
           in: path
           description: user who tries to edit comment
           required: true
@@ -455,7 +472,7 @@ paths:
           description: cannot find comment
         '403':
           description: permission denied - not owner or admin
-  /comment/delete/{commentId}/{user}:
+  /comment/delete/{commentId}/{userId}:
     delete:
       tags:
         - comment
@@ -469,9 +486,9 @@ paths:
           schema:
             type: integer
             format: int64
-        - name: user
+        - name: userId
           in: path
-          description: user who tries to delete review
+          description: userId who tries to delete review
           schema:
             type: integer
             format: int64
@@ -532,12 +549,12 @@ paths:
           description: Successful operation
         '400':
           description: Invalid comment
-  /getReport/{bookId}/{user}:
+  /getReport/{bookId}/{userId}/{info}:
     get:
       tags:
         - bookData
       summary: report about a book
-      description: generates and returns a report about the reviews and interactions of the book; if the user is not the author, you get partial data
+      description: generates and returns a report about the reviews and interactions of the book; depending on the value of info, we return a report if the user is an author, for rating and interactions, we do not check the user and just return the information
       parameters:
         - name: bookId
           in: path
@@ -546,13 +563,22 @@ paths:
           schema:
             type: integer
             format: int64
-        - name: user
+        - name: userId
           in: path
-          description: the user that requests the report - should be checked if it is the author of the book
+          description: the userId that requests the report - should be checked if it is the author of the book
           required: true
           schema:
             type: integer
             format: int64
+        - name: info
+          in: path
+          description: what the user is requesting
+          schema:
+            type: string
+            enum:
+              - report
+              - rating
+              - interactions
       responses:
         '200':
           description: Successful operation
