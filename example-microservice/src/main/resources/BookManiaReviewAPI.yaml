@@ -255,13 +255,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Review'
+              $ref: '#/components/schemas/Report'
         required: true
       responses:
         '200':
           description: Successful operation
         '400':
-          description: Invalid review
+          description: cannot save report
   /reported/{userId}:
     get:
       tags:
@@ -281,13 +281,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Report'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Report'
         '400':
           description: No reported reviews
         '401':
           description: No found user
-        '402':
-          description: User not an admin
+        '403':
+            description: permission denied - not admin
   /report/delete/{reportId}/{userId}:
     delete:
       tags:
@@ -313,9 +315,9 @@ paths:
         '400':
           description: No report with this id
         '401':
-          description: No found user
-        '402':
-          description: User not an admin
+          description: Not found user
+        '403':
+          description: permission denied - not owner or admin
   /review/spoiler/{reviewId}:
     put:
       tags:
@@ -344,14 +346,14 @@ paths:
       parameters:
         - name: bookId
           in: path
-          description: the bookId of the book to get the average rating of
+          description: the bookId of the book to get the average rating for
           required: true
           schema:
             type: integer
             format: int64
         - name: userId
           in: path
-          description: the user that requests the average rating of
+          description: the user that requests the average rating
           required: true
           schema:
             type: integer
@@ -489,14 +491,14 @@ paths:
       parameters:
         - name: commentId
           in: path
-          description: id of review to be deleted
+          description: id of comment to be deleted
           required: true
           schema:
             type: integer
             format: int64
         - name: userId
           in: path
-          description: userId who tries to delete review
+          description: userId who tries to delete comment
           schema:
             type: integer
             format: int64
@@ -651,9 +653,6 @@ components:
         pinned:
           type: boolean
           example: false
-        reported:
-          type: boolean
-          example: true
         timeCreated:
           type: string
           format: date
