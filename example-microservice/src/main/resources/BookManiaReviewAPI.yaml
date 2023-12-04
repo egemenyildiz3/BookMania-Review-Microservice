@@ -97,6 +97,7 @@ paths:
         - name: userId
           in: path
           description: user who tries to delete review
+          required: true
           schema:
             type: integer
             format: int64
@@ -272,6 +273,7 @@ paths:
         - name: userId
           in: path
           description: user that is trying to get reported content, check if he is admin
+          required: true
           schema:
             type: integer
             format: int64
@@ -300,12 +302,14 @@ paths:
         - name: userId
           in: path
           description: user that is trying to delete the report
+          required: true
           schema:
             type: integer
             format: int64
         - name: reportId
           in: path
           description: the id of the report that is requested for deletion
+          required: true
           schema:
             type: integer
             format: int64
@@ -412,7 +416,7 @@ paths:
       description: creates and stores a new comment in the database that is associated with the user who created it and the review it was created to, check for profanities
       parameters:
         - name: userId
-          in: query
+          in: path
           description: user who creates the comment
           required: true
           schema:
@@ -499,6 +503,7 @@ paths:
         - name: userId
           in: path
           description: userId who tries to delete comment
+          required: true
           schema:
             type: integer
             format: int64
@@ -583,6 +588,7 @@ paths:
         - name: info
           in: path
           description: what the user is requesting
+          required: true
           schema:
             type: string
             enum:
