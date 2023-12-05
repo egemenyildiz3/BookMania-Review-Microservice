@@ -340,12 +340,42 @@ paths:
           description: No found user
         '403':
             description: permission denied - not admin
-  /report/delete/{reportId}/{userId}:
+  /report/review/delete/{reportId}/{userId}:
     delete:
       tags:
         - report
       summary: delete a report
-      description: deletes the report with this reportId if the userId is an admin
+      description: reports about reviews - deletes the report with this reportId if the userId is an admin
+      parameters:
+        - name: userId
+          in: path
+          description: user that is trying to delete the report
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: reportId
+          in: path
+          description: the id of the report that is requested for deletion
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: No report with this id
+        '401':
+          description: Not found user
+        '403':
+          description: permission denied - not owner or admin
+  /report/comment/delete/{reportId}/{userId}:
+    delete:
+      tags:
+        - report
+      summary: delete a report
+      description: reports about comments deletes the report with this reportId if the userId is an admin
       parameters:
         - name: userId
           in: path
