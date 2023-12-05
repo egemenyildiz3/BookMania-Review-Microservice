@@ -245,34 +245,52 @@ paths:
                   $ref: '#/components/schemas/Review'
         '400':
           description: cannot find user
-  /report:
+  /report/review:
     post:
       tags:
         - report
-      summary: reporting a review/comment
-      description: the review/comment is set as reported and can be assessed by the admin for deletion or user ban
+      summary: reporting a review
+      description: the review is set as reported and can be assessed by the admin for deletion or user ban
       requestBody:
-        description: the comment/review that is reported
+        description: the review that is reported
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Report'
+              $ref: '#/components/schemas/Review'
         required: true
       responses:
         '200':
           description: Successful operation
         '400':
           description: cannot save report
-  /reported/{userId}:
+  /report/comment:
+    post:
+      tags:
+        - report
+      summary: reporting a comment
+      description: the comment is set as reported and can be assessed by the admin for deletion or user ban
+      requestBody:
+        description: the comment that is reported
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Comment'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: cannot save report
+  /reported/comments/{userId}:
     get:
       tags:
-         - report
-      summary: see reported reviews/comments
-      description: shows all of the reported reviews to the admin
+        - report
+      summary: see reported comments
+      description: shows all of the reported comments to the admin
       parameters:
         - name: userId
           in: path
-          description: user that is trying to get reported content, check if he is admin
+          description: user that is trying to get reported comments, check if he is admin
           required: true
           schema:
             type: integer
@@ -285,7 +303,37 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Report'
+                  $ref: '#/components/schemas/ReportComment'
+        '400':
+          description: No reported reviews
+        '401':
+          description: No found user
+        '403':
+          description: permission denied - not admin
+
+  /reported/reviews/{userId}:
+    get:
+      tags:
+         - report
+      summary: see reported reviews
+      description: shows all of the reported reviews to the admin
+      parameters:
+        - name: userId
+          in: path
+          description: user that is trying to get reported reviews, check if he is admin
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportReview'
         '400':
           description: No reported reviews
         '401':
@@ -341,7 +389,7 @@ paths:
           description: Successful operation
         '400':
           description: Invalid review
-  /getAvrRating/{bookId}/{userId}:
+  /stats/avgRating/{bookId}/{userId}:
     get:
       tags:
         - public book statistics
@@ -375,7 +423,7 @@ paths:
           description: cannot find book
         '401':
           description: cannot find user
-  /getPublicInteractions/{bookId}/{userId}:
+  /stats/interactions/{bookId}/{userId}:
     get:
       tags:
         - public book statistics
@@ -514,6 +562,31 @@ paths:
           description: cannot find comment
         '403':
           description: permission denied - not owner or admin
+  /comment/{reviewId}:
+    get:
+      tags:
+        - comment
+      summary: getting a list of comments for review
+      description: display the comments with to this reviewId from the database
+      parameters:
+        - name: reviewId
+          in: path
+          description: the reviewId we are searching for
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '400':
+          description: cannot find reviewId
   /comment/{commentId}:
     get:
       tags:
@@ -726,11 +799,19 @@ components:
           type: integer
           format: int32
           example: 4
-    Report:
+    ReportComment:
       type: object
       properties:
-        object:
-          type: object
-        text:
+        comment:
+          $ref: '#/components/schemas/Comment'
+        reason:
+          type: string
+          example: offensive
+    ReportReview:
+      type: object
+      properties:
+        review:
+          $ref: '#/components/schemas/Review'
+        reason:
           type: string
           example: offensive
