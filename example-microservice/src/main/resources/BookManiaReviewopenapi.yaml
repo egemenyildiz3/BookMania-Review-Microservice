@@ -39,10 +39,28 @@ paths:
                   $ref: '#/components/schemas/Review'
           '405':
             description: Internal server error - cannot save review
+            content:
+              application/json:
+                schema:
+                  type: string
+                  description: Error message
+                  example: cannot save review.
           '400':
             description: Invalid book or user
+            content:
+              application/json:
+                schema:
+                  type: string
+                  description: Error message
+                  example: cannot find book or user.
           '406':
               description: profanities detected
+              content:
+                application/json:
+                  schema:
+                    type: string
+                    description: Error message
+                    example: Profanities or inappropriate words detected.
 
   /review/update/{userId}:
     put:
@@ -72,14 +90,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Review'
-        '405':
-          description: Invalid input
         '400':
          description: cannot find user
+         content:
+           application/json:
+             schema:
+               type: string
+               description: Error message
+               example: cannot find userId.
         '403':
           description: permission denied - not owner or admin
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Authentication error
+                example: user is not owner or admin of review.
         '406':
           description: profanities detected
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Text Error
+                example: profanities detected
   /review/delete/{reviewId}/{userId}:
     delete:
       tags:
@@ -104,10 +138,28 @@ paths:
       responses:
         '200':
           description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: succesful operation
+                example: review with id 5 deleted
         '400':
           description: cannot find review
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find review.
         '403':
           description: permission denied - not owner or admin
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Authentication error
+                example: user is not owner or admin of review.
   /review/{reviewId}:
     get:
       tags:
@@ -131,6 +183,12 @@ paths:
                   $ref: '#/components/schemas/Review'
         '400':
           description: cannot find review
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find review.
   /seeAllReviews/{bookId}/{filter}:
     get:
       tags:
@@ -166,6 +224,12 @@ paths:
                   $ref: '#/components/schemas/Review'
         '400':
           description: cannot find book
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find book.
   /review/vote/{reviewId}:
     put:
       tags:
@@ -191,8 +255,20 @@ paths:
       responses:
         '200':
           description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: success
+                example: successful update of votes.
         '400':
           description: Invalid review
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find review.
   /review/pin/{reviewId}:
     put:
       tags:
@@ -218,8 +294,20 @@ paths:
       responses:
         '200':
           description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Success
+                example: updated pin value.
         '400':
           description: Invalid review
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find review.
   /review/mostUpvoted/{userId}:
     get:
       tags:
@@ -245,6 +333,12 @@ paths:
                   $ref: '#/components/schemas/Review'
         '400':
           description: cannot find user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error Message
+                example: cannot find user.
   /report/review:
     post:
       tags:
@@ -261,8 +355,20 @@ paths:
       responses:
         '200':
           description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Success
+                example: review reported.
         '400':
           description: cannot save report
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: error saving report.
   /report/comment:
     post:
       tags:
@@ -279,8 +385,20 @@ paths:
       responses:
         '200':
           description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Success
+                example: reported comment.
         '400':
           description: cannot save report
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: error saving report.
   /reported/comments/{userId}:
     get:
       tags:
@@ -304,12 +422,22 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ReportComment'
-        '400':
-          description: No reported reviews
         '401':
           description: No found user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find user.
         '403':
           description: permission denied - not admin
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Authentication error
+                example: user is not admin.
 
   /reported/reviews/{userId}:
     get:
@@ -334,12 +462,22 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ReportReview'
-        '400':
-          description: No reported reviews
         '401':
           description: No found user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find user.
         '403':
             description: permission denied - not admin
+            content:
+              application/json:
+                schema:
+                  type: string
+                  description: Authentication error
+                  example: user is not admin.
   /report/review/delete/{reportId}/{userId}:
     delete:
       tags:
@@ -364,12 +502,36 @@ paths:
       responses:
         '200':
           description: successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Success
+                example: deleted report.
         '400':
           description: No report with this id
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find report.
         '401':
           description: Not found user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error Message
+                example: cannot find user.
         '403':
           description: permission denied - not owner or admin
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Authentication error
+                example: user is not admin.
   /report/comment/delete/{reportId}/{userId}:
     delete:
       tags:
@@ -396,10 +558,28 @@ paths:
           description: successful operation
         '400':
           description: No report with this id
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find report.
         '401':
           description: Not found user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find user.
         '403':
           description: permission denied - not owner or admin
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Authentication error
+                example: user is not admin.
   /review/spoiler/{reviewId}:
     put:
       tags:
@@ -417,8 +597,20 @@ paths:
       responses:
         '200':
           description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: success
+                example: spoiler added.
         '400':
           description: Invalid review
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find review.
   /stats/avgRating/{bookId}/{userId}:
     get:
       tags:
@@ -451,8 +643,20 @@ paths:
                 example: 4.4
         '400':
           description: cannot find book
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find book.
         '401':
           description: cannot find user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find user.
   /stats/interactions/{bookId}/{userId}:
     get:
       tags:
@@ -485,6 +689,20 @@ paths:
                 example: 250
         '400':
           description: cannot find book
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find book.
+        '401':
+          description: cannot find user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find user.
 
   /comment/add/{reviewId}/{userId}:
     post:
@@ -523,10 +741,28 @@ paths:
                 $ref: '#/components/schemas/Comment'
         '405':
           description: Internal server error - cannot save comment
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot save comment.
         '400':
           description: Invalid review or user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find review or user.
         '406':
           description: profanities detected
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Foul language
+                example: content contains profanities.
 
   /comment/edit/{userId}:
     put:
@@ -556,14 +792,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
-        '405':
-          description: Invalid input
         '400':
           description: cannot find comment
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find comment.
         '403':
           description: permission denied - not owner or admin
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Authentication error
+                example: user not admin or owner.
         '406':
           description: profanities detected
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Foul language
+                example: content contains profanities.
   /comment/delete/{commentId}/{userId}:
     delete:
       tags:
@@ -588,10 +840,28 @@ paths:
       responses:
         '200':
           description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Success
+                example: comment with id 5 deleted.
         '400':
           description: cannot find comment
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find comment.
         '403':
           description: permission denied - not owner or admin
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Authentication error
+                example: user not owner or admin.
   /comment/{reviewId}:
     get:
       tags:
@@ -617,6 +887,12 @@ paths:
                   $ref: '#/components/schemas/Comment'
         '400':
           description: cannot find reviewId
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find review.
   /comment/{commentId}:
     get:
       tags:
@@ -640,6 +916,12 @@ paths:
                 $ref: '#/components/schemas/Comment'
         '400':
           description: cannot find comment
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find comment.
   /comment/vote/{commentId}:
     put:
       tags:
@@ -665,8 +947,20 @@ paths:
       responses:
         '200':
           description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Success
+                example: vote added.
         '400':
           description: Invalid comment
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find comment.
   /getReport/{bookId}/{userId}/{info}:
     get:
       tags:
@@ -706,8 +1000,20 @@ paths:
                 $ref: '#/components/schemas/BookData'
         '400':
           description: cannot find book
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find book.
         '401':
           description: cannot find user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find user.
 
 
 components:
