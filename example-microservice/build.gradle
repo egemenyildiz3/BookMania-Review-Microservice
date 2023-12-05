@@ -149,7 +149,7 @@ pitest {
 apply plugin: 'org.openapi.generator'
 openApiGenerate {
 	generatorName.set("spring")
-	inputSpec.set("$rootDir/example-microservice/src/main/resources/BookManiaReviewAPI.yaml")
+	inputSpec.set("$rootDir/example-microservice/src/main/resources/BookManiaReviewopenapi.yaml")
 	outputDir.set("$buildDir/generated")
 	apiPackage.set("nl.tudelft.sem.template.api")
 	modelPackage.set("nl.tudelft.sem.template.model")
