@@ -14,20 +14,25 @@ public class ReviewServiceImpl implements ReviewService{
         this.repo = repo;
     }
 
-    private List<String> profanities = Arrays.asList("fuck","shit", "motherfucker", "bastard","cunt");
+    private static List<String> profanities = Arrays.asList("fuck","shit", "motherfucker", "bastard","cunt");
 
     @Override
     public ResponseEntity<Review> add(Review review) {
         if(review == null) {
             return ResponseEntity.badRequest().build();
         }
-        for (String s: profanities){
-            if(review.getText().toLowerCase().contains(s)){
-                return ResponseEntity.badRequest().build();
-            }
-        }
+        if(checkProfanities(review.getText()))
+            return ResponseEntity.badRequest().build();
         Review saved = repo.save(review);
         return ResponseEntity.ok(saved);
+    }
+    public static boolean checkProfanities(String s){
+        for (String p: profanities){
+            if(s.contains(p)){
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -43,6 +48,8 @@ public class ReviewServiceImpl implements ReviewService{
         if (review == null || review.getUserId()!=userId){
             return ResponseEntity.badRequest().build();
         }
+        if(checkProfanities(review.getText()))
+            return ResponseEntity.badRequest().build();
         Review saved = repo.save(review);
         return ResponseEntity.ok(saved);
     }
@@ -53,12 +60,19 @@ public class ReviewServiceImpl implements ReviewService{
             return ResponseEntity.badRequest().build();
         }
         Review review = repo.findById(reviewId).get();
-        boolean isAdmin = true;//call method for admin check from users
+        boolean isAdmin = isAdmin(userId);//call method for admin check from users
         if(userId == review.getUserId() || isAdmin){
             repo.deleteById(reviewId);
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();
 
+    }
+    public boolean isAdmin(Long userId){
+        //get the user role from user microservice
+        // if(getRole(userId) == admin)
+        // return true;
+        //else return false;
+        return true;
     }
 }
