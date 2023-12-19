@@ -126,6 +126,11 @@ public class Comment {
     return this;
   }
 
+  public Comment addUpvote() {
+    this.upvote++;
+    return this;
+  }
+
   /**
    * Get upvote
    * @return upvote
@@ -145,6 +150,12 @@ public class Comment {
     this.downvote = downvote;
     return this;
   }
+
+  public Comment addDownvote() {
+    this.downvote++;
+    return this;
+  }
+
 
   /**
    * Get downvote
