@@ -42,6 +42,7 @@ public class Review {
 
   private Long rating;
 
+  @ElementCollection
   @Valid
   private List<Long> commentList;
 
