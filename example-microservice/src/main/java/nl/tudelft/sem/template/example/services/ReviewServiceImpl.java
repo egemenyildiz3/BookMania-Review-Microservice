@@ -14,7 +14,7 @@ public class ReviewServiceImpl implements ReviewService{
         this.repo = repo;
     }
 
-    private static List<String> profanities = Arrays.asList("fuck","shit", "motherfucker", "bastard","cunt");
+    private static final List<String> profanities = Arrays.asList("fuck","shit", "motherfucker", "bastard","cunt");
 
     @Override
     public ResponseEntity<Review> add(Review review) {
@@ -23,13 +23,16 @@ public class ReviewServiceImpl implements ReviewService{
         }
         if(checkProfanities(review.getText()))
             return ResponseEntity.badRequest().build();
+
         Review saved = repo.save(review);
         return ResponseEntity.ok(saved);
     }
     public static boolean checkProfanities(String s){
-        for (String p: profanities){
-            if(s.contains(p)){
-                return true;
+        if(s!=null){
+            for (String p: profanities){
+                if(s.toLowerCase().contains(p)){
+                   return true;
+                }
             }
         }
         return false;
@@ -37,7 +40,7 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Override
     public ResponseEntity<Review> get(Long reviewId) {
-        if(!repo.existsById(reviewId) || repo.findById(reviewId).isEmpty()) {
+        if(!repo.existsById(reviewId)) {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(repo.findById(reviewId).get());
@@ -45,7 +48,7 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Override
     public ResponseEntity<Review> update(Long userId, Review review) {
-        if (review == null || review.getUserId()!=userId){
+        if (review == null || review.getUserId()!=userId || !repo.existsById(review.getId())){
             return ResponseEntity.badRequest().build();
         }
         if(checkProfanities(review.getText()))
