@@ -251,6 +251,11 @@ public class Review {
     return this;
   }
 
+  public Review addUpvote() {
+    this.upvote += 1;
+    return this;
+  }
+
   /**
    * Get upvote
    * @return upvote
@@ -268,6 +273,11 @@ public class Review {
 
   public Review downvote(Long downvote) {
     this.downvote = downvote;
+    return this;
+  }
+
+  public Review addDownvote() {
+    this.downvote += 1;
     return this;
   }
 
