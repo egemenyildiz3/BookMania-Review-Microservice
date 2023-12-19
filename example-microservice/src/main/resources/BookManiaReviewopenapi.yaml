@@ -4,7 +4,7 @@ info:
   description: Specifications about all endpoints of the review microservices for the BookMania application
   version: 1.0.0
 servers:
-  - url: 'https://bookmania.tudelft.nl/api'
+  - url: 'https://localhost:8082/api'
 tags:
   - name: review
     description: actions for reviews
