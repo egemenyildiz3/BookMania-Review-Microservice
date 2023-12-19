@@ -28,13 +28,8 @@ public class BookData {
 
   private Long avrRating;
 
-
-  @OneToOne
-  @JoinColumn(name = "mostUpvotedReview", referencedColumnName = "id")
   private Long mostUpvotedReview;
 
-  @OneToOne
-  @JoinColumn(name = "mostUpvotedComment", referencedColumnName = "id")
   private Long mostUpvotedComment;
 
   private Integer positiveRev;
