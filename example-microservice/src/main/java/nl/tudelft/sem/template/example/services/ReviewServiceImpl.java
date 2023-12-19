@@ -4,16 +4,27 @@ import nl.tudelft.sem.template.example.model.Review;
 import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class ReviewServiceImpl implements ReviewService{
     private final ReviewRepository repo;
     public ReviewServiceImpl(ReviewRepository repo) {
         this.repo = repo;
     }
 
+    private List<String> profanities = Arrays.asList("fuck","shit", "motherfucker", "bastard","cunt");
+
     @Override
     public ResponseEntity<Review> add(Review review) {
         if(review == null) {
             return ResponseEntity.badRequest().build();
+        }
+        for (String s: profanities){
+            if(review.getText().toLowerCase().contains(s)){
+                return ResponseEntity.badRequest().build();
+            }
         }
         Review saved = repo.save(review);
         return ResponseEntity.ok(saved);
