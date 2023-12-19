@@ -6,7 +6,6 @@
 package nl.tudelft.sem.template.example.api;
 
 import nl.tudelft.sem.template.api.ApiUtil;
-import nl.tudelft.sem.template.model.Review;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import nl.tudelft.sem.template.example.model.Review;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +25,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.multipart.MultipartFile;
+
 
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -91,7 +92,7 @@ public interface ReviewApi {
         tags = { "review" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Successful operation", content = {
-                @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = Review.class)))
+                @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = nl.tudelft.sem.template.example.model.Review.class)))
             }),
             @ApiResponse(responseCode = "400", description = "cannot find user")
         }
@@ -101,7 +102,7 @@ public interface ReviewApi {
         value = "/review/mostUpvoted/{userId}",
         produces = { "application/json" }
     )
-    default ResponseEntity<List<Review>> reviewMostUpvotedUserIdGet(
+    default ResponseEntity<List<nl.tudelft.sem.template.example.model.Review>> reviewMostUpvotedUserIdGet(
         @Parameter(name = "userId", description = "the user for which we are getting top reviews", required = true, in = ParameterIn.PATH) @PathVariable("userId") Long userId
     ) {
         getRequest().ifPresent(request -> {
@@ -168,7 +169,7 @@ public interface ReviewApi {
         tags = { "review" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Successful operation", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = Review.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = nl.tudelft.sem.template.example.model.Review.class))
             }),
             @ApiResponse(responseCode = "405", description = "Internal server error - cannot save review"),
             @ApiResponse(responseCode = "400", description = "Invalid book or user"),
@@ -181,8 +182,8 @@ public interface ReviewApi {
         produces = { "application/json" },
         consumes = { "application/json" }
     )
-    default ResponseEntity<Review> reviewPost(
-        @Parameter(name = "Review", description = "Create a new review for a book", required = true) @Valid @RequestBody Review review
+    default ResponseEntity<nl.tudelft.sem.template.example.model.Review> reviewPost(
+        @Parameter(name = "Review", description = "Create a new review for a book", required = true) @Valid @RequestBody nl.tudelft.sem.template.example.model.Review review
     ) {
         getRequest().ifPresent(request -> {
             for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
@@ -213,7 +214,7 @@ public interface ReviewApi {
         tags = { "review" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Successful operation", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = Review.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = nl.tudelft.sem.template.example.model.Review.class))
             }),
             @ApiResponse(responseCode = "400", description = "cannot find review")
         }
@@ -223,7 +224,7 @@ public interface ReviewApi {
         value = "/review/{reviewId}",
         produces = { "application/json" }
     )
-    default ResponseEntity<Review> reviewReviewIdGet(
+    default ResponseEntity<nl.tudelft.sem.template.example.model.Review> reviewReviewIdGet(
         @Parameter(name = "reviewId", description = "the reviewId we are searching for", required = true, in = ParameterIn.PATH) @PathVariable("reviewId") Long reviewId
     ) {
         getRequest().ifPresent(request -> {
@@ -289,7 +290,7 @@ public interface ReviewApi {
         tags = { "review" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Successful operation", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = Review.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = nl.tudelft.sem.template.example.model.Review.class))
             }),
             @ApiResponse(responseCode = "405", description = "Invalid input"),
             @ApiResponse(responseCode = "400", description = "cannot find user"),
@@ -305,7 +306,7 @@ public interface ReviewApi {
     )
     default ResponseEntity<Review> reviewUpdateUserIdPut(
         @Parameter(name = "userId", description = "user who tries to edit review", required = true, in = ParameterIn.PATH) @PathVariable("userId") Long userId,
-        @Parameter(name = "Review", description = "updates a review for the book", required = true) @Valid @RequestBody Review review
+        @Parameter(name = "Review", description = "updates a review for the book", required = true) @Valid @RequestBody nl.tudelft.sem.template.example.model.Review review
     ) {
         getRequest().ifPresent(request -> {
             for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {

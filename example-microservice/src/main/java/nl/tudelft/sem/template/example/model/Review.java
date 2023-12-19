@@ -11,6 +11,7 @@ import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.openapitools.jackson.nullable.JsonNullable;
 import java.time.OffsetDateTime;
+import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,8 +25,11 @@ import javax.annotation.Generated;
  */
 
 @Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2023-12-05T16:23:47.330644900+01:00[Europe/Amsterdam]")
+@Entity
 public class Review {
 
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   private Long bookId;
@@ -38,6 +42,7 @@ public class Review {
 
   private Long rating;
 
+  @ElementCollection
   @Valid
   private List<Long> commentList;
 
