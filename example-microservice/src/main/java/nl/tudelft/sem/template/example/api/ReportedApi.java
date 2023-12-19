@@ -5,9 +5,9 @@
  */
 package nl.tudelft.sem.template.example.api;
 
-import nl.tudelft.sem.template.api.ApiUtil;
-import nl.tudelft.sem.template.model.ReportComment;
-import nl.tudelft.sem.template.model.ReportReview;
+import nl.tudelft.sem.template.example.api.ApiUtil;
+import nl.tudelft.sem.template.example.model.ReportComment;
+import nl.tudelft.sem.template.example.model.ReportReview;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -79,7 +79,7 @@ public interface ReportedApi {
             for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
                 if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
                     String exampleString = "[ { \"reason\" : \"offensive\", \"comment\" : { \"downvote\" : 345, \"timeCreated\" : \"2013-10-24T00:00:00.000+00:00\", \"id\" : 3, \"text\" : \"bad review\", \"reviewId\" : 3, \"userId\" : 10, \"upvote\" : 453 } }, { \"reason\" : \"offensive\", \"comment\" : { \"downvote\" : 345, \"timeCreated\" : \"2013-10-24T00:00:00.000+00:00\", \"id\" : 3, \"text\" : \"bad review\", \"reviewId\" : 3, \"userId\" : 10, \"upvote\" : 453 } } ]";
-                    nl.tudelft.sem.template.api.ApiUtil.setExampleResponse(request, "application/json", exampleString);
+                    nl.tudelft.sem.template.example.api.ApiUtil.setExampleResponse(request, "application/json", exampleString);
                     break;
                 }
             }
