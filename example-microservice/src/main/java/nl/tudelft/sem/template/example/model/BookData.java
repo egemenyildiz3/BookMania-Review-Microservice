@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import org.openapitools.jackson.nullable.JsonNullable;
 import java.time.OffsetDateTime;
+import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,16 +18,23 @@ import javax.annotation.Generated;
 /**
  * BookData
  */
-
+@Entity
 @Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2023-12-05T16:23:47.330644900+01:00[Europe/Amsterdam]")
 public class BookData {
 
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long bookId;
 
   private Long avrRating;
 
+
+  @OneToOne
+  @JoinColumn(name = "mostUpvotedReview", referencedColumnName = "id")
   private Long mostUpvotedReview;
 
+  @OneToOne
+  @JoinColumn(name = "mostUpvotedComment", referencedColumnName = "id")
   private Long mostUpvotedComment;
 
   private Integer positiveRev;
