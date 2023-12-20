@@ -5,7 +5,7 @@
  */
 package nl.tudelft.sem.template.example.api;
 
-import nl.tudelft.sem.template.api.ApiUtil;
+import nl.tudelft.sem.template.example.api.ApiUtil;
 import nl.tudelft.sem.template.example.model.Review;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;

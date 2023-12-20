@@ -5,8 +5,9 @@
  */
 package nl.tudelft.sem.template.example.api;
 
-import nl.tudelft.sem.template.api.ApiUtil;
-import nl.tudelft.sem.template.model.BookData;
+import nl.tudelft.sem.template.example.api.ApiUtil;
+import nl.tudelft.sem.template.example.model.BookData;
+import nl.tudelft.sem.template.example.model.BookData;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
