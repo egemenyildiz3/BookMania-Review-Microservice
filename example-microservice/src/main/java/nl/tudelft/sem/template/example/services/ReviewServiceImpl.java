@@ -4,6 +4,7 @@ import nl.tudelft.sem.template.example.model.Review;
 import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,7 +15,7 @@ public class ReviewServiceImpl implements ReviewService{
         this.repo = repo;
     }
 
-    private static final List<String> profanities = Arrays.asList("fuck","shit", "motherfucker", "bastard","cunt");
+    private static final List<String> profanities = Arrays.asList("fuck","shit", "motherfucker", "bastard","cunt", "bitch");
 
     @Override
     public ResponseEntity<Review> add(Review review) {
@@ -24,6 +25,8 @@ public class ReviewServiceImpl implements ReviewService{
         if(checkProfanities(review.getText()))
             return ResponseEntity.badRequest().build();
 
+        review.lastEditTime(LocalDate.now());
+        review.timeCreated(LocalDate.now());
         Review saved = repo.save(review);
         return ResponseEntity.ok(saved);
     }
@@ -53,6 +56,7 @@ public class ReviewServiceImpl implements ReviewService{
         }
         if(checkProfanities(review.getText()))
             return ResponseEntity.badRequest().build();
+        review.lastEditTime(LocalDate.now());
         Review saved = repo.save(review);
         return ResponseEntity.ok(saved);
     }
@@ -71,7 +75,7 @@ public class ReviewServiceImpl implements ReviewService{
         return ResponseEntity.badRequest().build();
 
     }
-    public boolean isAdmin(Long userId){
+    public static boolean isAdmin(Long userId){
         //get the user role from user microservice
         // if(getRole(userId) == admin)
         // return true;
