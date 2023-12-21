@@ -76,10 +76,8 @@ public class ReviewServiceImpl implements ReviewService{
 
     }
     public static boolean isAdmin(Long userId){
-        //get the user role from user microservice
-        // if(getRole(userId) == admin)
-        // return true;
-        //else return false;
+        //TODO: call the method from user microservice that returns the role of user
+        // return true if admin
         return true;
     }
 }

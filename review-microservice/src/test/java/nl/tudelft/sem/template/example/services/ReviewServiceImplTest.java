@@ -31,12 +31,12 @@ class ReviewServiceImplTest {
 
     @Test
     void add() {
-        Review review = new Review();
+        Review review = new Review(1L,2L,10L);
         when(repository.save(review)).thenReturn(review);
         var result = service.add(review);
         verify(repository).save(review);
         assertEquals(result.getBody(),review);
-        Review r1 = new Review();
+        Review r1 = new Review(1L,2L,10L);
         r1.text("FUCK");
         when(repository.save(r1)).thenReturn(r1);
         var res = service.add(r1);
@@ -53,7 +53,7 @@ class ReviewServiceImplTest {
 
     @Test
     void getValid() {
-        Review review = new Review();
+        Review review = new Review(1L,2L,10L);
         when(repository.existsById(1L)).thenReturn(true);
         when(repository.findById(1L)).thenReturn(Optional.of(review));
         var result = service.get(1L);
@@ -74,7 +74,7 @@ class ReviewServiceImplTest {
 
     @Test
     void updateOwner() {
-        Review review = new Review();
+        Review review = new Review(1L,2L,10L);
         review.id(1L);
         review.userId(10L);
         when(repository.save(review)).thenReturn(review);
@@ -88,7 +88,7 @@ class ReviewServiceImplTest {
     }
     @Test
     void updateNotOwner() {
-        Review review = new Review();
+        Review review = new Review(1L,2L,10L);
         review.id(1L);
         review.userId(10L);
         when(repository.save(review)).thenReturn(review);
@@ -100,5 +100,15 @@ class ReviewServiceImplTest {
 
     @Test
     void delete() {
+        Review review = new Review(1L,2L,10L);
+        when(repository.existsById(1L)).thenReturn(true);
+        when(repository.findById(1L)).thenReturn(Optional.of(review));
+        doNothing().when(repository).deleteById(1L);
+
+        var result = service.delete(1L,10L);
+        verify(repository).existsById(1L);
+        verify(repository).findById(1L);
+        verify(repository).deleteById(1L);
+        assertEquals(result.getStatusCode(),HttpStatus.OK);
     }
 }
