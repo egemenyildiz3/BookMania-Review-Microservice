@@ -5,8 +5,6 @@ import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import nl.tudelft.sem.template.example.services.ReviewServiceImpl;
 import nl.tudelft.sem.template.model.Review;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -40,14 +38,12 @@ public class ReviewController implements ReviewApi {
     }
 
     @Override
-    @PutMapping("/spoiler/{reviewId}")
-    public ResponseEntity<String> reviewSpoilerReviewIdPut(@PathVariable("reviewId") Long reviewId) {
+    public ResponseEntity<String> reviewSpoilerReviewIdPut(Long reviewId) {
         return service.addSpoiler(reviewId);
     }
 
     @Override
-    @PutMapping("/vote/{reviewId}")
-    public ResponseEntity<String> reviewVoteReviewIdPut(@PathVariable("reviewId") Long reviewId, Integer body) {
+    public ResponseEntity<String> reviewVoteReviewIdPut(Long reviewId, Integer body) {
         return service.addVote(reviewId, body);
     }
 }
