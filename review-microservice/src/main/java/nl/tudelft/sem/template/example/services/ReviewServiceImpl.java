@@ -5,7 +5,6 @@ import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -79,5 +78,37 @@ public class ReviewServiceImpl implements ReviewService{
         //TODO: call the method from user microservice that returns the role of user
         // return true if admin
         return true;
+    }
+
+    @Override
+    public ResponseEntity<String> addSpoiler(Long reviewId) {
+        if(!repo.existsById(reviewId) || get(reviewId).getBody() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        Review review = get(reviewId).getBody();
+        review.spoiler(true);
+        repo.save(review);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<String> addVote(Long reviewId, Integer body) {
+        if(!repo.existsById(reviewId) || get(reviewId).getBody() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        Review review = get(reviewId).getBody();
+        if (body == 1) {
+            if (review.getUpvote() == null) {
+                review.setUpvote(0L);
+            }
+            review.upvote(review.getUpvote() + 1);
+        } else {
+            if (review.getDownvote() == null) {
+                review.setDownvote(0L);
+            }
+            review.downvote(review.getDownvote() + 1);
+        }
+        repo.save(review);
+        return ResponseEntity.ok().build();
     }
 }
