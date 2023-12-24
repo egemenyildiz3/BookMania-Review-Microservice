@@ -1,6 +1,5 @@
 package nl.tudelft.sem.template.example.services;
 
-import nl.tudelft.sem.template.example.RESTcontrollers.ReviewController;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Optional;
 
@@ -110,5 +110,56 @@ class ReviewServiceImplTest {
         verify(repository).findById(1L);
         verify(repository).deleteById(1L);
         assertEquals(result.getStatusCode(),HttpStatus.OK);
+    }
+
+    @Test
+    void testAddSpoiler() {
+        Long reviewId = 1L;
+        Review review = new Review(1L,2L,10L);
+
+        when(repository.existsById(reviewId)).thenReturn(true);
+        when(repository.findById(reviewId)).thenReturn(Optional.of(review));
+        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ResponseEntity<String> response = service.addSpoiler(reviewId);
+
+        assertTrue(response.getStatusCode().is2xxSuccessful());
+        assertTrue(review.getSpoiler());
+        verify(repository, times(1)).save(review);
+    }
+
+    @Test
+    void testAddUpvote() {
+        Long reviewId = 1L;
+        Integer upvote = 1;
+        Review review = new Review(1L,2L,10L);
+
+        when(repository.existsById(reviewId)).thenReturn(true);
+        when(repository.findById(reviewId)).thenReturn(Optional.of(review));
+        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ResponseEntity<String> response = service.addVote(reviewId, upvote);
+
+        assertTrue(response.getStatusCode().is2xxSuccessful());
+        assertEquals(review.getUpvote(), 1);
+        verify(repository, times(1)).save(review);
+    }
+
+    @Test
+    void testAddDownvote() {
+        Long reviewId = 1L;
+        Integer downvote = 0;
+        Review review = new Review(1L,2L,10L);
+
+        when(repository.existsById(reviewId)).thenReturn(true);
+        when(repository.findById(reviewId)).thenReturn(Optional.of(review));
+        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ResponseEntity<String> response = service.addVote(reviewId, downvote);
+
+        assertTrue(response.getStatusCode().is2xxSuccessful());
+        assertNull(review.getUpvote());
+        assertEquals(review.getDownvote(), 1);
+        verify(repository, times(1)).save(review);
     }
 }
