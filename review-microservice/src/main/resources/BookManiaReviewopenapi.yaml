@@ -1,0 +1,1194 @@
+openapi: 3.0.3
+info:
+  title: BookMania-ReviewMicroservice
+  description: Specifications about all endpoints of the review microservices for the BookMania application
+  version: 1.0.0
+servers:
+  - url: 'https://localhost:8082/api'
+tags:
+  - name: review
+    description: actions for reviews
+  - name: comment
+    description: actions for comments
+  - name: bookData
+    description: hand out report (only for authors)
+  - name: public book statistics
+    description: provide statistics for books that are visible to all users
+  - name: report
+    description: reporting inappropriate reviews and comments
+paths:
+  /review:
+    post:
+      tags:
+        - review
+      summary: create a new review to a specific book
+      description: creates and stores a new review in the database that is associated with the user who created it and the book it was created to - only adds review when there are no profanities
+      requestBody:
+        description: Create a new review for a book
+        content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+        required: true
+      responses:
+          '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Review'
+          '405':
+            description: Internal server error - cannot save review
+            content:
+              application/json:
+                schema:
+                  type: string
+                  description: Error message
+                  example: cannot save review.
+          '400':
+            description: Invalid book or user
+            content:
+              application/json:
+                schema:
+                  type: string
+                  description: Error message
+                  example: cannot find book or user.
+          '406':
+              description: profanities detected
+              content:
+                application/json:
+                  schema:
+                    type: string
+                    description: Error message
+                    example: Profanities or inappropriate words detected.
+
+  /review/update/{userId}:
+    put:
+      tags:
+        - review
+      summary: updates a review
+      description: applies the changes made to the review, check for profanities in text
+      parameters:
+        - name: userId
+          in: path
+          description: user who tries to edit review
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: updates a review for the book
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+        '400':
+         description: cannot find user
+         content:
+           application/json:
+             schema:
+               type: string
+               description: Error message
+               example: cannot find userId.
+        '403':
+          description: permission denied - not owner or admin
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Authentication error
+                example: user is not owner or admin of review.
+        '406':
+          description: profanities detected
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Text Error
+                example: profanities detected
+  /review/delete/{reviewId}/{userId}:
+    delete:
+      tags:
+        - review
+      summary: deletes a review
+      description: deletes the review from review database, book and user
+      parameters:
+        - name: reviewId
+          in: path
+          description: id of review to be deleted
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: userId
+          in: path
+          description: user who tries to delete review
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: succesful operation
+                example: review with id 5 deleted
+        '400':
+          description: cannot find review
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find review.
+        '403':
+          description: permission denied - not owner or admin
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Authentication error
+                example: user is not owner or admin of review.
+  /review/{reviewId}:
+    get:
+      tags:
+        - review
+      summary: getting a review
+      description: display the review with this reviewId from the database
+      parameters:
+        - name: reviewId
+          in: path
+          description: the reviewId we are searching for
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Review'
+        '400':
+          description: cannot find review
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find review.
+  /seeAllReviews/{bookId}/{filter}:
+    get:
+      tags:
+        - review
+      summary: get reviews for book
+      description: searches the database for the reviews that are made to that bookId (with other api, gets the book and its list of reviews from the other database)
+      parameters:
+        - name: bookId
+          in: path
+          description: the book for which we are getting reviews
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: filter
+          in: path
+          description: how to sort the reviews
+          required: true
+          schema:
+            type: string
+            enum:
+              - mostRelevant
+              - mostRecent
+              - highestRated
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+        '400':
+          description: cannot find book
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find book.
+  /review/vote/{reviewId}:
+    put:
+      tags:
+        - review
+      summary: upvoting or downvoting a review
+      description: sending either a 0 or 1 to server for downvoting or upvoting a review respectfully
+      parameters:
+        - name: reviewId
+          in: path
+          description: the reviewId of the desired review for upvote or downvote
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: 1 for upvote or 0 for downvote
+        content:
+          application/json:
+            schema:
+              type: integer
+              format: int32
+              example: 0
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: success
+                example: successful update of votes.
+        '400':
+          description: Invalid review
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find review.
+  /review/pin/{reviewId}:
+    put:
+      tags:
+        - review
+      summary: pinning a review
+      description: places the review at the start of the list of reviews for the book
+      parameters:
+        - name: reviewId
+          in: path
+          description: the reviewId of the desired review to pin, set pinned boolean to true
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: the value to which we set the pinned boolean of the review
+        content:
+          application/json:
+            schema:
+              type: boolean
+              example: true
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Success
+                example: updated pin value.
+        '400':
+          description: Invalid review
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find review.
+  /review/mostUpvoted/{userId}:
+    get:
+      tags:
+        - review
+      summary: get the top reviews for the user
+      description: searches the database for the reviews that are made by that user and returns top three most recent ones
+      parameters:
+        - name: userId
+          in: path
+          description: the user for which we are getting top reviews
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+        '400':
+          description: cannot find user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error Message
+                example: cannot find user.
+  /report/review:
+    post:
+      tags:
+        - report
+      summary: reporting a review
+      description: the review is set as reported and can be assessed by the admin for deletion or user ban
+      requestBody:
+        description: the review that is reported
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Success
+                example: review reported.
+        '400':
+          description: cannot save report
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: error saving report.
+  /report/comment:
+    post:
+      tags:
+        - report
+      summary: reporting a comment
+      description: the comment is set as reported and can be assessed by the admin for deletion or user ban
+      requestBody:
+        description: the comment that is reported
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Comment'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Success
+                example: reported comment.
+        '400':
+          description: cannot save report
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: error saving report.
+  /reported/comments/{userId}:
+    get:
+      tags:
+        - report
+      summary: see reported comments
+      description: shows all of the reported comments to the admin
+      parameters:
+        - name: userId
+          in: path
+          description: user that is trying to get reported comments, check if he is admin
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportComment'
+        '401':
+          description: No found user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find user.
+        '403':
+          description: permission denied - not admin
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Authentication error
+                example: user is not admin.
+
+  /reported/reviews/{userId}:
+    get:
+      tags:
+         - report
+      summary: see reported reviews
+      description: shows all of the reported reviews to the admin
+      parameters:
+        - name: userId
+          in: path
+          description: user that is trying to get reported reviews, check if he is admin
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportReview'
+        '401':
+          description: No found user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find user.
+        '403':
+            description: permission denied - not admin
+            content:
+              application/json:
+                schema:
+                  type: string
+                  description: Authentication error
+                  example: user is not admin.
+  /report/review/delete/{reportId}/{userId}:
+    delete:
+      tags:
+        - report
+      summary: delete a report
+      description: reports about reviews - deletes the report with this reportId if the userId is an admin
+      parameters:
+        - name: userId
+          in: path
+          description: user that is trying to delete the report
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: reportId
+          in: path
+          description: the id of the report that is requested for deletion
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Success
+                example: deleted report.
+        '400':
+          description: No report with this id
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find report.
+        '401':
+          description: Not found user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error Message
+                example: cannot find user.
+        '403':
+          description: permission denied - not owner or admin
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Authentication error
+                example: user is not admin.
+  /report/comment/delete/{reportId}/{userId}:
+    delete:
+      tags:
+        - report
+      summary: delete a report
+      description: reports about comments deletes the report with this reportId if the userId is an admin
+      parameters:
+        - name: userId
+          in: path
+          description: user that is trying to delete the report
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: reportId
+          in: path
+          description: the id of the report that is requested for deletion
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: No report with this id
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find report.
+        '401':
+          description: Not found user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find user.
+        '403':
+          description: permission denied - not owner or admin
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Authentication error
+                example: user is not admin.
+  /review/spoiler/{reviewId}:
+    put:
+      tags:
+        - review
+      summary: adding a spoiler flag to the review
+      description: setting the spoiler value in the review to true
+      parameters:
+        - name: reviewId
+          in: path
+          description: the reviewId of the desired review to add a spoiler warning to
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: success
+                example: spoiler added.
+        '400':
+          description: Invalid review
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find review.
+  /stats/avgRating/{bookId}/{userId}:
+    get:
+      tags:
+        - public book statistics
+      summary: the average rating for the book
+      description: returns the average rating for this bookId, calls report with a user that is not the author of the book
+      parameters:
+        - name: bookId
+          in: path
+          description: the bookId of the book to get the average rating for
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: userId
+          in: path
+          description: the user that requests the average rating
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+                example: 4.4
+        '400':
+          description: cannot find book
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find book.
+        '401':
+          description: cannot find user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find user.
+  /stats/interactions/{bookId}/{userId}:
+    get:
+      tags:
+        - public book statistics
+      summary: how many reviews the book has
+      description: returns the amount of reviews, so that users can quickly see the interactions and popularity of the book
+      parameters:
+        - name: bookId
+          in: path
+          description: the book to return number of reviews
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: userId
+          in: path
+          description: the user that requests number of reviews
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+                example: 250
+        '400':
+          description: cannot find book
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find book.
+        '401':
+          description: cannot find user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find user.
+
+  /comment/add/{reviewId}/{userId}:
+    post:
+      tags:
+        - comment
+      summary: create a new comment to a specific review
+      description: creates and stores a new comment in the database that is associated with the user who created it and the review it was created to, check for profanities
+      parameters:
+        - name: userId
+          in: path
+          description: user who creates the comment
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: reviewId
+          in: path
+          description: the review for which the comment is created
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Create a new comment to a review
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Comment'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '405':
+          description: Internal server error - cannot save comment
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot save comment.
+        '400':
+          description: Invalid review or user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find review or user.
+        '406':
+          description: profanities detected
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Foul language
+                example: content contains profanities.
+
+  /comment/edit/{userId}:
+    put:
+      tags:
+        - comment
+      summary: updates a comment
+      description: applies the changes made to the comment, check for profanities
+      parameters:
+        - name: userId
+          in: path
+          description: user who tries to edit comment
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: updates a comment for a review
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Comment'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: cannot find comment
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find comment.
+        '403':
+          description: permission denied - not owner or admin
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Authentication error
+                example: user not admin or owner.
+        '406':
+          description: profanities detected
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Foul language
+                example: content contains profanities.
+  /comment/delete/{commentId}/{userId}:
+    delete:
+      tags:
+        - comment
+      summary: deletes a comment
+      description: deletes the comment from comment database, book and user
+      parameters:
+        - name: commentId
+          in: path
+          description: id of comment to be deleted
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: userId
+          in: path
+          description: userId who tries to delete comment
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Success
+                example: comment with id 5 deleted.
+        '400':
+          description: cannot find comment
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find comment.
+        '403':
+          description: permission denied - not owner or admin
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Authentication error
+                example: user not owner or admin.
+  /comment/{reviewId}:
+    get:
+      tags:
+        - comment
+      summary: getting a list of comments for review
+      description: display the comments with to this reviewId from the database
+      parameters:
+        - name: reviewId
+          in: path
+          description: the reviewId we are searching for
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '400':
+          description: cannot find reviewId
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find review.
+  /comment/{commentId}:
+    get:
+      tags:
+        - comment
+      summary: getting a comment
+      description: display the comment with this commentId from the database
+      parameters:
+        - name: commentId
+          in: path
+          description: the commentId we are searching for
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: cannot find comment
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find comment.
+  /comment/vote/{commentId}:
+    put:
+      tags:
+        - comment
+      summary: upvoting or downvoting a comment
+      description: sending either a 0 or 1 to server for downvoting or upvoting a comment respectfully
+      parameters:
+        - name: commentId
+          in: path
+          description: the commentId of the desired comment for upvote or downvote
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: 1 for upvote or 0 for downvote
+        content:
+          application/json:
+            schema:
+              type: integer
+              format: int32
+              example: 0
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Success
+                example: vote added.
+        '400':
+          description: Invalid comment
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find comment.
+  /getReport/{bookId}/{userId}/{info}:
+    get:
+      tags:
+        - bookData
+      summary: report about a book
+      description: generates and returns a report about the reviews and interactions of the book; depending on the value of info, we return a report if the user is an author, for rating and interactions, we do not check the user and just return the information
+      parameters:
+        - name: bookId
+          in: path
+          description: the bookId of the book to generate a report for
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: userId
+          in: path
+          description: the userId that requests the report - should be checked if it is the author of the book
+          required: true
+          schema:
+            type: string
+        - name: info
+          in: path
+          description: what the user is requesting
+          required: true
+          schema:
+            type: string
+            enum:
+              - report
+              - rating
+              - interactions
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookData'
+        '400':
+          description: cannot find book
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find book.
+        '401':
+          description: cannot find user
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Error message
+                example: cannot find user.
+
+
+components:
+  schemas:
+    Review:
+      type: object
+      x-class-extra-annotation: "@javax.persistence.Entity"
+      x-field-extra-annotation: "@javax.persistence.ManyToOne(cascade = javax.persistence.CascadeType.ALL)"
+      properties:
+        id:
+          type: integer
+          format: int64
+          x-field-extra-annotation: "@javax.persistence.Id @javax.persistence.GeneratedValue(strategy = javax.persistence.GenerationType.IDENTITY)"
+          example: 10
+        bookId:
+          type: integer
+          format: int64
+          example: 1234
+        userId:
+          type: integer
+          format: int64
+          example: 10
+        title:
+          type: string
+          example: wow
+        text:
+          type: string
+          example: nice book
+        rating:
+          type: integer
+          format: int64
+          example: 4
+        commentList:
+          type: array
+          x-field-extra-annotation: "@javax.persistence.ElementCollection"
+          items:
+            type: integer
+            format: int64
+            example: 3
+        upvote:
+          type: integer
+          format: int64
+          example: 453
+        downvote:
+          type: integer
+          format: int64
+          example: 345
+        spoiler:
+          type: boolean
+          example: true
+        bookNotion:
+          type: string
+          enum:
+            - POSITIVE
+            - NEGATIVE
+            - NEUTRAL
+        pinned:
+          type: boolean
+          example: false
+        timeCreated:
+          type: string
+          format: date
+          example: '2013-10-24'
+        lastEditTime:
+          type: string
+          format: date
+          example: '2013-10-24'
+      required:
+        - id
+        - bookId
+        - userId
+    Comment:
+      type: object
+      x-class-extra-annotation: "@javax.persistence.Entity"
+      x-field-extra-annotation: "@javax.persistence.ManyToOne(cascade = javax.persistence.CascadeType.ALL)"
+      properties:
+        id:
+          x-field-extra-annotation: "@javax.persistence.Id @javax.persistence.GeneratedValue(strategy = javax.persistence.GenerationType.IDENTITY)"
+          type: integer
+          format: int64
+          example: 3
+        reviewId:
+          type: integer
+          format: int64
+          example: 3
+        userId:
+          type: integer
+          format: int64
+          example: 10
+        text:
+          type: string
+          example: bad review
+        upvote:
+          type: integer
+          format: int64
+          example: 453
+        downvote:
+          type: integer
+          format: int64
+          example: 345
+        timeCreated:
+          type: string
+          format: date
+          example: '2013-10-24'
+      required:
+        - id
+        - reviewId
+        - userId
+    BookData:
+      type: object
+      x-class-extra-annotation: "@javax.persistence.Entity"
+      properties:
+        id:
+          x-field-extra-annotation: "@javax.persistence.Id @javax.persistence.GeneratedValue(strategy = javax.persistence.GenerationType.IDENTITY)"
+          type: integer
+          format: int64
+          example: 1
+        bookId:
+          type: integer
+          format: int64
+          example: 23
+        avrRating:
+          type: integer
+          format: int64
+          example: 4.3
+        mostUpvotedReview:
+          description: the id of the review that has the most upvotes
+          type: integer
+          format: int64
+          example: 3
+        mostUpvotedComment:
+          description: the id of the comment that has the most upvotes
+          type: integer
+          format: int64
+          example: 3
+        positiveRev:
+          type: integer
+          format: int32
+          example: 20
+        negativeRev:
+          type: integer
+          format: int32
+          example: 15
+        neutralRev:
+          type: integer
+          format: int32
+          example: 4
+      required:
+          - id
+          - bookId
+    ReportComment:
+      type: object
+      x-class-extra-annotation: "@javax.persistence.Entity"
+      properties:
+        id:
+          x-field-extra-annotation: "@javax.persistence.Id @javax.persistence.GeneratedValue(strategy = javax.persistence.GenerationType.IDENTITY)"
+          type: integer
+          format: int64
+          example: 3
+        comment:
+          $ref: '#/components/schemas/Comment'
+        reason:
+          type: string
+          example: offensive
+    ReportReview:
+      type: object
+      x-class-extra-annotation: "@javax.persistence.Entity "
+      properties:
+        id:
+          x-field-extra-annotation: "@javax.persistence.Id @javax.persistence.GeneratedValue(strategy = javax.persistence.GenerationType.IDENTITY)"
+          type: integer
+          format: int64
+          example: 3
+        review:
+          $ref: '#/components/schemas/Review'
+        reason:
+          type: string
+          example: offensive
