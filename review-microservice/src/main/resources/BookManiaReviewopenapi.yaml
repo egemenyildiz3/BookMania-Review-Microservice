@@ -1048,11 +1048,9 @@ components:
           example: 4
         commentList:
           type: array
-          x-field-extra-annotation: "@javax.persistence.ElementCollection"
+          x-field-extra-annotation: "@javax.persistence.OneToMany(cascade = javax.persistence.CascadeType.ALL)"
           items:
-            type: integer
-            format: int64
-            example: 3
+            $ref: '#/components/schemas/Comment'
         upvote:
           type: integer
           format: int64
@@ -1095,10 +1093,8 @@ components:
           type: integer
           format: int64
           example: 3
-        reviewId:
-          type: integer
-          format: int64
-          example: 3
+        review:
+          $ref: '#/components/schemas/Review'
         userId:
           type: integer
           format: int64
