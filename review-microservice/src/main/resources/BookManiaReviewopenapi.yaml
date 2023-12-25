@@ -1122,12 +1122,8 @@ components:
       type: object
       x-class-extra-annotation: "@javax.persistence.Entity"
       properties:
-        id:
-          x-field-extra-annotation: "@javax.persistence.Id @javax.persistence.GeneratedValue(strategy = javax.persistence.GenerationType.IDENTITY)"
-          type: integer
-          format: int64
-          example: 1
         bookId:
+          x-field-extra-annotation: "@javax.persistence.Id"
           type: integer
           format: int64
           example: 23
