@@ -4,12 +4,18 @@ import java.util.*;
 import java.time.*;
 
 import nl.tudelft.sem.template.example.repositories.CommentRepository;
+import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.Comment;
+import nl.tudelft.sem.template.model.Review;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
 public class CommentServiceImpl implements CommentService {
+
     private final CommentRepository repository;
-    public CommentServiceImpl(CommentRepository repository) {
+    private final ReviewRepository reviewRepository;
+    public CommentServiceImpl(CommentRepository repository, ReviewRepository reviewRepository) {
+        this.reviewRepository = reviewRepository;
         this.repository = repository;
     }
 
@@ -28,16 +34,22 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public ResponseEntity<Comment> add(Long userId, Long reviewId, Comment comment) {
-        if (comment == null || !repository.existsById(reviewId)) {
+
+        if (comment == null || !reviewRepository.existsById(reviewId)) {
             return ResponseEntity.badRequest().build();
         }
         if (checkProfanities(comment.getText())) {
             return ResponseEntity.badRequest().build();
         }
+        Review review = reviewRepository.findById(reviewId).get();
         comment.setUserId(userId);
-        comment.timeCreated(LocalDate.now());
-        Comment added = repository.save(comment);
-        return ResponseEntity.ok(added);
+        comment.setTimeCreated(LocalDate.now());
+        comment.setReview(review);
+        //Comment added = repository.save(comment);
+        review.addCommentListItem(comment);
+        reviewRepository.save(review);
+        review.getCommentList().sort(Comparator.comparing(Comment::getTimeCreated));
+        return ResponseEntity.ok(review.getCommentList().get(review.getCommentList().size()-1));
     }
 
     @Override
@@ -53,6 +65,9 @@ public class CommentServiceImpl implements CommentService {
         if (comment == null || !Objects.equals(comment.getUserId(), userId) || !repository.existsById(comment.getId())) {
             return ResponseEntity.badRequest().build();
         }
+        System.out.println(comment.getId());
+        System.out.println(comment.getReview());
+        comment.setReview(repository.findById(comment.getId()).get().getReview());
         if (checkProfanities(comment.getText())) {
             return ResponseEntity.badRequest().build();
         }
@@ -66,8 +81,11 @@ public class CommentServiceImpl implements CommentService {
             return ResponseEntity.badRequest().build();
         }
         Comment comment = repository.findById(commentId).get();
+        Review rev = comment.getReview();
         if (userId == comment.getUserId()) {
-            repository.deleteById(commentId);
+            //repository.deleteById(commentId);
+            rev.getCommentList().remove(comment);
+            reviewRepository.save(rev);
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();

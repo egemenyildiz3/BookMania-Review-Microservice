@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.example.services;
 
 import java.util.*;
 import nl.tudelft.sem.template.model.Comment;
+import nl.tudelft.sem.template.model.Review;
 import org.springframework.http.ResponseEntity;
 public interface CommentService {
     ResponseEntity<Comment> add(Long userId, Long reviewId, Comment comment);
