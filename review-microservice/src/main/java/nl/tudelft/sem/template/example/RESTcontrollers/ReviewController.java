@@ -5,7 +5,6 @@ import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import nl.tudelft.sem.template.example.services.ReviewServiceImpl;
 import nl.tudelft.sem.template.model.Review;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -36,5 +35,15 @@ public class ReviewController implements ReviewApi {
     @Override
     public ResponseEntity<Review> reviewUpdateUserIdPut(Long userId, Review review) {
         return service.update(userId,review);
+    }
+
+    @Override
+    public ResponseEntity<String> reviewSpoilerReviewIdPut(Long reviewId) {
+        return service.addSpoiler(reviewId);
+    }
+
+    @Override
+    public ResponseEntity<String> reviewVoteReviewIdPut(Long reviewId, Integer body) {
+        return service.addVote(reviewId, body);
     }
 }
