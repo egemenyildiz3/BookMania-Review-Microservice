@@ -1021,7 +1021,9 @@ components:
     Review:
       type: object
       x-class-extra-annotation: "@javax.persistence.Entity"
-      x-field-extra-annotation: "@javax.persistence.ManyToOne(cascade = javax.persistence.CascadeType.PERSIST) @com.fasterxml.jackson.annotation.JsonBackReference"
+      x-field-extra-annotation: " @javax.persistence.ManyToOne(cascade = javax.persistence.CascadeType.PERSIST)
+      @com.fasterxml.jackson.annotation.JsonIdentityInfo(generator = com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator.class, property = \"id\")
+      @com.fasterxml.jackson.annotation.JsonIdentityReference(alwaysAsId = true)"
       properties:
         id:
           type: integer
@@ -1048,7 +1050,7 @@ components:
           example: 4
         commentList:
           type: array
-          x-field-extra-annotation: "@javax.persistence.OneToMany(cascade = javax.persistence.CascadeType.ALL, orphanRemoval = true) @com.fasterxml.jackson.annotation.JsonManagedReference"
+          x-field-extra-annotation: "@javax.persistence.OneToMany(cascade = javax.persistence.CascadeType.ALL, orphanRemoval = true)"
           items:
             $ref: '#/components/schemas/Comment'
         upvote:
