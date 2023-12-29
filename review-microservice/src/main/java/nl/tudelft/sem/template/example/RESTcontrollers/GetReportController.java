@@ -7,10 +7,12 @@ import nl.tudelft.sem.template.example.services.GetReportService;
 import nl.tudelft.sem.template.example.services.GetReportServiceImpl;
 import nl.tudelft.sem.template.example.services.ReviewServiceImpl;
 import nl.tudelft.sem.template.model.BookData;
+import nl.tudelft.sem.template.model.Review;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
 
+import java.awt.print.Book;
 import java.util.Optional;
 
 @RestController
@@ -18,12 +20,20 @@ public class GetReportController implements GetReportApi {
 
     private final GetReportServiceImpl service;
 
-    public GetReportController(BookDataRepository repo) {
-        this.service = new GetReportServiceImpl(repo);
+    public GetReportController(BookDataRepository repo, ReviewRepository rr) {
+        this.service = new GetReportServiceImpl(repo, rr);
     }
 
     @Override
     public ResponseEntity<BookData> getReportBookIdUserIdInfoGet(Long bookId, String userId, String info) {
-        return GetReportApi.super.getReportBookIdUserIdInfoGet(bookId, userId, info);
+        return service.getReport(bookId, userId, info);
+    }
+
+    public ResponseEntity<BookData> addRatingAndNotion(Long bookId, Long rating, Review.BookNotionEnum notion){
+        return service.addRatingAndNotion(bookId, rating, notion);
+    }
+
+    public ResponseEntity<BookData> createBookDataEntity(Long bookId){
+        return service.createBookDataInRepository(bookId);
     }
 }
