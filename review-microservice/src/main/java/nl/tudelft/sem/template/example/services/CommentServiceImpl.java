@@ -9,11 +9,13 @@ import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.Review;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository repository;
     private final ReviewRepository reviewRepository;
+    @Autowired
     public CommentServiceImpl(CommentRepository repository, ReviewRepository reviewRepository) {
         this.reviewRepository = reviewRepository;
         this.repository = repository;
@@ -42,6 +44,7 @@ public class CommentServiceImpl implements CommentService {
             return ResponseEntity.badRequest().build();
         }
         Review review = reviewRepository.findById(reviewId).get();
+
         comment.setUserId(userId);
         comment.setTimeCreated(LocalDate.now());
         comment.setReview(review);
