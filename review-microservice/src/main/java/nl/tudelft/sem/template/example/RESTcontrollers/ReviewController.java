@@ -13,8 +13,8 @@ public class ReviewController implements ReviewApi {
 
     private final ReviewServiceImpl service;
 
-    public ReviewController(ReviewRepository repo, CommunicationServiceImpl communicationService) {
-
+    public ReviewController(ReviewRepository repo) {
+        CommunicationServiceImpl communicationService = new CommunicationServiceImpl();
         this.service = new ReviewServiceImpl(repo,communicationService);
     }
 

@@ -26,7 +26,7 @@ class ReviewServiceImplTest {
     @BeforeEach
     public void setup() {
         repository = mock(ReviewRepository.class);
-
+        communicationService = mock(CommunicationServiceImpl.class);
         service = new ReviewServiceImpl(repository,communicationService);
 
     }

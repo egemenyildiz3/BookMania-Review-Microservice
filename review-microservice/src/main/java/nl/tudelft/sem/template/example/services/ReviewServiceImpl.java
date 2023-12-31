@@ -29,13 +29,13 @@ public class ReviewServiceImpl implements ReviewService{
             return ResponseEntity.badRequest().build();
         }
         boolean book = communicationService.existsBook(review.getBookId());
-        if(false){
+        if(book){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .header("Invalid Book", "book id not found")
                     .build();
         }
         boolean user = communicationService.existsUser(review.getUserId());
-        if(false){
+        if(user){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .header("Invalid User", "user id not found")
                     .build();
@@ -77,14 +77,14 @@ public class ReviewServiceImpl implements ReviewService{
         }
         //check for user in database
         boolean user = communicationService.existsUser(userId);
-        if(false){
+        if(user){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .header("Invalid User", "user id not found ")
                     .build();
         }
         //check for owner or admin
         boolean isAdmin = communicationService.isAdmin(userId);
-        if(true && review.getUserId()!=userId ){
+        if(!isAdmin && review.getUserId()!=userId ){
             return ResponseEntity.status(403)
                     .header("Permission denied", "user is not owner or admin")
                     .build();

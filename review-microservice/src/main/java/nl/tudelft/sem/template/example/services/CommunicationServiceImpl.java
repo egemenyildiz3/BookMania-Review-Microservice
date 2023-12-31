@@ -10,6 +10,9 @@ public class CommunicationServiceImpl {
 
     private final String bookMicroURL = "http://localhost:8081";
 
+    public CommunicationServiceImpl() {
+    }
+
 
     public boolean isAdmin(Long userId){
         //TODO make http request to endpoint for admin
@@ -24,5 +27,5 @@ public class CommunicationServiceImpl {
         return true;
     }
 
-    
+
 }
