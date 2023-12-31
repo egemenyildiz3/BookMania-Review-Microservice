@@ -85,7 +85,7 @@ public class CommentServiceImpl implements CommentService {
         }
         Comment comment = repository.findById(commentId).get();
         Review rev = comment.getReview();
-        if (userId == comment.getUserId()) {
+        if (Objects.equals(userId, comment.getUserId())) {
             //repository.deleteById(commentId);
             rev.getCommentList().remove(comment);
             reviewRepository.save(rev);
