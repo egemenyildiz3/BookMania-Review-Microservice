@@ -20,12 +20,14 @@ class ReviewServiceImplTest {
     private ReviewServiceImpl service;
     private ReviewRepository repository;
 
+    private CommunicationServiceImpl communicationService;
 
 
     @BeforeEach
     public void setup() {
         repository = mock(ReviewRepository.class);
-        service = new ReviewServiceImpl(repository);
+
+        service = new ReviewServiceImpl(repository,communicationService);
 
     }
 
@@ -36,12 +38,17 @@ class ReviewServiceImplTest {
         var result = service.add(review);
         verify(repository).save(review);
         assertEquals(result.getBody(),review);
+
+
         Review r1 = new Review(1L,2L,10L);
         r1.text("FUCK");
         when(repository.save(r1)).thenReturn(r1);
         var res = service.add(r1);
         verify(repository,never()).save(r1);
-        assertEquals(res.getStatusCode(), HttpStatus.BAD_REQUEST);
+        assertEquals(res.getStatusCode(), HttpStatus.NOT_ACCEPTABLE);
+
+        res = service.add(null);
+        assertEquals(res.getStatusCode(),HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -95,7 +102,26 @@ class ReviewServiceImplTest {
         when(repository.existsById(1L)).thenReturn(true);
         var result = service.update(9L,review);
         verify(repository,never()).save(review);
-        assertEquals(result.getStatusCode(),HttpStatus.BAD_REQUEST);
+        assertEquals(result.getStatusCode(),HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void updateProfanities() {
+        Review review = new Review(1L,2L,10L);
+        review.id(1L);
+        review.userId(10L);
+        review.setText("fuck");
+        when(repository.save(review)).thenReturn(review);
+        when(repository.existsById(1L)).thenReturn(true);
+        var result = service.update(10L,review);
+        verify(repository,never()).save(review);
+        assertEquals(result.getStatusCode(),HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    @Test
+    void updateNull(){
+        var res = service.update(1L,null);
+        assertEquals(res.getStatusCode(),HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -110,6 +136,20 @@ class ReviewServiceImplTest {
         verify(repository).findById(1L);
         verify(repository).deleteById(1L);
         assertEquals(result.getStatusCode(),HttpStatus.OK);
+    }
+
+    @Test
+    void deleteInvalid() {
+        Review review = new Review(1L,2L,10L);
+        when(repository.existsById(1L)).thenReturn(false);
+        when(repository.findById(1L)).thenReturn(Optional.of(review));
+        doNothing().when(repository).deleteById(1L);
+
+        var result = service.delete(1L,10L);
+        verify(repository).existsById(1L);
+        verify(repository,never()).findById(1L);
+        verify(repository,never()).deleteById(1L);
+        assertEquals(result.getStatusCode(),HttpStatus.BAD_REQUEST);
     }
 
     @Test

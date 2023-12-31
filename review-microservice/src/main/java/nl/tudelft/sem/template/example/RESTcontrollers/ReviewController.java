@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.example.RESTcontrollers;
 
 import nl.tudelft.sem.template.api.ReviewApi;
 import nl.tudelft.sem.template.example.repositories.ReviewRepository;
+import nl.tudelft.sem.template.example.services.CommunicationServiceImpl;
 import nl.tudelft.sem.template.example.services.ReviewServiceImpl;
 import nl.tudelft.sem.template.model.Review;
 import org.springframework.http.ResponseEntity;
@@ -12,8 +13,9 @@ public class ReviewController implements ReviewApi {
 
     private final ReviewServiceImpl service;
 
-    public ReviewController(ReviewRepository repo) {
-        this.service = new ReviewServiceImpl(repo);
+    public ReviewController(ReviewRepository repo, CommunicationServiceImpl communicationService) {
+
+        this.service = new ReviewServiceImpl(repo,communicationService);
     }
 
 
