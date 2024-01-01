@@ -110,19 +110,6 @@ class ReportReviewServiceImplTest {
         assertEquals(2, result.getBody().size());
     }
 
-
-
-    //This test cannot happen right now due to the admin method implementation, please take a look at my branch for basic reviews
-    // there you can find an implementation that allows for easy mocking, check it out
-//    @Test
-//    void getAllReportedReviewsInvalid() {
-//        ResponseEntity<List<ReportReview>> result = service.getAllReportedReviews(0L);
-//
-//        verify(repository, never()).findAll();
-//        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
-//        assertNull(result.getBody());
-//    }
-
     @Test
     void isReported() {
         when(repository.existsByReviewId(1L)).thenReturn(true);
@@ -169,4 +156,6 @@ class ReportReviewServiceImplTest {
         when(repository.existsByReviewId(1L)).thenReturn(true);
         when(repository.findAllByReviewId(1L)).thenReturn(Arrays.asList(new ReportReview()));
     }
+
+    //getAllReportedCommentsInvalid, deleteReportsForCommentInvalid, deleteReportsForCommentNotAdmin
 }

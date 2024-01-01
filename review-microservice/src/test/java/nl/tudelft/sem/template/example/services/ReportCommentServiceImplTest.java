@@ -112,18 +112,6 @@ class ReportCommentServiceImplTest {
         assertEquals(2, result.getBody().size());
     }
 
-    /*
-    @Test
-    void getAllReportedCommentsInvalid() {
-        ResponseEntity<List<ReportComment>> result = service.getAllReportedComments(0L);
-
-        verify(repository, never()).findAll();
-        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
-        assertNull(result.getBody());
-    }
-
-     */
-
     @Test
     void isReported() {
         when(repository.existsByCommentId(1L)).thenReturn(true);
@@ -172,30 +160,6 @@ class ReportCommentServiceImplTest {
         when(repository.findAllByCommentId(1L)).thenReturn(Arrays.asList(new ReportComment()));
     }
 
-    /*
-    @Test
-    void deleteReportsForCommentInvalid() {
-        ResponseEntity<String> result = service.deleteReportsForComment(0L, 1L);
+    //getAllReportedCommentsInvalid, deleteReportsForCommentInvalid, deleteReportsForCommentNotAdmin
 
-        verify(repository, never()).existsByCommentId(0L);
-        verify(repository).findAllByCommentId(0L);
-        verify(repository, never()).delete(any());
-        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
-    }
-
-     */
-
-/*    @Test
-    void deleteReportsForCommentNotAdmin() {
-        when(repository.existsByCommentId(1L)).thenReturn(true);
-
-        ResponseEntity<String> result = service.deleteReportsForComment(1L, 0L);
-
-        verify(repository).existsByCommentId(1L);
-        verify(repository, never()).findAllByCommentId(1L);
-        verify(repository, never()).delete(any());
-        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
-    }
-
- */
 }
