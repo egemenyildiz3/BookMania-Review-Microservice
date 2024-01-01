@@ -4,6 +4,7 @@ import nl.tudelft.sem.template.example.repositories.CommentRepository;
 import nl.tudelft.sem.template.example.repositories.ReportCommentRepository;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.ReportComment;
+import nl.tudelft.sem.template.model.Review;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -38,7 +39,8 @@ class ReportCommentServiceImplTest {
 
     @Test
     void report() {
-        Comment comment = new Comment(1L, 223L, 33L);
+        Review review = new Review(1L, 10L, 23L);
+        Comment comment = new Comment(1L, review, 33L);
         when(repository.save(any())).thenReturn(new ReportComment());
 
         ResponseEntity<ReportComment> result = service.report(comment);
