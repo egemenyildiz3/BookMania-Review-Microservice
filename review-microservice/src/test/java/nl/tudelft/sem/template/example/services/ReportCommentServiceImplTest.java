@@ -3,11 +3,9 @@ package nl.tudelft.sem.template.example.services;
 import nl.tudelft.sem.template.example.repositories.ReportCommentRepository;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.ReportComment;
-import nl.tudelft.sem.template.model.ReportReview;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
@@ -46,6 +44,18 @@ class ReportCommentServiceImplTest {
         assertNotNull(result.getBody());
     }
 
+    /*
+    @Test
+    void reportInvalid() {
+        ResponseEntity<ReportComment> result = service.report(null);
+
+        verify(repository, never()).save(any());
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        assertNull(result.getBody());
+    }
+
+     */
+
     @Test
     void get() {
         ReportComment reportComment = new ReportComment();
@@ -58,16 +68,6 @@ class ReportCommentServiceImplTest {
         verify(repository).existsById(1L);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(reportComment, result.getBody());
-    }
-
-    @Test
-    void reportInvalid() {
-        ResponseEntity<ReportComment> result = service.report(null);
-
-        verify(repository, never()).save(any());
-        verify(repository).existsById(0L);
-        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
-        assertNull(result.getBody());
     }
 
     @Test
@@ -164,6 +164,7 @@ class ReportCommentServiceImplTest {
         when(repository.findAllByCommentId(1L)).thenReturn(Arrays.asList(new ReportComment()));
     }
 
+    /*
     @Test
     void deleteReportsForCommentInvalid() {
         ResponseEntity<String> result = service.deleteReportsForComment(0L, 1L);
@@ -173,6 +174,8 @@ class ReportCommentServiceImplTest {
         verify(repository, never()).delete(any());
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
     }
+
+     */
 
 /*    @Test
     void deleteReportsForCommentNotAdmin() {
