@@ -22,7 +22,7 @@ public class ReportReviewController implements ReportApi {
     }
 
     @Override
-    public ResponseEntity<ReportReview> reportReviewPost(Review review, String reason) {
-        return service.report(review, reason);
+    public ResponseEntity<ReportReview> reportReviewPost(Review review) {
+        return service.report(review);
     }
 }

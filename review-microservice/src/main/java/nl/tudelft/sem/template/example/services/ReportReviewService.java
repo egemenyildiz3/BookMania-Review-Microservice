@@ -8,7 +8,7 @@ import java.util.List;
 
 
 public interface ReportReviewService {
-    ResponseEntity<ReportReview> report(Review review, String reason);
+    ResponseEntity<ReportReview> report(Review review);
 
     ResponseEntity<ReportReview> get(Long id);
 

@@ -18,14 +18,13 @@ public class ReportReviewServiceImpl implements ReportReviewService{
     }
 
     @Override
-    public ResponseEntity<ReportReview> report(Review review, String reason) {
+    public ResponseEntity<ReportReview> report(Review review) {
         if (review == null) {
             return ResponseEntity.badRequest().build();
         }
 
         ReportReview reportReview = new ReportReview();
         reportReview.setReview(review);
-        reportReview.setReason(reason);
 
         repo.save(reportReview);
 

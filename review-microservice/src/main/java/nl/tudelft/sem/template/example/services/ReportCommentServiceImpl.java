@@ -18,14 +18,13 @@ public class ReportCommentServiceImpl implements ReportCommentService{
         this.repo = repo;
     }
     @Override
-    public ResponseEntity<ReportComment> report(Comment comment, String reason) {
+    public ResponseEntity<ReportComment> report(Comment comment) {
         if (comment == null) {
             return ResponseEntity.badRequest().build();
         }
 
         ReportComment reportComment = new ReportComment();
         reportComment.setComment(comment);
-        reportComment.setReason(reason);
 
         repo.save(reportComment);
 

@@ -36,7 +36,7 @@ class ReportReviewServiceImplTest {
         Review review = new Review(1L, 10L, 23L);
         when(repository.save(any())).thenReturn(new ReportReview());
 
-        ResponseEntity<ReportReview> result = service.report(review, "Reason");
+        ResponseEntity<ReportReview> result = service.report(review);
 
         verify(repository).save(any());
         assertEquals(HttpStatus.OK, result.getStatusCode());
@@ -45,7 +45,7 @@ class ReportReviewServiceImplTest {
 
     @Test
     void reportInvalid() {
-        ResponseEntity<ReportReview> result = service.report(null, "Reason");
+        ResponseEntity<ReportReview> result = service.report(null);
 
         verify(repository, never()).save(any());
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());

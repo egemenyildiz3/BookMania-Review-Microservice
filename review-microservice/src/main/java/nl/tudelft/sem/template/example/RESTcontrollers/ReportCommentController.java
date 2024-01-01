@@ -22,7 +22,7 @@ public class ReportCommentController implements ReportApi {
     }
 
     @Override
-    public ResponseEntity<ReportComment> reportCommentPost(Comment comment, String reason) {
-        return service.report(comment, reason);
+    public ResponseEntity<ReportComment> reportCommentPost(Comment comment) {
+        return service.report(comment);
     }
 }

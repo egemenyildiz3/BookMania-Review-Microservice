@@ -8,7 +8,7 @@ import java.util.List;
 
 
 public interface ReportCommentService {
-    ResponseEntity<ReportComment> report(Comment comment, String reason);
+    ResponseEntity<ReportComment> report(Comment comment);
 
     ResponseEntity<ReportComment> get(Long id);
 

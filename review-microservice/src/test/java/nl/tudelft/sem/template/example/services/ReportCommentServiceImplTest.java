@@ -37,7 +37,7 @@ class ReportCommentServiceImplTest {
         Comment comment = new Comment(1L, 223L, 33L);
         when(repository.save(any())).thenReturn(new ReportComment());
 
-        ResponseEntity<ReportComment> result = service.report(comment, "Pandas");
+        ResponseEntity<ReportComment> result = service.report(comment);
 
         verify(repository).save(any());
         assertEquals(HttpStatus.OK, result.getStatusCode());
@@ -46,7 +46,7 @@ class ReportCommentServiceImplTest {
 
     @Test
     void reportInvalid() {
-        ResponseEntity<ReportComment> result = service.report(null, "D");
+        ResponseEntity<ReportComment> result = service.report(null);
 
         verify(repository, never()).save(any());
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
