@@ -24,20 +24,21 @@ class ReportReviewServiceImplTest {
 
     private ReportReviewServiceImpl service;
 
-    @Mock
     private ReportReviewRepository repository;
-    @Mock
+
     private ReviewRepository reviewRepository;
 
     @BeforeEach
     public void setup() {
         repository = mock(ReportReviewRepository.class);
+        reviewRepository = mock(ReviewRepository.class);
         service = new ReportReviewServiceImpl(repository, reviewRepository);
     }
 
     @Test
     void report() {
         Review review = new Review(1L, 10L, 23L);
+
         when(repository.save(any())).thenReturn(new ReportReview());
 
         ResponseEntity<ReportReview> result = service.report(review);
