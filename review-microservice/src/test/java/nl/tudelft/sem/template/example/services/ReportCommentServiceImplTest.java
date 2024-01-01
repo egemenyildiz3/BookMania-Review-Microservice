@@ -19,6 +19,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+
+//take a look at the changes I made to the reportreview tests and try to do the same here.
+// The main issues was you forgot to mock the repo. Now there are some more when statements to write.
 @RunWith(MockitoJUnitRunner.class)
 class ReportCommentServiceImplTest {
 
@@ -29,6 +32,7 @@ class ReportCommentServiceImplTest {
 
     @BeforeEach
     public void setup() {
+        repository = mock(ReportCommentRepository.class);
         service = new ReportCommentServiceImpl(repository);
     }
 

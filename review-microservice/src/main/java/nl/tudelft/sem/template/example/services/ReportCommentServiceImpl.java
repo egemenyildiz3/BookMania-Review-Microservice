@@ -50,6 +50,7 @@ public class ReportCommentServiceImpl implements ReportCommentService{
         boolean isAdmin = isAdmin(userId);
         if(isAdmin){
             List<ReportComment> allReportedComments = repo.findAll();
+            //here you need to ok the list in order to return it
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();

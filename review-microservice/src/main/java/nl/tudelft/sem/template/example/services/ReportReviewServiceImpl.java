@@ -50,7 +50,7 @@ public class ReportReviewServiceImpl implements ReportReviewService{
         boolean isAdmin = isAdmin(userId);
         if(isAdmin){
             List<ReportReview> allReportedReviews = repo.findAll();
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok(allReportedReviews);
         }
         return ResponseEntity.badRequest().build();
     }
