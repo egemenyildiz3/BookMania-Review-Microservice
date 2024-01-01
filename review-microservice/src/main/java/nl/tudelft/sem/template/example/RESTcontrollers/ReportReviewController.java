@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.example.RESTcontrollers;
 
 import nl.tudelft.sem.template.api.ReportApi;
 import nl.tudelft.sem.template.example.repositories.ReportReviewRepository;
+import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import nl.tudelft.sem.template.example.services.ReportReviewServiceImpl;
 import nl.tudelft.sem.template.model.ReportReview;
 import nl.tudelft.sem.template.model.Review;
@@ -12,8 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReportReviewController implements ReportApi {
     private final ReportReviewServiceImpl service;
 
-    public ReportReviewController(ReportReviewRepository repo) {
-        this.service = new ReportReviewServiceImpl(repo);
+    public ReportReviewController(ReportReviewRepository repo, ReviewRepository reviewRepo) {
+        this.service = new ReportReviewServiceImpl(repo, reviewRepo);
     }
 
     @Override

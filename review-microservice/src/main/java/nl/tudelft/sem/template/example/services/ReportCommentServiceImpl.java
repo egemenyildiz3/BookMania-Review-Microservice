@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.example.services;
 
+import nl.tudelft.sem.template.example.repositories.CommentRepository;
 import nl.tudelft.sem.template.example.repositories.ReportReviewRepository;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.ReportComment;
@@ -13,13 +14,14 @@ import java.util.List;
 @Service
 public class ReportCommentServiceImpl implements ReportCommentService{
     private final ReportCommentRepository repo;
-
-    public ReportCommentServiceImpl(ReportCommentRepository repo) {
+    private final CommentRepository commentRepo;
+    public ReportCommentServiceImpl(ReportCommentRepository repo, CommentRepository commentRepo) {
         this.repo = repo;
+        this.commentRepo = commentRepo;
     }
     @Override
     public ResponseEntity<ReportComment> report(Comment comment) {
-        if (comment == null) {
+        if (comment == null || !commentRepo.existsById(comment.getId())) {
             return ResponseEntity.badRequest().build();
         }
 

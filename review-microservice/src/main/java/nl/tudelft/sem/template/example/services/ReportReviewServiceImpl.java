@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.example.services;
 
+import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.model.ReportReview;
 import nl.tudelft.sem.template.example.repositories.ReportReviewRepository;
@@ -12,14 +13,16 @@ import java.util.List;
 public class ReportReviewServiceImpl implements ReportReviewService{
 
     private final ReportReviewRepository repo;
+    private final ReviewRepository reviewRepo;
 
-    public ReportReviewServiceImpl(ReportReviewRepository repo) {
+    public ReportReviewServiceImpl(ReportReviewRepository repo, ReviewRepository reviewRepo) {
         this.repo = repo;
+        this.reviewRepo = reviewRepo;
     }
 
     @Override
     public ResponseEntity<ReportReview> report(Review review) {
-        if (review == null) {
+        if (review == null || !reviewRepo.existsById(review.getId())) {
             return ResponseEntity.badRequest().build();
         }
 

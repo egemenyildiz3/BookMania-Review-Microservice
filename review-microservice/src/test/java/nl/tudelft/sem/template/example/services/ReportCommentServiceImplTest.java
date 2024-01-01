@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.example.services;
 
+import nl.tudelft.sem.template.example.repositories.CommentRepository;
 import nl.tudelft.sem.template.example.repositories.ReportCommentRepository;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.ReportComment;
@@ -26,10 +27,13 @@ class ReportCommentServiceImplTest {
     @Mock
     private ReportCommentRepository repository;
 
+    @Mock
+    private CommentRepository commentRepository;
+
     @BeforeEach
     public void setup() {
         repository = mock(ReportCommentRepository.class);
-        service = new ReportCommentServiceImpl(repository);
+        service = new ReportCommentServiceImpl(repository, commentRepository);
     }
 
     @Test
@@ -44,7 +48,6 @@ class ReportCommentServiceImplTest {
         assertNotNull(result.getBody());
     }
 
-    /*
     @Test
     void reportInvalid() {
         ResponseEntity<ReportComment> result = service.report(null);
@@ -54,7 +57,6 @@ class ReportCommentServiceImplTest {
         assertNull(result.getBody());
     }
 
-     */
 
     @Test
     void get() {
@@ -164,18 +166,15 @@ class ReportCommentServiceImplTest {
         when(repository.findAllByCommentId(1L)).thenReturn(Arrays.asList(new ReportComment()));
     }
 
-    /*
     @Test
     void deleteReportsForCommentInvalid() {
         ResponseEntity<String> result = service.deleteReportsForComment(0L, 1L);
 
         verify(repository, never()).existsByCommentId(0L);
-        verify(repository, never()).findAllByCommentId(0L);
+        verify(repository).findAllByCommentId(0L);
         verify(repository, never()).delete(any());
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
     }
-
-     */
 
 /*    @Test
     void deleteReportsForCommentNotAdmin() {

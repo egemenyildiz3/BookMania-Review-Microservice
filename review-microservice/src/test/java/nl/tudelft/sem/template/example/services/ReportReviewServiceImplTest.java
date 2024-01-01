@@ -1,6 +1,7 @@
 package nl.tudelft.sem.template.example.services;
 
 import nl.tudelft.sem.template.example.repositories.ReportReviewRepository;
+import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.model.ReportReview;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,11 +26,13 @@ class ReportReviewServiceImplTest {
 
     @Mock
     private ReportReviewRepository repository;
+    @Mock
+    private ReviewRepository reviewRepository;
 
     @BeforeEach
     public void setup() {
         repository = mock(ReportReviewRepository.class);
-        service = new ReportReviewServiceImpl(repository);
+        service = new ReportReviewServiceImpl(repository, reviewRepository);
     }
 
     @Test
