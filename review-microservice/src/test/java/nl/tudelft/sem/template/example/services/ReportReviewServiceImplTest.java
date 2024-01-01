@@ -7,6 +7,7 @@ import nl.tudelft.sem.template.model.ReportReview;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
@@ -39,11 +40,14 @@ class ReportReviewServiceImplTest {
     void report() {
         Review review = new Review(1L, 10L, 23L);
 
-        when(repository.save(any())).thenReturn(new ReportReview());
+        when(reviewRepository.existsById(review.getId())).thenReturn(true);
+        when(repository.save(ArgumentMatchers.any())).thenReturn(new ReportReview());
 
         ResponseEntity<ReportReview> result = service.report(review);
 
-        verify(repository).save(any());
+        verify(reviewRepository).existsById(review.getId());
+        verify(repository).save(ArgumentMatchers.any());
+
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertNotNull(result.getBody());
     }
