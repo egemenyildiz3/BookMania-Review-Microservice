@@ -895,7 +895,7 @@ paths:
                 type: string
                 description: Error message
                 example: cannot find review.
-  /comment/{commentId}:
+  /comment/getOne/{commentId}:
     get:
       tags:
         - comment
@@ -1023,7 +1023,9 @@ components:
     Review:
       type: object
       x-class-extra-annotation: "@javax.persistence.Entity"
-      x-field-extra-annotation: "@javax.persistence.ManyToOne(cascade = javax.persistence.CascadeType.ALL)"
+      x-field-extra-annotation: " @javax.persistence.ManyToOne(cascade = javax.persistence.CascadeType.PERSIST)
+      @com.fasterxml.jackson.annotation.JsonIdentityInfo(generator = com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator.class, property = \"id\")
+      @com.fasterxml.jackson.annotation.JsonIdentityReference(alwaysAsId = true)"
       properties:
         id:
           type: integer
@@ -1050,11 +1052,9 @@ components:
           example: 4
         commentList:
           type: array
-          x-field-extra-annotation: "@javax.persistence.ElementCollection"
+          x-field-extra-annotation: "@javax.persistence.OneToMany(cascade = javax.persistence.CascadeType.ALL, orphanRemoval = true)"
           items:
-            type: integer
-            format: int64
-            example: 3
+            $ref: '#/components/schemas/Comment'
         upvote:
           type: integer
           format: int64
@@ -1097,10 +1097,8 @@ components:
           type: integer
           format: int64
           example: 3
-        reviewId:
-          type: integer
-          format: int64
-          example: 3
+        review:
+          $ref: '#/components/schemas/Review'
         userId:
           type: integer
           format: int64
@@ -1122,18 +1120,13 @@ components:
           example: '2013-10-24'
       required:
         - id
-        - reviewId
         - userId
     BookData:
       type: object
       x-class-extra-annotation: "@javax.persistence.Entity"
       properties:
-        id:
-          x-field-extra-annotation: "@javax.persistence.Id @javax.persistence.GeneratedValue(strategy = javax.persistence.GenerationType.IDENTITY)"
-          type: integer
-          format: int64
-          example: 1
         bookId:
+          x-field-extra-annotation: "@javax.persistence.Id"
           type: integer
           format: int64
           example: 23
@@ -1164,7 +1157,6 @@ components:
           format: int32
           example: 4
       required:
-          - id
           - bookId
     ReportComment:
       type: object
