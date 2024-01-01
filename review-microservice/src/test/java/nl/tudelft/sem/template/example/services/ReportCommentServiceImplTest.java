@@ -40,7 +40,8 @@ class ReportCommentServiceImplTest {
     @Test
     void report() {
         Review review = new Review(1L, 10L, 23L);
-        Comment comment = new Comment(1L, review, 33L);
+        Comment comment = new Comment(1L, 33L);
+        comment.setReview(review);
         when(repository.save(any())).thenReturn(new ReportComment());
 
         ResponseEntity<ReportComment> result = service.report(comment);
