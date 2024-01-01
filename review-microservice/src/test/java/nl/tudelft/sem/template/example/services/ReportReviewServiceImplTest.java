@@ -89,7 +89,7 @@ class ReportReviewServiceImplTest {
         assertEquals(reports, result.getBody());
     }
 
-    /*
+
     @Test
     void getAllReportedReviewsValid() {
         when(repository.findAll()).thenReturn(Arrays.asList(new ReportReview(), new ReportReview()));
@@ -102,7 +102,7 @@ class ReportReviewServiceImplTest {
         assertEquals(2, result.getBody().size());
     }
 
-     */
+
 
     //This test cannot happen right now due to the admin method implementation, please take a look at my branch for basic reviews
     // there you can find an implementation that allows for easy mocking, check it out
