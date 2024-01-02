@@ -5,8 +5,11 @@ import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ReviewServiceImpl implements ReviewService{
     private final ReviewRepository repo;
@@ -46,6 +49,28 @@ public class ReviewServiceImpl implements ReviewService{
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(repo.findById(reviewId).get());
+    }
+
+    @Override
+    public ResponseEntity<List<Review>> seeAll(Long bookId, String filter) {
+        List<Review> listOfReviews = repo.findAll().stream()
+                .filter(r -> r.getBookId().equals(bookId))
+                .collect(Collectors.toList());
+
+        if (listOfReviews.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        if (!Arrays.asList("mostRelevant", "mostRecent", "highestRated").contains(filter)) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (filter.equals("mostRecent")) {
+            listOfReviews.sort(Comparator.comparing(Review::getTimeCreated).reversed());
+        } else if (filter.equals("highestRated")) {
+            listOfReviews.sort(Comparator.comparing(Review::getUpvote).reversed());
+        }
+
+        return ResponseEntity.ok(listOfReviews);
     }
 
     @Override
