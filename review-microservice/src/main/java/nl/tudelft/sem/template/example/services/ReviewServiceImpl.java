@@ -64,10 +64,12 @@ public class ReviewServiceImpl implements ReviewService{
             return ResponseEntity.badRequest().build();
         }
 
-        if (filter.equals("mostRecent")) {
-            listOfReviews.sort(Comparator.comparing(Review::getTimeCreated).reversed());
-        } else if (filter.equals("highestRated")) {
-            listOfReviews.sort(Comparator.comparing(Review::getUpvote).reversed());
+        switch (filter) {
+            case "mostRecent" -> listOfReviews.sort(Comparator.comparing(Review::getTimeCreated).reversed());
+            case "highestRated" -> listOfReviews.sort(Comparator.comparing(Review::getUpvote).reversed());
+            case "mostRelevant" -> listOfReviews.sort(Comparator.comparingLong(
+                    review -> review.getDownvote() - review.getUpvote()
+            ));
         }
 
         return ResponseEntity.ok(listOfReviews);
