@@ -29,11 +29,4 @@ public class GetReportController implements GetReportApi {
     public ResponseEntity<BookData> getReportBookIdUserIdInfoGet(Long bookId, String userId, String info) {
         return service.getReport(bookId, userId, info);
     }
-    public ResponseEntity<BookData> addRatingAndNotion(Long bookId, Long rating, Review.BookNotionEnum notion){
-        return service.addRatingAndNotion(bookId, rating, notion);
-    }
-
-    public ResponseEntity<BookData> createBookDataEntity(Long bookId){
-        return service.createBookDataInRepository(bookId);
-    }
 }

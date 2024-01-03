@@ -9,4 +9,24 @@ class GetReportServiceImplTest {
     @Test
     void getReport() {
     }
+
+    @Test
+    void testGetReport() {
+    }
+
+    @Test
+    void addRatingAndNotion() {
+    }
+
+    @Test
+    void removeRatingAndNotion() {
+    }
+
+    @Test
+    void updateRatingAndNotion() {
+    }
+
+    @Test
+    void createBookDataInRepository() {
+    }
 }

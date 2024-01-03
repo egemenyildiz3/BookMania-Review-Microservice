@@ -7,8 +7,11 @@ import org.springframework.http.ResponseEntity;
 public interface GetReportService {
     ResponseEntity<BookData> getReport(Long bookId, String userId, String info);
 
-    ResponseEntity<BookData> addRatingAndNotion(Long bookId, Long rating, Review.BookNotionEnum notion);
-
     ResponseEntity<BookData> createBookDataInRepository(Long bookId);
+
+    ResponseEntity<BookData> addRatingAndNotion(Long bookId, Long rating, Review.BookNotionEnum notion);
+    ResponseEntity<BookData> removeRatingAndNotion(Long bookId, Long rating, Review.BookNotionEnum notion);
+    ResponseEntity<BookData> updateRatingAndNotion(Long bookId, Long oldRating, Review.BookNotionEnum oldNotion,
+                                                   Long newRating, Review.BookNotionEnum newNotion);
 }
 

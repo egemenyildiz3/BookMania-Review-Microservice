@@ -88,6 +88,43 @@ public class GetReportServiceImpl implements GetReportService{
         return ResponseEntity.ok(saved);
     }
 
+    @Override
+    public ResponseEntity<BookData> removeRatingAndNotion(Long bookId, Long rating, Review.BookNotionEnum notion) {
+        // If you're trying to delete a review, and there is no bookData object yet
+        // then something has gone horribly wrong
+        if(!bookDataRepository.existsById(bookId)){
+            return ResponseEntity.badRequest().build();
+        }
+
+        BookData bd = initializeLazyObjectFromDatabase(bookDataRepository.getOne(bookId));
+
+        int totalReviews = bd.getNegativeRev() + bd.getPositiveRev() + bd.getNegativeRev();
+        double totalRating = bd.getAvrRating() * totalReviews;
+        totalRating -= rating;
+        totalReviews--;
+        bd.setAvrRating(totalRating / totalReviews);
+
+
+        switch (notion){
+            case NEUTRAL -> bd.setNeutralRev(bd.getNeutralRev()-1);
+            case NEGATIVE -> bd.setNegativeRev(bd.getNegativeRev()-1);
+            case POSITIVE -> bd.setPositiveRev(bd.getPositiveRev()-1);
+        }
+
+        BookData saved = bookDataRepository.save(bd);
+
+        return ResponseEntity.ok(saved);
+    }
+
+    @Override
+    public ResponseEntity<BookData> updateRatingAndNotion(Long bookId, Long oldRating, Review.BookNotionEnum oldNotion,
+                                                          Long newRating, Review.BookNotionEnum newNotion) {
+        var response =  removeRatingAndNotion(bookId, oldRating, oldNotion);
+        if(response.getStatusCode().is4xxClientError())
+            return response;
+        return addRatingAndNotion(bookId, newRating, newNotion);
+    }
+
     public ResponseEntity<BookData> createBookDataInRepository(Long bookId) {
         if(bookDataRepository.existsById(bookId)){
             return ResponseEntity.status(400).build();
