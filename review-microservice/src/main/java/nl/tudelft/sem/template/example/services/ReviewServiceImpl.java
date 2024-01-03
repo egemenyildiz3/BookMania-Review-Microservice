@@ -1,13 +1,15 @@
 package nl.tudelft.sem.template.example.services;
 
+import nl.tudelft.sem.template.example.domain.review.filter.HighestRatedFilter;
+import nl.tudelft.sem.template.example.domain.review.filter.MostRecentFilter;
+import nl.tudelft.sem.template.example.domain.review.filter.MostRelevantFilter;
+import nl.tudelft.sem.template.example.domain.review.filter.ReviewFilter;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +20,19 @@ public class ReviewServiceImpl implements ReviewService{
     }
 
     private static final List<String> profanities = Arrays.asList("fuck","shit", "motherfucker", "bastard","cunt", "bitch");
+
+    public ReviewFilter getFilter(String type) {
+        if (type.equals("mostRecent")) {
+            return new MostRecentFilter();
+        }
+        if (type.equals("highestRated")) {
+            return new HighestRatedFilter();
+        }
+        if (type.equals("mostRelevant")) {
+            return new MostRelevantFilter();
+        }
+        return null;
+    }
 
     @Override
     public ResponseEntity<Review> add(Review review) {
@@ -64,15 +79,9 @@ public class ReviewServiceImpl implements ReviewService{
             return ResponseEntity.badRequest().build();
         }
 
-        switch (filter) {
-            case "mostRecent" -> listOfReviews.sort(Comparator.comparing(Review::getTimeCreated).reversed());
-            case "highestRated" -> listOfReviews.sort(Comparator.comparing(Review::getUpvote).reversed());
-            case "mostRelevant" -> listOfReviews.sort(Comparator.comparingLong(
-                    review -> review.getDownvote() - review.getUpvote()
-            ));
-        }
+        ReviewFilter reviewFilter = getFilter(filter);
 
-        return ResponseEntity.ok(listOfReviews);
+        return ResponseEntity.ok(reviewFilter.filter(listOfReviews));
     }
 
     @Override
