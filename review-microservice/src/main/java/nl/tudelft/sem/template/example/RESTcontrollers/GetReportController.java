@@ -24,11 +24,11 @@ public class GetReportController implements GetReportApi {
         this.service = new GetReportServiceImpl(repo, rr);
     }
 
+
     @Override
     public ResponseEntity<BookData> getReportBookIdUserIdInfoGet(Long bookId, String userId, String info) {
         return service.getReport(bookId, userId, info);
     }
-
     public ResponseEntity<BookData> addRatingAndNotion(Long bookId, Long rating, Review.BookNotionEnum notion){
         return service.addRatingAndNotion(bookId, rating, notion);
     }
