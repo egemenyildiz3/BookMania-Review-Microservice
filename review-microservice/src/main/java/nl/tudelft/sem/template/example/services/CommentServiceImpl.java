@@ -2,12 +2,14 @@ package nl.tudelft.sem.template.example.services;
 
 import java.util.*;
 import java.time.*;
+import java.util.stream.Collectors;
 
 import nl.tudelft.sem.template.example.repositories.CommentRepository;
 import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.Review;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -61,6 +63,20 @@ public class CommentServiceImpl implements CommentService {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(repository.findById(commentId).get());
+    }
+
+    @Override
+    public ResponseEntity<List<Comment>> getAll(Long reviewId) {
+        if (!reviewRepository.existsById(reviewId)) {
+            return  ResponseEntity.badRequest().build();
+        }
+
+        List<Comment> comments = repository.findAll().stream()
+                .filter(c -> c.getReview().getId().equals(reviewId))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(comments);
+
     }
 
     @Override
