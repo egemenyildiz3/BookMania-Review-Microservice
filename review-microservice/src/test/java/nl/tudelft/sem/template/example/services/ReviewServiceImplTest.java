@@ -9,6 +9,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -161,5 +163,73 @@ class ReviewServiceImplTest {
         assertNull(review.getUpvote());
         assertEquals(review.getDownvote(), 1);
         verify(repository, times(1)).save(review);
+    }
+
+    @Test
+    void seeAllMostRecent() {
+        Review r = new Review(1L,2L,10L);
+        Review r2 = new Review(2L,2L,9L);
+        Review r3 = new Review(3L,1L,8L);
+        Review r4 = new Review(4L,2L,7L);
+        Review r5 = new Review(5L,2L,6L);
+        when(repository.findAll()).thenReturn(List.of(r,r2,r3,r4,r5));
+
+        r.setTimeCreated(LocalDate.of(2003,12,27));
+        r2.setTimeCreated(LocalDate.of(2020,9,27));
+        r3.setTimeCreated(LocalDate.of(2020,9,30));
+        r4.setTimeCreated(LocalDate.of(2019,1,27));
+        r5.setTimeCreated(LocalDate.of(2020,9,26));
+
+        List<Review> correctList = List.of(r2,r5,r4,r);
+
+        ResponseEntity<List<Review>> reviews = service.seeAll(2L, "mostRecent");
+        assertEquals(reviews.getBody(), correctList);
+    }
+
+    @Test
+    void seeAllMostUpvote() {
+        Review r = new Review(1L,2L,10L);
+        Review r2 = new Review(2L,2L,9L);
+        Review r3 = new Review(3L,1L,8L);
+        Review r4 = new Review(4L,2L,7L);
+        Review r5 = new Review(5L,2L,6L);
+        when(repository.findAll()).thenReturn(List.of(r,r2,r3,r4,r5));
+
+        r.setUpvote(9999L);
+        r2.setUpvote(0L);
+        r3.setUpvote(9999L);
+        r4.setUpvote(1L);
+        r5.setUpvote(10000L);
+
+        List<Review> correctList = List.of(r5,r,r4,r2);
+
+        ResponseEntity<List<Review>> reviews = service.seeAll(2L, "highestRated");
+        assertEquals(reviews.getBody(), correctList);
+    }
+
+    @Test
+    void seeAllMostRelevant() {
+        Review r = new Review(1L,2L,10L);
+        Review r2 = new Review(2L,2L,9L);
+        Review r3 = new Review(3L,1L,8L);
+        Review r4 = new Review(4L,2L,7L);
+        Review r5 = new Review(5L,2L,6L);
+        when(repository.findAll()).thenReturn(List.of(r,r2,r3,r4,r5));
+
+        r.setUpvote(9999L);
+        r.setDownvote(1000L);
+        r2.setUpvote(0L);
+        r2.setDownvote(1000L);
+        r3.setUpvote(9999L);
+        r3.setDownvote(0L);
+        r4.setUpvote(1L);
+        r4.setDownvote(0L);
+        r5.setUpvote(10000L);
+        r5.setDownvote(1002L);
+
+        List<Review> correctList = List.of(r,r5,r4,r2);
+
+        ResponseEntity<List<Review>> reviews = service.seeAll(2L, "mostRelevant");
+        assertEquals(reviews.getBody(), correctList);
     }
 }

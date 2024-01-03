@@ -7,6 +7,8 @@ import nl.tudelft.sem.template.model.Review;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 public class ReviewController implements ReviewApi {
 
@@ -30,6 +32,11 @@ public class ReviewController implements ReviewApi {
     @Override
     public ResponseEntity<Review> reviewReviewIdGet(Long reviewId) {
         return service.get(reviewId);
+    }
+
+    @Override
+    public ResponseEntity<List<Review>> reviewSeeAllBookIdFilterGet(Long bookId, String filter) {
+        return service.seeAll(bookId, filter);
     }
 
     @Override

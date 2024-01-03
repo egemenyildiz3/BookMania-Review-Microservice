@@ -1,5 +1,9 @@
 package nl.tudelft.sem.template.example.services;
 
+import nl.tudelft.sem.template.example.domain.review.filter.HighestRatedFilter;
+import nl.tudelft.sem.template.example.domain.review.filter.MostRecentFilter;
+import nl.tudelft.sem.template.example.domain.review.filter.MostRelevantFilter;
+import nl.tudelft.sem.template.example.domain.review.filter.ReviewFilter;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
@@ -7,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ReviewServiceImpl implements ReviewService{
     private final ReviewRepository repo;
@@ -15,6 +20,19 @@ public class ReviewServiceImpl implements ReviewService{
     }
 
     private static final List<String> profanities = Arrays.asList("fuck","shit", "motherfucker", "bastard","cunt", "bitch");
+
+    public ReviewFilter getFilter(String type) {
+        if (type.equals("mostRecent")) {
+            return new MostRecentFilter();
+        }
+        if (type.equals("highestRated")) {
+            return new HighestRatedFilter();
+        }
+        if (type.equals("mostRelevant")) {
+            return new MostRelevantFilter();
+        }
+        return null;
+    }
 
     @Override
     public ResponseEntity<Review> add(Review review) {
@@ -46,6 +64,24 @@ public class ReviewServiceImpl implements ReviewService{
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(repo.findById(reviewId).get());
+    }
+
+    @Override
+    public ResponseEntity<List<Review>> seeAll(Long bookId, String filter) {
+        List<Review> listOfReviews = repo.findAll().stream()
+                .filter(r -> r.getBookId().equals(bookId))
+                .collect(Collectors.toList());
+
+        if (listOfReviews.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        if (!Arrays.asList("mostRelevant", "mostRecent", "highestRated").contains(filter)) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        ReviewFilter reviewFilter = getFilter(filter);
+
+        return ResponseEntity.ok(reviewFilter.filter(listOfReviews));
     }
 
     @Override
