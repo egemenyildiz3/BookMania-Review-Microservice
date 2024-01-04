@@ -181,5 +181,17 @@ class GetReportServiceImplTest {
 
     @Test
     void createBookDataInRepository() {
+        long id = 10L;
+        BookData expected = new BookData(id);
+        expected.setAvrRating(0.0);
+        expected.setPositiveRev(0);
+        expected.setNeutralRev(0);
+        expected.setNegativeRev(0);
+
+        when(bookDataRepository.save(expected)).thenReturn(expected);
+
+        BookData result = service.createBookDataInRepository(id).getBody();
+
+        assertEquals(expected, result);
     }
 }
