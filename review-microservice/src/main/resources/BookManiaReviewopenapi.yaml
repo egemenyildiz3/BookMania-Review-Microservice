@@ -1129,8 +1129,8 @@ components:
           format: int64
           example: 23
         avrRating:
-          type: integer
-          format: int64
+          type: number
+          format: double
           example: 4.3
         mostUpvotedReview:
           description: the id of the review that has the most upvotes
