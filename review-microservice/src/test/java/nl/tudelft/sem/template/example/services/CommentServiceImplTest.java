@@ -9,10 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -167,4 +170,36 @@ class CommentServiceImplTest {
         assertTrue(review.getCommentList().contains(comment));
         assertEquals(result.getStatusCode(), HttpStatus.BAD_REQUEST);
     }
+
+    @Test
+    void testGetAll() {
+        Review r1 = new Review(17L, 1L, 1L);
+        Review r2 = new Review(13L, 2L, 2L);
+        Comment c1 = new Comment(1L,1L);
+        Comment c2 = new Comment(2L,1L);
+        Comment c3 = new Comment(3L,1L);
+        Comment c4 = new Comment(4L,2L);
+        Comment c5 = new Comment(5L,1L);
+        Comment c6 = new Comment(6L,2L);
+        c1.setReview(r1);
+        c2.setReview(r1);
+        c3.setReview(r2);
+        c4.setReview(r1);
+        c5.setReview(r1);
+        c6.setReview(r1);
+
+        when(reviewRepository.existsById(17L)).thenReturn(true);
+        when(reviewRepository.existsById(2L)).thenReturn(false);
+        when(commentRepository.findAll()).thenReturn(List.of(c1,c2,c3,c4,c5,c6));
+
+        List<Comment> correctList = List.of(c1,c2,c4,c5,c6);
+        ResponseEntity<List<Comment>> result = service.getAll(17L);
+        ResponseEntity<List<Comment>> failResult = service.getAll(2L);
+
+        assertEquals(result.getBody(), correctList);
+        assertEquals(result.getStatusCode(), HttpStatus.OK);
+        assertEquals(failResult.getStatusCode(), HttpStatus.BAD_REQUEST);
+
+    }
+
 }
