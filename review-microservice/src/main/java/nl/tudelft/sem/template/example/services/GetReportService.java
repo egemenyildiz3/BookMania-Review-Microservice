@@ -5,7 +5,7 @@ import nl.tudelft.sem.template.model.Review;
 import org.springframework.http.ResponseEntity;
 
 public interface GetReportService {
-    ResponseEntity<BookData> getReport(Long bookId, String userId, String info);
+    ResponseEntity<BookData> getReport(Long bookId, Long userId, String info);
 
     ResponseEntity<BookData> createBookDataInRepository(Long bookId);
 
