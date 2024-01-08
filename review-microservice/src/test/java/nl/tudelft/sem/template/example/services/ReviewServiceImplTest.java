@@ -339,4 +339,16 @@ class ReviewServiceImplTest {
         corrList.add(r3);
         assertEquals(service.mostUpvotedReviews(userId).getBody(), corrList);
     }
+
+    @Test
+    void pinTest() {
+        Long userId = 17L;
+        Review r1 = new Review(1L, 2L, userId);
+        when(repository.existsById(1L)).thenReturn(true);
+        when(repository.findById(1L)).thenReturn(Optional.of(r1));
+        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ResponseEntity<String> response = service.pinReview(1L, true);
+        assertTrue(response.getStatusCode().is2xxSuccessful());
+    }
 }
