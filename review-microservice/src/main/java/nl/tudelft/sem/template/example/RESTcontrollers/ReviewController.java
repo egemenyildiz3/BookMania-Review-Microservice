@@ -55,4 +55,14 @@ public class ReviewController implements ReviewApi {
     public ResponseEntity<String> reviewVoteReviewIdPut(Long reviewId, Integer body) {
         return service.addVote(reviewId, body);
     }
+
+    @Override
+    public ResponseEntity<List<Review>> reviewMostUpvotedUserIdGet(Long userId) {
+        return service.mostUpvotedReviews(userId);
+    }
+
+    @Override
+    public ResponseEntity<String> reviewPinReviewIdPut(Long reviewId, Boolean body) {
+        return service.pinReview(reviewId, body);
+    }
 }

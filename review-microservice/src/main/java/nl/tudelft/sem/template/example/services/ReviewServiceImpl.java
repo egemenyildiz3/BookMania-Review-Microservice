@@ -11,9 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ReviewServiceImpl implements ReviewService{
@@ -179,6 +177,40 @@ public class ReviewServiceImpl implements ReviewService{
             }
             review.downvote(review.getDownvote() + 1);
         }
+        repo.save(review);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<List<Review>> mostUpvotedReviews(Long userId) {
+        List<Review> listOfReviews = new ArrayList<>(repo.findAll());
+        List<Review> result = new ArrayList<>();
+        for (Review rev : listOfReviews) {
+            if (rev.getUserId().equals(userId)) {
+                result.add(rev);
+            }
+        }
+        result.sort(Comparator.comparingLong((Review r) -> r.getUpvote() == null ? 0 : r.getUpvote()).reversed());
+        List<Review> finalRes = new ArrayList<>();
+        if (result.get(0) != null) {
+            finalRes.add(result.get(0));
+        }
+        if (result.get(1) != null) {
+            finalRes.add(result.get(1));
+        }
+        if (result.get(2) != null) {
+            finalRes.add(result.get(2));
+        }
+        return ResponseEntity.ok(finalRes);
+    }
+
+    @Override
+    public ResponseEntity<String> pinReview(Long reviewId, Boolean body) {
+        if(!repo.existsById(reviewId) || get(reviewId).getBody() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).header("Invalid ReviewId", "review Id not found").build();
+        }
+        Review review = get(reviewId).getBody();
+        review.setPinned(body);
         repo.save(review);
         return ResponseEntity.ok().build();
     }
