@@ -2,12 +2,16 @@ package nl.tudelft.sem.template.example.repositories;
 
 import nl.tudelft.sem.template.model.ReportReview;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
 public interface ReportReviewRepository extends JpaRepository<ReportReview, Long> {
+    @Query("SELECT rr FROM ReportReview rr WHERE rr.review.id = :reviewId")
     List<ReportReview> findAllByReviewId(Long reviewId);
+
+    @Query("SELECT CASE WHEN COUNT(rr) > 0 THEN true ELSE false END FROM ReportReview rr WHERE rr.review.id = :reviewId")
     boolean existsByReviewId(Long reviewId);
 }
