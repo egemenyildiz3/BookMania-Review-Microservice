@@ -102,7 +102,9 @@ public class GetReportServiceImpl implements GetReportService{
         // If you're trying to delete a review, and there is no bookData object yet
         // then something has gone horribly wrong
         if(!bookDataRepository.existsById(bookId)){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(400)
+                    .header("Error", "bookData doesn't exist.")
+                    .build();
         }
 
         BookData bd = initializeLazyObjectFromDatabase(bookDataRepository.getOne(bookId));
@@ -135,9 +137,17 @@ public class GetReportServiceImpl implements GetReportService{
     }
 
     public ResponseEntity<BookData> createBookDataInRepository(Long bookId) {
-        if(bookDataRepository.existsById(bookId)){
-            return ResponseEntity.status(400).build();
+        if(bookId == null){
+            return ResponseEntity.status(400)
+                    .header("Error", "bookId is null.")
+                    .build();
         }
+        if(bookDataRepository.existsById(bookId)){
+            return ResponseEntity.status(400)
+                    .header("Error", "bookData already exists.")
+                    .build();
+        }
+
 
         BookData bd = new BookData(bookId);
         bd.setAvrRating(0.0);

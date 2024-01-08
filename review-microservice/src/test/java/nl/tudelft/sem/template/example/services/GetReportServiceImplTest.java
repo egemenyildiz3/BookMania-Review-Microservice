@@ -111,6 +111,26 @@ class GetReportServiceImplTest {
     }
 
     @Test
+    void testGetReportReportNoReviews() {
+        long id = 20L;
+        BookData data = new BookData(id);
+        data.setAvrRating(4.0);
+        data.setPositiveRev(3);
+        data.setNeutralRev(1);
+        data.setNegativeRev(1);
+
+        when(bookDataRepository.existsById(id)).thenReturn(true);
+        when(bookDataRepository.getOne(id)).thenReturn(data);
+
+        List<Long> reviews = new ArrayList<>();
+        when(reviewRepository.findMostUpvotedReviewId(eq(id), any(Pageable.class))).thenReturn(reviews);
+
+        BookData result = service.getReport(id, 5L, "report").getBody();
+
+        assertEquals(data, result);
+    }
+
+    @Test
     void testGetReportRating() {
         long id = 20L;
         BookData data = new BookData(id);
@@ -163,7 +183,7 @@ class GetReportServiceImplTest {
     }
 
     @Test
-    void addRatingAndNotion() {
+    void addRatingAndNotionPositive() {
         long id = 20L;
         BookData data = new BookData(id);
         data.setAvrRating(4.0);
@@ -183,6 +203,83 @@ class GetReportServiceImplTest {
 
         assertNotNull(result);
         assertEquals(data, result);
+    }
+    @Test
+    void addRatingAndNotionNeutral() {
+        long id = 20L;
+        BookData data = new BookData(id);
+        data.setAvrRating(4.0);
+        data.setPositiveRev(3);
+        data.setNeutralRev(1);
+        data.setNegativeRev(1);
+
+        when(bookDataRepository.existsById(id)).thenReturn(true);
+        when(bookDataRepository.getOne(id)).thenReturn(data);
+
+        when(bookDataRepository.save(any(BookData.class))).thenAnswer(invocation ->  {return invocation.getArgument(0);});
+
+        BookData result = service.addRatingAndNotion(id, 3L, Review.BookNotionEnum.NEUTRAL).getBody();
+
+        data.setNeutralRev(2);
+        data.setAvrRating((4.0 * 5 + 3) / 6);
+
+        assertNotNull(result);
+        assertEquals(data, result);
+    }
+    @Test
+    void addRatingAndNotionNegative() {
+        long id = 20L;
+        BookData data = new BookData(id);
+        data.setAvrRating(4.0);
+        data.setPositiveRev(3);
+        data.setNeutralRev(1);
+        data.setNegativeRev(1);
+
+        when(bookDataRepository.existsById(id)).thenReturn(true);
+        when(bookDataRepository.getOne(id)).thenReturn(data);
+
+        when(bookDataRepository.save(any(BookData.class))).thenAnswer(invocation ->  {return invocation.getArgument(0);});
+
+        BookData result = service.addRatingAndNotion(id, 3L, Review.BookNotionEnum.NEGATIVE).getBody();
+
+        data.setNegativeRev(2);
+        data.setAvrRating((4.0 * 5 + 3) / 6);
+
+        assertNotNull(result);
+        assertEquals(data, result);
+    }
+    @Test
+    void addRatingAndNotionBookDataDoesntExist() {
+        long id = 20L;
+        BookData data = new BookData(id);
+        data.setAvrRating(4.0);
+        data.setPositiveRev(3);
+        data.setNeutralRev(1);
+        data.setNegativeRev(1);
+
+        when(bookDataRepository.existsById(id)).thenReturn(false);
+        when(bookDataRepository.getOne(id)).thenReturn(data);
+
+        when(bookDataRepository.save(any(BookData.class))).thenAnswer(invocation ->  {return invocation.getArgument(0);});
+
+        BookData result = service.addRatingAndNotion(id, 3L, Review.BookNotionEnum.POSITIVE).getBody();
+
+        data.setPositiveRev(4);
+        data.setAvrRating((4.0 * 5 + 3) / 6);
+
+        assertNotNull(result);
+        assertEquals(data, result);
+    }
+    @Test
+    void addRatingAndNotionBookDataNullID() {
+        Long id = null;
+        BookData data = new BookData(5L);
+
+        when(bookDataRepository.existsById(id)).thenReturn(false);
+
+        var result = service.addRatingAndNotion(id, 3L, Review.BookNotionEnum.POSITIVE);
+
+        assertEquals(400, result.getStatusCode().value());
     }
 
     @Test
@@ -206,6 +303,38 @@ class GetReportServiceImplTest {
 
         assertNotNull(result);
         assertEquals(data, result);
+    }
+    @Test
+    void removeRatingAndNotionPositive() {
+        long id = 20L;
+        BookData data = new BookData(id);
+        data.setAvrRating(4.0);
+        data.setPositiveRev(3);
+        data.setNeutralRev(1);
+        data.setNegativeRev(1);
+
+        when(bookDataRepository.existsById(id)).thenReturn(true);
+        when(bookDataRepository.getOne(id)).thenReturn(data);
+
+        when(bookDataRepository.save(any(BookData.class))).thenAnswer(invocation ->  {return invocation.getArgument(0);});
+
+        BookData result = service.removeRatingAndNotion(id, 2L, Review.BookNotionEnum.POSITIVE).getBody();
+
+        data.setPositiveRev(2);
+        data.setAvrRating((4.0 * 5 - 2) / 4);
+
+        assertNotNull(result);
+        assertEquals(data, result);
+    }
+    @Test
+    void removeRatingAndNotionBookDataDoesntExist() {
+        long id = 20L;
+
+        when(bookDataRepository.existsById(id)).thenReturn(false);
+
+        var result = service.removeRatingAndNotion(id, 2L, Review.BookNotionEnum.NEUTRAL);
+
+        assertEquals(400, result.getStatusCode().value());
     }
 
     @Test
@@ -238,6 +367,15 @@ class GetReportServiceImplTest {
     }
 
     @Test
+    void updateRatingAndNotionNull () {
+        Long id = null;
+        var result = service.updateRatingAndNotion(id, 3L, Review.BookNotionEnum.NEGATIVE
+                , 5L, Review.BookNotionEnum.POSITIVE);
+
+        assertEquals(400, result.getStatusCode().value());
+    }
+
+    @Test
     void createBookDataInRepository() {
         long id = 10L;
         BookData expected = new BookData(id);
@@ -251,5 +389,14 @@ class GetReportServiceImplTest {
         BookData result = service.createBookDataInRepository(id).getBody();
 
         assertEquals(expected, result);
+    }
+
+    @Test
+    void createBookDataInRepositoryAlreadyExists() {
+        long id = 10L;
+        when(bookDataRepository.existsById(id)).thenReturn(true);
+        var result = service.createBookDataInRepository(id);
+
+        assertEquals(400, result.getStatusCode().value());
     }
 }
