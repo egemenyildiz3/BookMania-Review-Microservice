@@ -43,10 +43,11 @@ class ReportReviewServiceImplTest {
         when(reviewRepository.existsById(review.getId())).thenReturn(true);
         when(repository.save(ArgumentMatchers.any())).thenReturn(new ReportReview());
 
+        when(reviewRepository.getOne(1L)).thenReturn(review);
         ResponseEntity<ReportReview> result = service.report(review);
 
         verify(reviewRepository).existsById(review.getId());
-        verify(repository).save(ArgumentMatchers.any());
+        verify(reviewRepository).save(ArgumentMatchers.any());
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertNotNull(result.getBody());
