@@ -47,7 +47,7 @@ class ReportCommentServiceImplTest {
         when(repository.save(ArgumentMatchers.any())).thenReturn(new ReportComment());
         when(commentRepository.getOne(1L)).thenReturn(comment);
 
-        ResponseEntity<ReportComment> result = service.report(comment);
+        ResponseEntity<ReportComment> result = service.report(1L,"foul language");
 
         verify(commentRepository).existsById(comment.getId());
         verify(commentRepository).save(ArgumentMatchers.any());
@@ -58,7 +58,7 @@ class ReportCommentServiceImplTest {
 
     @Test
     void reportInvalid() {
-        ResponseEntity<ReportComment> result = service.report(null);
+        ResponseEntity<ReportComment> result = service.report(1L,null);
 
         verify(repository, never()).save(any());
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());

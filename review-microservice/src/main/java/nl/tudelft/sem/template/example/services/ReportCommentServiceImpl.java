@@ -21,20 +21,39 @@ public class ReportCommentServiceImpl implements ReportCommentService{
         this.repo = repo;
         this.commentRepo = commentRepo;
     }
-    @Override
-    public ResponseEntity<ReportComment> report(Comment comment) {
-        if (comment == null || !commentRepo.existsById(comment.getId())) {
-            return ResponseEntity.badRequest().build();
-        }
+//    @Override
+//    public ResponseEntity<ReportComment> report(String reason) {
+//        comment.setReview(null);
+//        if ( == null || !commentRepo.existsById(comment.getId())) {
+//            return ResponseEntity.badRequest().header("fefe").build();
+//        }
+//        ReportComment reportComment = new ReportComment();
+//        Comment com = commentRepo.getOne(comment.getId());
+//        reportComment.setComment(com);
+//        com.addReportListItem(reportComment);
+//        //repo.save(reportComment);
+//        commentRepo.save(com);
+//
+//        return ResponseEntity.ok(reportComment);
+//    }
 
+    @Override
+    public ResponseEntity<ReportComment> report(Long commentId, String reason) {
+        if ( reason == null || !commentRepo.existsById(commentId)) {
+            return ResponseEntity.badRequest().header("bad").build();
+        }
         ReportComment reportComment = new ReportComment();
-        Comment com = commentRepo.getOne(comment.getId());
+        Comment com = commentRepo.getOne(commentId);
         reportComment.setComment(com);
+        reportComment.setReason(reason);
         com.addReportListItem(reportComment);
+        //repo.save(reportComment);
         commentRepo.save(com);
 
         return ResponseEntity.ok(reportComment);
     }
+
+
 
     @Override
     public ResponseEntity<ReportComment> get(Long id) {

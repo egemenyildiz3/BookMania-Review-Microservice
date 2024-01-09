@@ -44,6 +44,7 @@ public class CommentServiceImpl implements CommentService {
             return ResponseEntity.badRequest().build();
         }
         Review review = reviewRepository.findById(reviewId).get();
+        comment.setId(0L);
         comment.setUserId(userId);
         comment.setTimeCreated(LocalDate.now());
         comment.setReview(review);

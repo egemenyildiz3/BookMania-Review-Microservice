@@ -21,20 +21,37 @@ public class ReportReviewServiceImpl implements ReportReviewService{
         this.reviewRepo = reviewRepo;
     }
 
+//    @Override
+//    public ResponseEntity<ReportReview> report(Review review) {
+//        if (review == null || !reviewRepo.existsById(review.getId())) {
+//            return ResponseEntity.badRequest().build();
+//        }
+//
+//        ReportReview reportReview = new ReportReview();
+//        Review rev = reviewRepo.getOne(review.getId());
+//        rev.addReportListItem(reportReview);
+//        reportReview.setReview(rev);
+//
+//        reviewRepo.save(rev);
+//
+//        return ResponseEntity.ok(reportReview);
+//    }
+
     @Override
-    public ResponseEntity<ReportReview> report(Review review) {
-        if (review == null || !reviewRepo.existsById(review.getId())) {
+    public ResponseEntity<ReportReview> report(Long reviewId, String reason) {
+        if (reason == null || !reviewRepo.existsById(reviewId)) {
             return ResponseEntity.badRequest().build();
         }
 
         ReportReview reportReview = new ReportReview();
-        Review rev = reviewRepo.getOne(review.getId());
+        Review rev = reviewRepo.getOne(reviewId);
         rev.addReportListItem(reportReview);
+        reportReview.setReason(reason);
         reportReview.setReview(rev);
 
         reviewRepo.save(rev);
 
-        return ResponseEntity.ok(reportReview);
+        return ResponseEntity.ok(rev.getReportList().get(rev.getReportList().size()-1));
     }
 
     @Override
