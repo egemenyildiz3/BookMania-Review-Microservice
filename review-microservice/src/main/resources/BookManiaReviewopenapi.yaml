@@ -613,23 +613,16 @@ paths:
                 type: string
                 description: Error message
                 example: cannot find review.
-  /stats/avgRating/{bookId}/{userId}:
+  /stats/avgRating/{bookId}:
     get:
       tags:
         - public book statistics
       summary: the average rating for the book
-      description: returns the average rating for this bookId, calls report with a user that is not the author of the book
+      description: returns the average rating for this bookId
       parameters:
         - name: bookId
           in: path
           description: the bookId of the book to get the average rating for
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: userId
-          in: path
-          description: the user that requests the average rating
           required: true
           schema:
             type: integer
@@ -651,15 +644,7 @@ paths:
                 type: string
                 description: Error message
                 example: cannot find book.
-        '401':
-          description: cannot find user
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Error message
-                example: cannot find user.
-  /stats/interactions/{bookId}/{userId}:
+  /stats/interactions/{bookId}:
     get:
       tags:
         - public book statistics
@@ -669,13 +654,6 @@ paths:
         - name: bookId
           in: path
           description: the book to return number of reviews
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: userId
-          in: path
-          description: the user that requests number of reviews
           required: true
           schema:
             type: integer
@@ -697,14 +675,6 @@ paths:
                 type: string
                 description: Error message
                 example: cannot find book.
-        '401':
-          description: cannot find user
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Error message
-                example: cannot find user.
 
   /comment/add/{reviewId}/{userId}:
     post:
