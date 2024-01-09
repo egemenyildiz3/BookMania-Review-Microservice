@@ -13,21 +13,30 @@ public class GetReportServiceImpl implements GetReportService{
 
     private final BookDataRepository bookDataRepository;
     private final ReviewRepository reviewRepository;
+    private final CommunicationServiceImpl communicationService;
 
-    public GetReportServiceImpl(BookDataRepository bdr, ReviewRepository rr){
+    public GetReportServiceImpl(BookDataRepository bdr, ReviewRepository rr, CommunicationServiceImpl cs){
         this.bookDataRepository = bdr;
         this.reviewRepository = rr;
+        this.communicationService = cs;
     }
 
     @Override
-    public ResponseEntity<BookData> getReport(Long bookId, String userId, String info) {
+    public ResponseEntity<BookData> getReport(Long bookId, Long userId, String info) {
         if(userId == null || bookId == null || info == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        // TODO: Check if user exists somehow
-        if(false){
-                return ResponseEntity.status(401).build();
+        if(!communicationService.existsUser(userId)){
+                return ResponseEntity.status(401)
+                        .header("Error", "cannot find user.")
+                        .build();
+        }
+
+        if(!communicationService.existsBook(bookId)){
+            return ResponseEntity.status(400)
+                    .header("Error", "cannot find book.")
+                    .build();
         }
 
         // If the bookData doesn't exist yet, then create an empty one for the repository, and work with it later
@@ -55,9 +64,9 @@ public class GetReportServiceImpl implements GetReportService{
             return ResponseEntity.ok((result));
         }
 
-        // TODO: This means that the info type was incorrect. How do I indicate this though?
-        // We would need a new response for the api
-        return ResponseEntity.status(400).build();
+        return ResponseEntity.status(400)
+                .header("Error", "invalid info type.")
+                .build();
     }
 
     @Override
@@ -93,7 +102,9 @@ public class GetReportServiceImpl implements GetReportService{
         // If you're trying to delete a review, and there is no bookData object yet
         // then something has gone horribly wrong
         if(!bookDataRepository.existsById(bookId)){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(400)
+                    .header("Error", "bookData doesn't exist.")
+                    .build();
         }
 
         BookData bd = initializeLazyObjectFromDatabase(bookDataRepository.getOne(bookId));
@@ -126,9 +137,17 @@ public class GetReportServiceImpl implements GetReportService{
     }
 
     public ResponseEntity<BookData> createBookDataInRepository(Long bookId) {
-        if(bookDataRepository.existsById(bookId)){
-            return ResponseEntity.status(400).build();
+        if(bookId == null){
+            return ResponseEntity.status(400)
+                    .header("Error", "bookId is null.")
+                    .build();
         }
+        if(bookDataRepository.existsById(bookId)){
+            return ResponseEntity.status(400)
+                    .header("Error", "bookData already exists.")
+                    .build();
+        }
+
 
         BookData bd = new BookData(bookId);
         bd.setAvrRating(0.0);
