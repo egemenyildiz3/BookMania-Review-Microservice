@@ -29,7 +29,7 @@ public class ReportCommentServiceImpl implements ReportCommentService{
 
         ReportComment reportComment = new ReportComment();
         Comment com = commentRepo.getOne(comment.getId());
-        reportComment.setComment(comment);
+        reportComment.setComment(com);
 
         repo.save(reportComment);
 

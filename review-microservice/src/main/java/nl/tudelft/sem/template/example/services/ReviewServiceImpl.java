@@ -42,9 +42,9 @@ public class ReviewServiceImpl implements ReviewService{
     }
 
     @Override
-    public ResponseEntity<Review> add(Review review) {
+    public ResponseEntity add(Review review) {
         if(review == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body("no review");
         }
         boolean book = communicationService.existsBook(review.getBookId());
         if(!book){
@@ -81,7 +81,7 @@ public class ReviewServiceImpl implements ReviewService{
     }
 
     @Override
-    public ResponseEntity<Review> get(Long reviewId) {
+    public ResponseEntity get(Long reviewId) {
         if(!repo.existsById(reviewId)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).header("Invalid ReviewId", "review Id not found").build();
         }
@@ -156,7 +156,7 @@ public class ReviewServiceImpl implements ReviewService{
         if(!repo.existsById(reviewId) || get(reviewId).getBody() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).header("Invalid ReviewId", "review Id not found").build();
         }
-        Review review = get(reviewId).getBody();
+        Review review = (Review) get(reviewId).getBody();
         review.spoiler(true);
         repo.save(review);
         return ResponseEntity.ok().build();
@@ -167,7 +167,7 @@ public class ReviewServiceImpl implements ReviewService{
         if(!repo.existsById(reviewId) || get(reviewId).getBody() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).header("Invalid ReviewId", "review Id not found").build();
         }
-        Review review = get(reviewId).getBody();
+        Review review = (Review) get(reviewId).getBody();
         if (body == 1) {
             if (review.getUpvote() == null) {
                 review.setUpvote(0L);
