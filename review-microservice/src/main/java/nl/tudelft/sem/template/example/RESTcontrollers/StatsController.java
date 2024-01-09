@@ -17,12 +17,12 @@ public class StatsController implements StatsApi {
     }
 
     @Override
-    public ResponseEntity<Double> statsAvgRatingBookIdUserIdGet(Long bookId, Long userId) {
-        return service.avgRating(bookId, userId);
+    public ResponseEntity<Double> statsAvgRatingBookIdGet(Long bookId) {
+        return service.avgRating(bookId);
     }
 
     @Override
-    public ResponseEntity<Long> statsInteractionsBookIdUserIdGet(Long bookId, Long userId) {
-        return service.interactions(bookId, userId);
+    public ResponseEntity<Long> statsInteractionsBookIdGet(Long bookId) {
+        return service.interactions(bookId);
     }
 }
