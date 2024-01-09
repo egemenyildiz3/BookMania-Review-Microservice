@@ -7,10 +7,10 @@ import nl.tudelft.sem.template.example.repositories.CommentRepository;
 import nl.tudelft.sem.template.example.repositories.ReportCommentRepository;
 import nl.tudelft.sem.template.example.services.ReportCommentServiceImpl;
 import nl.tudelft.sem.template.example.services.ReportReviewServiceImpl;
-import nl.tudelft.sem.template.model.ReportReview;
 import nl.tudelft.sem.template.model.Review;
-import nl.tudelft.sem.template.model.ReportComment;
 import nl.tudelft.sem.template.model.Comment;
+import nl.tudelft.sem.template.model.ReportReview;
+import nl.tudelft.sem.template.model.ReportComment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,8 +26,8 @@ public class ReportController implements ReportApi {
     }
 
     @Override
-    public ResponseEntity<String> reportReviewDeleteReportIdUserIdDelete(Long userId, Long id) {
-        return reportReviewService.delete(id, userId);
+    public ResponseEntity<String> reportReviewDeleteReportIdUserIdDelete(Long userId, Long reportId) {
+        return reportReviewService.delete(userId, reportId);
     }
 
     @Override
@@ -36,8 +36,8 @@ public class ReportController implements ReportApi {
     }
 
     @Override
-    public ResponseEntity<String> reportCommentDeleteReportIdUserIdDelete(Long userId, Long id) {
-        return reportCommentService.delete(id, userId);
+    public ResponseEntity<String> reportCommentDeleteReportIdUserIdDelete(Long userId, Long reportId) {
+        return reportCommentService.delete(userId, reportId);
     }
 
     @Override
@@ -45,4 +45,5 @@ public class ReportController implements ReportApi {
         return reportCommentService.report(comment);
     }
 }
+
 

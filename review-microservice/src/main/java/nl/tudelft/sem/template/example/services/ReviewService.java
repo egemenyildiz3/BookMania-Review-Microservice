@@ -16,5 +16,4 @@ public interface ReviewService {
     ResponseEntity<String> addSpoiler(Long reviewId);
     ResponseEntity<String> addVote(Long reviewId, Integer body);
 
-
 }
