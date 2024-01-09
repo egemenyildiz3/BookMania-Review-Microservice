@@ -230,7 +230,7 @@ paths:
                 type: string
                 description: Error message
                 example: cannot find book.
-  /review/vote/{reviewId}:
+  /review/vote/{reviewId}/{vote}:
     put:
       tags:
         - review
@@ -244,14 +244,13 @@ paths:
           schema:
             type: integer
             format: int64
-      requestBody:
-        description: 1 for upvote or 0 for downvote
-        content:
-          application/json:
-            schema:
-              type: integer
-              format: int32
-              example: 0
+        - name: vote
+          in: path
+          description: 1 for upvote and 0 for downvote
+          required: true
+          schema:
+            type: integer
+            format: int32
       responses:
         '200':
           description: Successful operation
@@ -912,7 +911,7 @@ paths:
                 type: string
                 description: Error message
                 example: cannot find comment.
-  /comment/vote/{commentId}:
+  /comment/vote/{commentId}/{vote}:
     put:
       tags:
         - comment
@@ -926,14 +925,13 @@ paths:
           schema:
             type: integer
             format: int64
-      requestBody:
-        description: 1 for upvote or 0 for downvote
-        content:
-          application/json:
-            schema:
-              type: integer
-              format: int32
-              example: 0
+        - name: vote
+          in: path
+          description: 1 for upvote and 0 for downvote
+          required: true
+          schema:
+            type: integer
+            format: int32
       responses:
         '200':
           description: Successful operation
