@@ -45,11 +45,12 @@ class ReportCommentServiceImplTest {
 
         when(commentRepository.existsById(comment.getId())).thenReturn(true);
         when(repository.save(ArgumentMatchers.any())).thenReturn(new ReportComment());
+        when(commentRepository.getOne(1L)).thenReturn(comment);
 
         ResponseEntity<ReportComment> result = service.report(comment);
 
         verify(commentRepository).existsById(comment.getId());
-        verify(repository).save(ArgumentMatchers.any());
+        verify(commentRepository).save(ArgumentMatchers.any());
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertNotNull(result.getBody());

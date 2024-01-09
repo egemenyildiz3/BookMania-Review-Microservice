@@ -23,9 +23,9 @@ public class ReportCommentServiceImpl implements ReportCommentService{
     }
     @Override
     public ResponseEntity<ReportComment> report(Comment comment) {
-//        if (comment == null || !commentRepo.existsById(comment.getId())) {
-//            return ResponseEntity.badRequest().build();
-//        }
+        if (comment == null || !commentRepo.existsById(comment.getId())) {
+            return ResponseEntity.badRequest().build();
+        }
 
         ReportComment reportComment = new ReportComment();
         Comment com = commentRepo.getOne(comment.getId());
