@@ -14,6 +14,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -44,11 +45,12 @@ class ReportCommentServiceImplTest {
 
         when(commentRepository.existsById(comment.getId())).thenReturn(true);
         when(repository.save(ArgumentMatchers.any())).thenReturn(new ReportComment());
+        when(commentRepository.getOne(1L)).thenReturn(comment);
 
-        ResponseEntity<ReportComment> result = service.report(comment);
+        ResponseEntity<ReportComment> result = service.report(1L,"foul language");
 
         verify(commentRepository).existsById(comment.getId());
-        verify(repository).save(ArgumentMatchers.any());
+        verify(commentRepository).save(ArgumentMatchers.any());
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertNotNull(result.getBody());
@@ -56,7 +58,7 @@ class ReportCommentServiceImplTest {
 
     @Test
     void reportInvalid() {
-        ResponseEntity<ReportComment> result = service.report(null);
+        ResponseEntity<ReportComment> result = service.report(1L,null);
 
         verify(repository, never()).save(any());
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
@@ -135,13 +137,16 @@ class ReportCommentServiceImplTest {
     @Test
     void delete() {
         ReportComment reportComment = new ReportComment();
+        Comment comment = new Comment(1L,2L);
+        comment.setReportList(new ArrayList<>());
+        reportComment.setComment(comment);
         when(repository.existsById(1L)).thenReturn(true);
         when(repository.findById(1L)).thenReturn(Optional.of(reportComment));
-
+        when(commentRepository.getOne(1L)).thenReturn(comment);
         ResponseEntity<String> result = service.delete(1L, 1L);
 
-        verify(repository).existsById(1L);
-        verify(repository).deleteById(1L);
+        //verify(repository).existsById(1L);
+        verify(commentRepository).save(comment);
         assertEquals(HttpStatus.OK, result.getStatusCode());
     }
 

@@ -43,10 +43,11 @@ class ReportReviewServiceImplTest {
         when(reviewRepository.existsById(review.getId())).thenReturn(true);
         when(repository.save(ArgumentMatchers.any())).thenReturn(new ReportReview());
 
-        ResponseEntity<ReportReview> result = service.report(review);
+        when(reviewRepository.getOne(1L)).thenReturn(review);
+        ResponseEntity<ReportReview> result = service.report(review.getId(),"foul language");
 
         verify(reviewRepository).existsById(review.getId());
-        verify(repository).save(ArgumentMatchers.any());
+        verify(reviewRepository).save(ArgumentMatchers.any());
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertNotNull(result.getBody());
@@ -54,7 +55,7 @@ class ReportReviewServiceImplTest {
 
     @Test
     void reportInvalid() {
-        ResponseEntity<ReportReview> result = service.report(null);
+        ResponseEntity<ReportReview> result = service.report(1L,null);
 
         verify(repository, never()).save(any());
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());

@@ -6,6 +6,7 @@ import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.ReportComment;
 import nl.tudelft.sem.template.example.repositories.ReportCommentRepository;
 import nl.tudelft.sem.template.model.ReportReview;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -15,23 +16,44 @@ import java.util.List;
 public class ReportCommentServiceImpl implements ReportCommentService{
     private final ReportCommentRepository repo;
     private final CommentRepository commentRepo;
+
     public ReportCommentServiceImpl(ReportCommentRepository repo, CommentRepository commentRepo) {
         this.repo = repo;
         this.commentRepo = commentRepo;
     }
+//    @Override
+//    public ResponseEntity<ReportComment> report(String reason) {
+//        comment.setReview(null);
+//        if ( == null || !commentRepo.existsById(comment.getId())) {
+//            return ResponseEntity.badRequest().header("fefe").build();
+//        }
+//        ReportComment reportComment = new ReportComment();
+//        Comment com = commentRepo.getOne(comment.getId());
+//        reportComment.setComment(com);
+//        com.addReportListItem(reportComment);
+//        //repo.save(reportComment);
+//        commentRepo.save(com);
+//
+//        return ResponseEntity.ok(reportComment);
+//    }
+
     @Override
-    public ResponseEntity<ReportComment> report(Comment comment) {
-        if (comment == null || !commentRepo.existsById(comment.getId())) {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<ReportComment> report(Long commentId, String reason) {
+        if ( reason == null || !commentRepo.existsById(commentId)) {
+            return ResponseEntity.badRequest().header("bad").build();
         }
-
         ReportComment reportComment = new ReportComment();
-        reportComment.setComment(comment);
-
-        repo.save(reportComment);
+        Comment com = commentRepo.getOne(commentId);
+        reportComment.setComment(com);
+        reportComment.setReason(reason);
+        com.addReportListItem(reportComment);
+        //repo.save(reportComment);
+        commentRepo.save(com);
 
         return ResponseEntity.ok(reportComment);
     }
+
+
 
     @Override
     public ResponseEntity<ReportComment> get(Long id) {
@@ -69,9 +91,11 @@ public class ReportCommentServiceImpl implements ReportCommentService{
             return ResponseEntity.badRequest().build();
         }
         ReportComment reportComment = repo.findById(id).get();
+        Comment reported = commentRepo.getOne(reportComment.getComment().getId());
         boolean isAdmin = isAdmin(userId);
         if(isAdmin){
-            repo.deleteById(id);
+            reported.getReportList().remove(reportComment);
+            commentRepo.save(reported);
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();

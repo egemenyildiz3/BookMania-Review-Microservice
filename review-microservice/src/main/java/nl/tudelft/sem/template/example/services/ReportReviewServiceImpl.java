@@ -4,6 +4,7 @@ import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.model.ReportReview;
 import nl.tudelft.sem.template.example.repositories.ReportReviewRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -14,24 +15,43 @@ public class ReportReviewServiceImpl implements ReportReviewService{
 
     private final ReportReviewRepository repo;
     private final ReviewRepository reviewRepo;
-
+    @Autowired
     public ReportReviewServiceImpl(ReportReviewRepository repo, ReviewRepository reviewRepo) {
         this.repo = repo;
         this.reviewRepo = reviewRepo;
     }
 
+//    @Override
+//    public ResponseEntity<ReportReview> report(Review review) {
+//        if (review == null || !reviewRepo.existsById(review.getId())) {
+//            return ResponseEntity.badRequest().build();
+//        }
+//
+//        ReportReview reportReview = new ReportReview();
+//        Review rev = reviewRepo.getOne(review.getId());
+//        rev.addReportListItem(reportReview);
+//        reportReview.setReview(rev);
+//
+//        reviewRepo.save(rev);
+//
+//        return ResponseEntity.ok(reportReview);
+//    }
+
     @Override
-    public ResponseEntity<ReportReview> report(Review review) {
-        if (review == null || !reviewRepo.existsById(review.getId())) {
+    public ResponseEntity<ReportReview> report(Long reviewId, String reason) {
+        if (reason == null || !reviewRepo.existsById(reviewId)) {
             return ResponseEntity.badRequest().build();
         }
 
         ReportReview reportReview = new ReportReview();
-        reportReview.setReview(review);
+        Review rev = reviewRepo.getOne(reviewId);
+        rev.addReportListItem(reportReview);
+        reportReview.setReason(reason);
+        reportReview.setReview(rev);
 
-        repo.save(reportReview);
+        reviewRepo.save(rev);
 
-        return ResponseEntity.ok(reportReview);
+        return ResponseEntity.ok(rev.getReportList().get(rev.getReportList().size()-1));
     }
 
     @Override
