@@ -6,6 +6,7 @@ import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.ReportComment;
 import nl.tudelft.sem.template.example.repositories.ReportCommentRepository;
 import nl.tudelft.sem.template.model.ReportReview;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.List;
 public class ReportCommentServiceImpl implements ReportCommentService{
     private final ReportCommentRepository repo;
     private final CommentRepository commentRepo;
+    @Autowired
     public ReportCommentServiceImpl(ReportCommentRepository repo, CommentRepository commentRepo) {
         this.repo = repo;
         this.commentRepo = commentRepo;
@@ -26,6 +28,7 @@ public class ReportCommentServiceImpl implements ReportCommentService{
         }
 
         ReportComment reportComment = new ReportComment();
+        Comment com = commentRepo.getOne(comment.getId());
         reportComment.setComment(comment);
 
         repo.save(reportComment);
