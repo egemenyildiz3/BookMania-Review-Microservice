@@ -640,8 +640,8 @@ paths:
           content:
             application/json:
               schema:
-                type: integer
-                format: int64
+                type: number
+                format: double
                 example: 4.4
         '400':
           description: cannot find book
