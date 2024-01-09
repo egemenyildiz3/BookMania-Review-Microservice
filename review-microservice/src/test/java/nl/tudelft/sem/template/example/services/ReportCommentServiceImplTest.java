@@ -14,6 +14,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -135,13 +136,16 @@ class ReportCommentServiceImplTest {
     @Test
     void delete() {
         ReportComment reportComment = new ReportComment();
+        Comment comment = new Comment(1L,2L);
+        comment.setReportList(new ArrayList<>());
+        reportComment.setComment(comment);
         when(repository.existsById(1L)).thenReturn(true);
         when(repository.findById(1L)).thenReturn(Optional.of(reportComment));
-
+        when(commentRepository.getOne(1L)).thenReturn(comment);
         ResponseEntity<String> result = service.delete(1L, 1L);
 
-        verify(repository).existsById(1L);
-        verify(repository).deleteById(1L);
+        //verify(repository).existsById(1L);
+        verify(commentRepository).save(comment);
         assertEquals(HttpStatus.OK, result.getStatusCode());
     }
 

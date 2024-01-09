@@ -94,10 +94,11 @@ class CommentServiceImplTest {
         when(commentRepository.save(comment)).thenReturn(comment);
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+        when(commentRepository.getOne(1L)).thenReturn(comment);
         var result = service.update(2L, comment);
         verify(commentRepository).save(comment);
         verify(commentRepository).existsById(1L);
-        verify(commentRepository).findById(1L);
+//        verify(commentRepository).findById(1L);
         assertEquals(result.getBody(), comment);
         comment.text("great");
         result = service.update(2L, comment);
@@ -113,10 +114,11 @@ class CommentServiceImplTest {
         when(commentRepository.save(comment)).thenReturn(comment);
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+        when(commentRepository.getOne(1L)).thenReturn(comment);
         var result = service.update(2L, comment);
         verify(commentRepository).save(comment);
         verify(commentRepository).existsById(1L);
-        verify(commentRepository).findById(1L);
+//        verify(commentRepository).findById(1L);
         assertEquals(result.getBody(), comment);
         comment.text("fuck");
         result = service.update(2L, comment);

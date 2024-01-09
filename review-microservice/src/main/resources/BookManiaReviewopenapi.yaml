@@ -1055,6 +1055,11 @@ components:
           x-field-extra-annotation: "@javax.persistence.OneToMany(cascade = javax.persistence.CascadeType.ALL, orphanRemoval = true)"
           items:
             $ref: '#/components/schemas/Comment'
+        reportList:
+          type: array
+          x-field-extra-annotation: "@javax.persistence.OneToMany(cascade = javax.persistence.CascadeType.ALL, orphanRemoval = true)"
+          items:
+            $ref: '#/components/schemas/ReportReview'
         upvote:
           type: integer
           format: int64
@@ -1090,7 +1095,9 @@ components:
     Comment:
       type: object
       x-class-extra-annotation: "@javax.persistence.Entity"
-      x-field-extra-annotation: "@javax.persistence.ManyToOne(cascade = javax.persistence.CascadeType.ALL)"
+      x-field-extra-annotation: "@javax.persistence.ManyToOne(cascade = javax.persistence.CascadeType.PERSIST)
+      @com.fasterxml.jackson.annotation.JsonIdentityInfo(generator = com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator.class, property = \"id\")
+      @com.fasterxml.jackson.annotation.JsonIdentityReference(alwaysAsId = true)"
       properties:
         id:
           x-field-extra-annotation: "@javax.persistence.Id @javax.persistence.GeneratedValue(strategy = javax.persistence.GenerationType.IDENTITY)"
@@ -1118,6 +1125,11 @@ components:
           type: string
           format: date
           example: '2013-10-24'
+        reportList:
+          type: array
+          x-field-extra-annotation: "@javax.persistence.OneToMany(cascade = javax.persistence.CascadeType.ALL, orphanRemoval = true)"
+          items:
+            $ref: '#/components/schemas/ReportComment'
       required:
         - id
         - userId

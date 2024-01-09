@@ -16,22 +16,22 @@ import java.util.List;
 public class ReportCommentServiceImpl implements ReportCommentService{
     private final ReportCommentRepository repo;
     private final CommentRepository commentRepo;
-    @Autowired
+
     public ReportCommentServiceImpl(ReportCommentRepository repo, CommentRepository commentRepo) {
         this.repo = repo;
         this.commentRepo = commentRepo;
     }
     @Override
     public ResponseEntity<ReportComment> report(Comment comment) {
-        if (comment == null || !commentRepo.existsById(comment.getId())) {
-            return ResponseEntity.badRequest().build();
-        }
+//        if (comment == null || !commentRepo.existsById(comment.getId())) {
+//            return ResponseEntity.badRequest().build();
+//        }
 
         ReportComment reportComment = new ReportComment();
         Comment com = commentRepo.getOne(comment.getId());
         reportComment.setComment(com);
-
-        repo.save(reportComment);
+        com.addReportListItem(reportComment);
+        commentRepo.save(com);
 
         return ResponseEntity.ok(reportComment);
     }
@@ -72,9 +72,11 @@ public class ReportCommentServiceImpl implements ReportCommentService{
             return ResponseEntity.badRequest().build();
         }
         ReportComment reportComment = repo.findById(id).get();
+        Comment reported = commentRepo.getOne(reportComment.getComment().getId());
         boolean isAdmin = isAdmin(userId);
         if(isAdmin){
-            repo.deleteById(id);
+            reported.getReportList().remove(reportComment);
+            commentRepo.save(reported);
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();

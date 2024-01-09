@@ -44,10 +44,10 @@ public class CommentServiceImpl implements CommentService {
             return ResponseEntity.badRequest().build();
         }
         Review review = reviewRepository.findById(reviewId).get();
-
         comment.setUserId(userId);
         comment.setTimeCreated(LocalDate.now());
         comment.setReview(review);
+        comment.setReportList(new ArrayList<>());
         //Comment added = repository.save(comment);
         review.addCommentListItem(comment);
         reviewRepository.save(review);
@@ -66,15 +66,15 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public ResponseEntity<Comment> update(Long userId, Comment comment) {
         if (comment == null || !Objects.equals(comment.getUserId(), userId) || !repository.existsById(comment.getId())) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().header("blah").build();
         }
-        System.out.println(comment.getId());
-        System.out.println(comment.getReview());
-        comment.setReview(repository.findById(comment.getId()).get().getReview());
+
         if (checkProfanities(comment.getText())) {
             return ResponseEntity.badRequest().build();
         }
-        Comment updated = repository.save(comment);
+        Comment dataCom = repository.getOne(comment.getId());
+        dataCom.setText(comment.getText());
+        Comment updated = repository.save(dataCom);
         return ResponseEntity.ok(updated);
     }
 

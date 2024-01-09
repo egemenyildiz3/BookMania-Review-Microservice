@@ -29,9 +29,10 @@ public class ReportReviewServiceImpl implements ReportReviewService{
 
         ReportReview reportReview = new ReportReview();
         Review rev = reviewRepo.getOne(review.getId());
+        rev.addReportListItem(reportReview);
         reportReview.setReview(rev);
 
-        repo.save(reportReview);
+        reviewRepo.save(rev);
 
         return ResponseEntity.ok(reportReview);
     }

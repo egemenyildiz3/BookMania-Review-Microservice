@@ -42,9 +42,9 @@ public class ReviewServiceImpl implements ReviewService{
     }
 
     @Override
-    public ResponseEntity add(Review review) {
+    public ResponseEntity<Review> add(Review review) {
         if(review == null) {
-            return ResponseEntity.badRequest().body("no review");
+            return ResponseEntity.badRequest().build();
         }
         boolean book = communicationService.existsBook(review.getBookId());
         if(!book){
@@ -64,6 +64,7 @@ public class ReviewServiceImpl implements ReviewService{
         review.setDownvote(0L);
         review.setUpvote(0L);
         review.setCommentList(new ArrayList<>());
+        review.setReportList(new ArrayList<>());
         review.lastEditTime(LocalDate.now());
         review.timeCreated(LocalDate.now());
         Review saved = repo.save(review);
@@ -108,7 +109,8 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Override
     public ResponseEntity<Review> update(Long userId, Review review) {
-        if (review == null || !repo.existsById(review.getId())){
+
+       if (review == null || !repo.existsById(review.getId())){
             return ResponseEntity.badRequest().header("Invalid ReviewId", "review Id not found").build();
         }
         //check for user in database
@@ -127,8 +129,16 @@ public class ReviewServiceImpl implements ReviewService{
         }
         if(checkProfanities(review.getText()))
             return ResponseEntity.status(406).header("Profanities", "Profanities were detected in text").build();
-        review.lastEditTime(LocalDate.now());
-        Review saved = repo.save(review);
+
+
+        Review dataReview = repo.getOne(review.getId());
+        dataReview.setLastEditTime(LocalDate.now());
+        dataReview.setText(review.getText());
+        dataReview.setTitle(review.getTitle());
+        dataReview.setRating(review.getRating());
+        dataReview.setSpoiler(review.getSpoiler());
+        dataReview.setBookNotion(review.getBookNotion());
+        Review saved = repo.save(dataReview);
         return ResponseEntity.ok(saved);
     }
 
