@@ -261,6 +261,8 @@ class CommentServiceImplTest {
 
         assertEquals(res1.getStatusCode(), HttpStatus.OK);
         assertEquals(res2.getStatusCode(), HttpStatus.OK);
+        assertEquals(5, c1.getUpvote());
+        assertEquals(6, c1.getDownvote());
     }
 
 }
