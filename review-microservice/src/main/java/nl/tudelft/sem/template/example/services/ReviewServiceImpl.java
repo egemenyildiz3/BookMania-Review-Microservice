@@ -82,7 +82,7 @@ public class ReviewServiceImpl implements ReviewService{
     }
 
     @Override
-    public ResponseEntity get(Long reviewId) {
+    public ResponseEntity<Review> get(Long reviewId) {
         if(!repo.existsById(reviewId)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).header("Invalid ReviewId", "review Id not found").build();
         }
