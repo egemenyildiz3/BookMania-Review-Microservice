@@ -1011,9 +1011,7 @@ components:
     Review:
       type: object
       x-class-extra-annotation: "@javax.persistence.Entity"
-      x-field-extra-annotation: " @javax.persistence.ManyToOne(cascade = javax.persistence.CascadeType.PERSIST)
-      @com.fasterxml.jackson.annotation.JsonIdentityInfo(generator = com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator.class, property = \"id\")
-      @com.fasterxml.jackson.annotation.JsonIdentityReference(alwaysAsId = true)"
+      x-field-extra-annotation: " @javax.persistence.ManyToOne(cascade = javax.persistence.CascadeType.PERSIST)"
       properties:
         id:
           type: integer

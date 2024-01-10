@@ -148,6 +148,7 @@ class CommentServiceImplTest {
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         when(reviewRepository.save(review)).thenReturn(review);
+        when(reviewRepository.getOne(3L)).thenReturn(review);
         var result = service.delete(1L, 2L);
         verify(commentRepository).existsById(1L);
         verify(commentRepository).findById(1L);
