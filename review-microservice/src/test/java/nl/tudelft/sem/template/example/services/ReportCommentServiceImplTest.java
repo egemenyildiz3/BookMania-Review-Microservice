@@ -41,7 +41,7 @@ class ReportCommentServiceImplTest {
     void report() {
         Review review = new Review(1L, 10L, 23L);
         Comment comment = new Comment(1L, 33L);
-        comment.setReview(review);
+        comment.setReviewId(review.getId());
 
         when(commentRepository.existsById(comment.getId())).thenReturn(true);
         when(repository.save(ArgumentMatchers.any())).thenReturn(new ReportComment());

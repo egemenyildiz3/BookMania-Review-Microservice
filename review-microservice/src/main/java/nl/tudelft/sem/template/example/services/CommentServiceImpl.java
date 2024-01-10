@@ -49,7 +49,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setId(0L);
         comment.setUserId(userId);
         comment.setTimeCreated(LocalDate.now());
-        comment.setReview(review);
+        comment.setReviewId(reviewId);
         comment.setReportList(new ArrayList<>());
         //Comment added = repository.save(comment);
         review.addCommentListItem(comment);
@@ -73,7 +73,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         List<Comment> comments = repository.findAll().stream()
-                .filter(c -> c.getReview().getId().equals(reviewId))
+                .filter(c -> c.getReviewId().equals(reviewId))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(comments);
@@ -101,7 +101,7 @@ public class CommentServiceImpl implements CommentService {
             return ResponseEntity.badRequest().build();
         }
         Comment comment = repository.findById(commentId).get();
-        Review rev = comment.getReview();
+        Review rev = reviewRepository.getOne(comment.getReviewId());
         if (Objects.equals(userId, comment.getUserId())) {
             //repository.deleteById(commentId);
             rev.getCommentList().remove(comment);
