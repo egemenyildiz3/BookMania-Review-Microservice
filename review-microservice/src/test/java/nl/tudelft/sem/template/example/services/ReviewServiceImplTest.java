@@ -1,6 +1,7 @@
 package nl.tudelft.sem.template.example.services;
 
 import nl.tudelft.sem.template.example.Exceptions.CustomBadRequestException;
+import nl.tudelft.sem.template.example.Exceptions.CustomPermissionsException;
 import nl.tudelft.sem.template.example.Exceptions.CustomProfanitiesException;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.example.repositories.ReviewRepository;
@@ -131,8 +132,9 @@ class ReviewServiceImplTest {
         when(communicationService.existsBook(2L)).thenReturn(true);
         when(repository.save(review)).thenReturn(review);
         when(repository.existsById(1L)).thenReturn(true);
+        when(repository.getOne(1L)).thenReturn(review);
         when(communicationService.isAdmin(9L)).thenReturn(false);
-        assertThrows(CustomBadRequestException.class, () -> service.update(9L,review));
+        assertThrows(CustomPermissionsException.class, () -> service.update(9L,review));
         verify(repository,never()).save(review);
         //assertEquals(result.getStatusCode(),HttpStatus.FORBIDDEN);
     }
@@ -200,6 +202,7 @@ class ReviewServiceImplTest {
         when(repository.existsById(reviewId)).thenReturn(true);
         when(repository.findById(reviewId)).thenReturn(Optional.of(review));
         when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.getOne(1L)).thenReturn(review);
 
         ResponseEntity<String> response = service.addSpoiler(reviewId);
 
