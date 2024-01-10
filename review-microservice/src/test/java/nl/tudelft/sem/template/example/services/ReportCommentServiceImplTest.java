@@ -139,7 +139,7 @@ class ReportCommentServiceImplTest {
         ReportComment reportComment = new ReportComment();
         Comment comment = new Comment(1L,2L);
         comment.setReportList(new ArrayList<>());
-        reportComment.setComment(comment);
+        reportComment.setCommentId(comment.getId());
         when(repository.existsById(1L)).thenReturn(true);
         when(repository.findById(1L)).thenReturn(Optional.of(reportComment));
         when(commentRepository.getOne(1L)).thenReturn(comment);

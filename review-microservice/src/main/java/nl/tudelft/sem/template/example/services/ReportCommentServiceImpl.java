@@ -44,7 +44,7 @@ public class ReportCommentServiceImpl implements ReportCommentService{
         }
         ReportComment reportComment = new ReportComment();
         Comment com = commentRepo.getOne(commentId);
-        reportComment.setComment(com);
+        reportComment.setCommentId(com.getId());
         reportComment.setReason(reason);
         com.addReportListItem(reportComment);
         //repo.save(reportComment);
@@ -91,7 +91,7 @@ public class ReportCommentServiceImpl implements ReportCommentService{
             return ResponseEntity.badRequest().build();
         }
         ReportComment reportComment = repo.findById(id).get();
-        Comment reported = commentRepo.getOne(reportComment.getComment().getId());
+        Comment reported = commentRepo.getOne(reportComment.getCommentId());
         boolean isAdmin = isAdmin(userId);
         if(isAdmin){
             reported.getReportList().remove(reportComment);

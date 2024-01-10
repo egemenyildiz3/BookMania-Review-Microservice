@@ -15,7 +15,7 @@ public class ReportReviewServiceImpl implements ReportReviewService{
 
     private final ReportReviewRepository repo;
     private final ReviewRepository reviewRepo;
-    @Autowired
+
     public ReportReviewServiceImpl(ReportReviewRepository repo, ReviewRepository reviewRepo) {
         this.repo = repo;
         this.reviewRepo = reviewRepo;
