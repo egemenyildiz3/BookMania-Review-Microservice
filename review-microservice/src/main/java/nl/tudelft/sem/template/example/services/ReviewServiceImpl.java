@@ -162,7 +162,7 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Override
     public ResponseEntity<String> addVote(Long reviewId, Integer body) {
-        if(!repo.existsById(reviewId) || get(reviewId).getBody() == null) {
+        if(!repo.existsById(reviewId) || get(reviewId).getBody() == null || !(List.of(0, 1).contains(body))) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).header("Invalid ReviewId", "review Id not found").build();
         }
         Review review = get(reviewId).getBody();
