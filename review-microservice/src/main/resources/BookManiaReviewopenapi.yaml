@@ -498,16 +498,16 @@ paths:
       summary: delete a report
       description: reports about reviews - deletes the report with this reportId if the userId is an admin
       parameters:
-        - name: userId
+        - name: reportId
           in: path
-          description: user that is trying to delete the report
+          description: the id of the report that is requested for deletion
           required: true
           schema:
             type: integer
             format: int64
-        - name: reportId
+        - name: userId
           in: path
-          description: the id of the report that is requested for deletion
+          description: user that is trying to delete the report
           required: true
           schema:
             type: integer
@@ -552,16 +552,16 @@ paths:
       summary: delete a report
       description: reports about comments deletes the report with this reportId if the userId is an admin
       parameters:
-        - name: userId
+        - name: reportId
           in: path
-          description: user that is trying to delete the report
+          description: the id of the report that is requested for deletion
           required: true
           schema:
             type: integer
             format: int64
-        - name: reportId
+        - name: userId
           in: path
-          description: the id of the report that is requested for deletion
+          description: user that is trying to delete the report
           required: true
           schema:
             type: integer
@@ -1176,7 +1176,7 @@ components:
           example: offensive
     ReportReview:
       type: object
-      x-class-extra-annotation: "@javax.persistence.Entity "
+      x-class-extra-annotation: "@javax.persistence.Entity"
       properties:
         id:
           x-field-extra-annotation: "@javax.persistence.Id @javax.persistence.GeneratedValue(strategy = javax.persistence.GenerationType.IDENTITY)"
