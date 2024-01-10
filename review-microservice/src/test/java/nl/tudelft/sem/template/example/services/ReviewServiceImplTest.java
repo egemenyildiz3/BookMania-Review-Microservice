@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -271,5 +272,83 @@ class ReviewServiceImplTest {
 
         ResponseEntity<List<Review>> reviews = service.seeAll(2L, "mostRelevant");
         assertEquals(reviews.getBody(), correctList);
+    }
+
+    @Test
+    void retrieveMostUpvotedTest() {
+        Long userId = 17L;
+        Review r1 = new Review(1L, 2L, userId);
+        Review r2 = new Review(2L, 2L, userId);
+        Review r3 = new Review(3L, 3L, userId);
+        Review r4 = new Review(4L, 5L, 89L);
+        Review r5 = new Review(5L, 5L, 78L);
+        Review r6 = new Review(6L, 2L, userId);
+
+        when(repository.findAll()).thenReturn(List.of(r1, r2, r3, r4, r5, r6));
+
+        when(repository.existsById(1L)).thenReturn(true);
+        when(repository.findById(1L)).thenReturn(Optional.of(r1));
+        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        when(repository.existsById(2L)).thenReturn(true);
+        when(repository.findById(2L)).thenReturn(Optional.of(r2));
+        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        when(repository.existsById(3L)).thenReturn(true);
+        when(repository.findById(3L)).thenReturn(Optional.of(r3));
+        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+
+        when(repository.existsById(4L)).thenReturn(true);
+        when(repository.findById(4L)).thenReturn(Optional.of(r4));
+        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        when(repository.existsById(5L)).thenReturn(true);
+        when(repository.findById(5L)).thenReturn(Optional.of(r5));
+        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        when(repository.existsById(6L)).thenReturn(true);
+        when(repository.findById(6L)).thenReturn(Optional.of(r6));
+        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.addVote(1L, 1);
+        service.addVote(1L, 1);
+        service.addVote(1L, 1);
+        service.addVote(1L, 1);
+        service.addVote(1L, 1);
+        service.addVote(3L, 1);
+        service.addVote(3L, 1);
+        service.addVote(3L, 1);
+        service.addVote(6L, 1);
+        service.addVote(6L, 1);
+        service.addVote(6L, 1);
+        service.addVote(6L, 1);
+        service.addVote(4L, 1);
+        service.addVote(4L, 1);
+        service.addVote(4L, 1);
+        service.addVote(4L, 1);
+        service.addVote(4L, 1);
+        service.addVote(4L, 1);
+        service.addVote(4L, 1);
+        service.addVote(4L, 1);
+        service.addVote(4L, 1);
+
+        List<Review> corrList = new ArrayList<>();
+        corrList.add(r1);
+        corrList.add(r6);
+        corrList.add(r3);
+        assertEquals(service.mostUpvotedReviews(userId).getBody(), corrList);
+    }
+
+    @Test
+    void pinTest() {
+        Long userId = 17L;
+        Review r1 = new Review(1L, 2L, userId);
+        when(repository.existsById(1L)).thenReturn(true);
+        when(repository.findById(1L)).thenReturn(Optional.of(r1));
+        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ResponseEntity<String> response = service.pinReview(1L, true);
+        assertTrue(response.getStatusCode().is2xxSuccessful());
     }
 }

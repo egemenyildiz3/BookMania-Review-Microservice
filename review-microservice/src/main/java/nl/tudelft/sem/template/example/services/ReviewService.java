@@ -15,5 +15,7 @@ public interface ReviewService {
     ResponseEntity<String> delete(Long reviewId, Long userId);
     ResponseEntity<String> addSpoiler(Long reviewId);
     ResponseEntity<String> addVote(Long reviewId, Integer body);
+    ResponseEntity<List<Review>> mostUpvotedReviews(Long userId);
+    ResponseEntity<String> pinReview(Long reviewId, Boolean body);
 
 }
