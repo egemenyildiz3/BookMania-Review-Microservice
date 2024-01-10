@@ -10,6 +10,8 @@ import nl.tudelft.sem.template.model.Review;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 public class CommentController implements CommentApi {
     private final CommentServiceImpl service;
@@ -28,7 +30,10 @@ public class CommentController implements CommentApi {
         return service.add(userId, reviewId, comment);
     }
 
-
+    @Override
+    public ResponseEntity<List<Comment>> commentReviewIdGet(Long reviewId) {
+        return service.getAll(reviewId);
+    }
 
     @Override
     public ResponseEntity<Comment> commentEditUserIdPut(Long userId, Comment comment) {

@@ -4,6 +4,7 @@ import nl.tudelft.sem.template.api.ReviewApi;
 import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import nl.tudelft.sem.template.example.services.CommunicationServiceImpl;
 import nl.tudelft.sem.template.example.services.ReviewServiceImpl;
+import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.Review;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
