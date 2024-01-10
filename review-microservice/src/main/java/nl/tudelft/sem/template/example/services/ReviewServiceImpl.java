@@ -60,7 +60,7 @@ public class ReviewServiceImpl implements ReviewService{
         }
         if(checkProfanities(review.getText()))
             return ResponseEntity.status(406).header("Profanities", "Profanities were detected in text").build();
-
+        review.setId(0L);
         review.setDownvote(0L);
         review.setUpvote(0L);
         review.setCommentList(new ArrayList<>());
