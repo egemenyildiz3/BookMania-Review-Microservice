@@ -1182,8 +1182,11 @@ components:
           type: integer
           format: int64
           example: 3
-        review:
-          $ref: '#/components/schemas/Review'
+        reviewId: # Added reviewId field
+          x-field-extra-annotation: "@javax.persistence.JoinColumn(name = \"id\")"
+          type: integer
+          format: int64
+          description: "The ID of the Review that is reported."
         reason:
           type: string
           example: offensive
