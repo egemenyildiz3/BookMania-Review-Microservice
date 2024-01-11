@@ -85,7 +85,7 @@ public class ReviewServiceImpl implements ReviewService{
     public ResponseEntity<Review> get(Long reviewId) {
         if(!repo.existsById(reviewId))
             throw new CustomBadRequestException("Invalid review id.");
-        Review review = repo.getOne(reviewId);
+        Review review = repo.findById(reviewId).get();
         return ResponseEntity.ok(review);
     }
 
