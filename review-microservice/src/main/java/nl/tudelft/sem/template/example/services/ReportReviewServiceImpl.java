@@ -4,7 +4,6 @@ import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.model.ReportReview;
 import nl.tudelft.sem.template.example.repositories.ReportReviewRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -20,22 +19,6 @@ public class ReportReviewServiceImpl implements ReportReviewService{
         this.repo = repo;
         this.reviewRepo = reviewRepo;
     }
-
-//    @Override
-//    public ResponseEntity<ReportReview> report(Review review) {
-//        if (review == null || !reviewRepo.existsById(review.getId())) {
-//            return ResponseEntity.badRequest().build();
-//        }
-//
-//        ReportReview reportReview = new ReportReview();
-//        Review rev = reviewRepo.getOne(review.getId());
-//        rev.addReportListItem(reportReview);
-//        reportReview.setReview(rev);
-//
-//        reviewRepo.save(rev);
-//
-//        return ResponseEntity.ok(reportReview);
-//    }
 
     @Override
     public ResponseEntity<ReportReview> report(Long reviewId, String reason) {
@@ -107,9 +90,7 @@ public class ReportReviewServiceImpl implements ReportReviewService{
         }
         boolean isAdmin = isAdmin(userId);
         if(isAdmin){
-            for (ReportReview report : repo.findAllByReviewId(reviewId)) {
-                repo.delete(report);
-            }
+            repo.deleteAll(repo.findAllByReviewId(reviewId));
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();
