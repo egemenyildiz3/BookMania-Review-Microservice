@@ -63,7 +63,7 @@ public class ReviewController implements ReviewApi {
     }
 
     @Override
-    public ResponseEntity<String> reviewPinReviewIdPut(Long reviewId, Boolean body) {
+    public ResponseEntity<String> reviewPinReviewIdPinValuePut(Long reviewId, Boolean body) {
         return service.pinReview(reviewId, body);
     }
 }

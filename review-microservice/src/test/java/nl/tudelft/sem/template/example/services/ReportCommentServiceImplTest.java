@@ -39,8 +39,8 @@ class ReportCommentServiceImplTest {
 
     @Test
     void report() {
-        Review review = new Review(1L, 10L, 23L);
-        Comment comment = new Comment(1L, 33L);
+        Review review = new Review(1L, 10L, 23L, "Review", "review", 5L);
+        Comment comment = new Comment(1L, 2L, 33L, "comment");
         comment.setReviewId(review.getId());
 
         when(commentRepository.existsById(comment.getId())).thenReturn(true);
@@ -137,7 +137,7 @@ class ReportCommentServiceImplTest {
     @Test
     void delete() {
         ReportComment reportComment = new ReportComment();
-        Comment comment = new Comment(1L,2L);
+        Comment comment = new Comment(1L, 2L, 2L, "comment");
         comment.setReportList(new ArrayList<>());
         reportComment.setCommentId(comment.getId());
         when(repository.existsById(1L)).thenReturn(true);

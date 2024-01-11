@@ -44,12 +44,12 @@ class CommentServiceImplTest {
 
     @Test
     void testAdd() {
-        Comment comment = new Comment(3L, null);
-        Review review = new Review(2L, 5L, 10L);
+        Review review = new Review(2L, 5L, 10L, "Review", "review", 5L);
+        Comment comment = new Comment(3L, 2L, 10L, "comment");
         when(reviewRepository.save(review)).thenReturn(review);
         when(reviewRepository.existsById(2L)).thenReturn(true);
         when(reviewRepository.findById(2L)).thenReturn(Optional.of(review));
-        var result = service.add(1L, 2L, comment);
+        var result = service.add(comment);
         verify(reviewRepository).save(review);
         verify(reviewRepository).existsById(2L);
         verify(reviewRepository).findById(2L);
@@ -59,18 +59,17 @@ class CommentServiceImplTest {
 
     @Test
     void testAddProfanities() {
-        Comment comment = new Comment(3L, null);
-        comment.text("fuck");
-        Review review = new Review(2L, 5L, 10L);
+        Review review = new Review(2L, 5L, 10L, "Review", "review", 5L);
+        Comment comment = new Comment(3L, 2L, 10L, "fuck");
         when(reviewRepository.save(review)).thenReturn(review);
-        var result = service.add(1L, 2L, comment);
+        var result = service.add(comment);
         verify(reviewRepository, never()).save(review);
         assertEquals(result.getStatusCode(), HttpStatus.BAD_REQUEST);
     }
 
     @Test
     void testGetValid() {
-        Comment comment = new Comment(1L, 2L);
+        Comment comment = new Comment(1L, 2L, 10L, "comment");
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         var result = service.get(1L);
@@ -91,7 +90,7 @@ class CommentServiceImplTest {
 
     @Test
     void testUpdateOwner() {
-        Comment comment = new Comment(1L, 2L);
+        Comment comment = new Comment(1L, 2L, 10L, "comment");
         comment.id(1L);
         comment.userId(2L);
         when(commentRepository.save(comment)).thenReturn(comment);
@@ -111,7 +110,7 @@ class CommentServiceImplTest {
 
     @Test
     void testUpdateOwnerProfanities() {
-        Comment comment = new Comment(1L, 2L);
+        Comment comment = new Comment(1L, 2L, 10L, "comment");
         comment.id(1L);
         comment.userId(2L);
         when(commentRepository.save(comment)).thenReturn(comment);
@@ -130,7 +129,7 @@ class CommentServiceImplTest {
 
     @Test
     void testUpdateNotOwner() {
-        Comment comment = new Comment(1L, 2L);
+        Comment comment = new Comment(1L, 2L, 10L, "comment");
         comment.id(1L);
         comment.userId(2L);
         when(commentRepository.save(comment)).thenReturn(comment);
@@ -141,8 +140,8 @@ class CommentServiceImplTest {
 
     @Test
     void testDeleteOwner() {
-        Comment comment = new Comment(1L, 2L);
-        Review review = new Review(3L, 5L, 10L);
+        Review review = new Review(3L, 5L, 10L, "Review", "review", 5L);
+        Comment comment = new Comment(1L, 5L, 2L, "comment");
         comment.setReviewId(review.getId());
         review.addCommentListItem(comment);
         when(commentRepository.existsById(1L)).thenReturn(true);
@@ -159,8 +158,8 @@ class CommentServiceImplTest {
 
     @Test
     void testDeleteNotOwner() {
-        Comment comment = new Comment(1L, 2L);
-        Review review = new Review(3L, 5L, 10L);
+        Review review = new Review(2L, 5L, 10L, "Review", "review", 5L);
+        Comment comment = new Comment(3L, 2L, 10L, "comment");
         comment.setReviewId(review.getId());
         review.addCommentListItem(comment);
         when(commentRepository.existsById(1L)).thenReturn(true);
@@ -176,20 +175,14 @@ class CommentServiceImplTest {
 
     @Test
     void testGetAll() {
-        Review r1 = new Review(17L, 1L, 1L);
-        Review r2 = new Review(13L, 2L, 2L);
-        Comment c1 = new Comment(1L,1L);
-        Comment c2 = new Comment(2L,1L);
-        Comment c3 = new Comment(3L,1L);
-        Comment c4 = new Comment(4L,2L);
-        Comment c5 = new Comment(5L,1L);
-        Comment c6 = new Comment(6L,2L);
-        c1.setReviewId(r1.getId());
-        c2.setReviewId(r1.getId());
-        c3.setReviewId(r2.getId());
-        c4.setReviewId(r1.getId());
-        c5.setReviewId(r1.getId());
-        c6.setReviewId(r1.getId());
+        Review r1 = new Review(17L, 1L, 1L, "Review", "review", 5L);
+        Review r2 = new Review(13L, 2L, 2L, "Review", "review", 5L);
+        Comment c1 = new Comment(1L, 17L, 1L, "comment");
+        Comment c2 = new Comment(2L, 17L, 1L, "comment");
+        Comment c3 = new Comment(3L, 13L, 1L, "comment");
+        Comment c4 = new Comment(4L, 17L, 1L, "comment");
+        Comment c5 = new Comment(5L, 17L, 1L, "comment");
+        Comment c6 = new Comment(6L, 17L, 1L, "comment");
 
         when(reviewRepository.existsById(17L)).thenReturn(true);
         when(reviewRepository.existsById(2L)).thenReturn(false);
