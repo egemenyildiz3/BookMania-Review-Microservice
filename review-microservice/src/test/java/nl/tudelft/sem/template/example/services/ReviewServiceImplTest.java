@@ -329,7 +329,18 @@ class ReviewServiceImplTest {
         Review r4 = new Review(4L, 5L, 89L);
         Review r5 = new Review(5L, 5L, 78L);
         Review r6 = new Review(6L, 2L, userId);
-
+        r1.setUpvote(0L);
+        r2.setUpvote(0L);
+        r3.setUpvote(0L);
+        r4.setUpvote(0L);
+        r5.setUpvote(0L);
+        r6.setUpvote(0L);
+        r1.setDownvote(0L);
+        r2.setDownvote(0L);
+        r3.setDownvote(0L);
+        r4.setDownvote(0L);
+        r5.setDownvote(0L);
+        r6.setDownvote(0L);
         when(repository.findAll()).thenReturn(List.of(r1, r2, r3, r4, r5, r6));
 
         when(repository.existsById(1L)).thenReturn(true);
@@ -356,6 +367,15 @@ class ReviewServiceImplTest {
         when(repository.existsById(6L)).thenReturn(true);
         when(repository.findById(6L)).thenReturn(Optional.of(r6));
         when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        when(repository.getOne(6L)).thenReturn(r6);
+        when(repository.getOne(5L)).thenReturn(r5);
+        when(repository.getOne(4L)).thenReturn(r4);
+        when(repository.getOne(3L)).thenReturn(r3);
+        when(repository.getOne(2L)).thenReturn(r2);
+        when(repository.getOne(1L)).thenReturn(r1);
+
+
 
         service.addVote(1L, 1);
         service.addVote(1L, 1);
@@ -393,6 +413,7 @@ class ReviewServiceImplTest {
         when(repository.existsById(1L)).thenReturn(true);
         when(repository.findById(1L)).thenReturn(Optional.of(r1));
         when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repository.getOne(1L)).thenReturn(r1);
 
         ResponseEntity<String> response = service.pinReview(1L, true);
         assertTrue(response.getStatusCode().is2xxSuccessful());
