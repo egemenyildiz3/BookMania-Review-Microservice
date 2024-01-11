@@ -90,9 +90,9 @@ class ReviewServiceImplTest {
     void getValid() {
         Review review = new Review(1L,2L,10L, "Review", "review", 5L);
         when(repository.existsById(1L)).thenReturn(true);
-        when(repository.getOne(1L)).thenReturn(review);
+        when(repository.findById(1L)).thenReturn(Optional.of(review));
         var result = service.get(1L);
-        verify(repository).getOne(1L);
+        verify(repository).findById(1L);
         verify(repository).existsById(1L);
         assertEquals(result.getBody(),review);
 
@@ -176,10 +176,10 @@ class ReviewServiceImplTest {
     void delete() {
         Review review = new Review(1L,2L,10L, "Review", "review", 5L);
         when(repository.existsById(1L)).thenReturn(true);
-        when(repository.getOne(1L)).thenReturn(review);
+        when(repository.findById(1L)).thenReturn(Optional.of(review));
         doNothing().when(repository).deleteById(1L);
         var result = service.delete(1L,10L);
-        verify(repository).getOne(1L);
+        verify(repository).findById(1L);
         verify(repository).deleteById(1L);
         assertEquals(result.getStatusCode(),HttpStatus.OK);
     }
@@ -331,16 +331,16 @@ class ReviewServiceImplTest {
         Review r6 = new Review(6L, 2L, userId, "Review", "review", 5L);
 
         r1.setUpvote(0L);
-        r1.setDownvote(0L);
         r2.setUpvote(0L);
-        r2.setDownvote(0L);
         r3.setUpvote(0L);
-        r3.setDownvote(0L);
         r4.setUpvote(0L);
-        r4.setDownvote(0L);
         r5.setUpvote(0L);
-        r5.setDownvote(0L);
         r6.setUpvote(0L);
+        r1.setDownvote(0L);
+        r2.setDownvote(0L);
+        r3.setDownvote(0L);
+        r4.setDownvote(0L);
+        r5.setDownvote(0L);
         r6.setDownvote(0L);
 
         when(repository.findAll()).thenReturn(List.of(r1, r2, r3, r4, r5, r6));
