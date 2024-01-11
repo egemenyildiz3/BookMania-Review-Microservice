@@ -4,7 +4,7 @@ info:
   description: Specifications about all endpoints of the review microservices for the BookMania application
   version: 1.0.0
 servers:
-  - url: 'https://localhost:8082/api'
+  - url: 'http://localhost:8082/api'
 tags:
   - name: review
     description: actions for reviews
@@ -230,7 +230,7 @@ paths:
                 type: string
                 description: Error message
                 example: cannot find book.
-  /review/vote/{reviewId}:
+  /review/vote/{reviewId}/{vote}:
     put:
       tags:
         - review
@@ -244,14 +244,13 @@ paths:
           schema:
             type: integer
             format: int64
-      requestBody:
-        description: 1 for upvote or 0 for downvote
-        content:
-          application/json:
-            schema:
-              type: integer
-              format: int32
-              example: 0
+        - name: vote
+          in: path
+          description: 1 for upvote and 0 for downvote
+          required: true
+          schema:
+            type: integer
+            format: int32
       responses:
         '200':
           description: Successful operation
@@ -339,18 +338,27 @@ paths:
                 type: string
                 description: Error Message
                 example: cannot find user.
-  /report/review:
+  /report/review/{reviewId}:
     post:
       tags:
         - report
       summary: reporting a review
       description: the review is set as reported and can be assessed by the admin for deletion or user ban
+      parameters:
+        - name: reviewId
+          in: path
+          description: the review to be reported
+          required: true
+          schema:
+            type: integer
+            format: int64
       requestBody:
-        description: the review that is reported
+        description: the reason for reporting
         content:
-          application/json:
+          text/plain:
             schema:
-              $ref: '#/components/schemas/Review'
+              type: string
+              example: foul language
         required: true
       responses:
         '200':
@@ -367,18 +375,27 @@ paths:
                 type: string
                 description: Error message
                 example: error saving report.
-  /report/comment:
+  /report/comment/{commentId}:
     post:
       tags:
         - report
       summary: reporting a comment
       description: the comment is set as reported and can be assessed by the admin for deletion or user ban
+      parameters:
+        - name: commentId
+          in: path
+          description: the comment to be reported
+          required: true
+          schema:
+            type: integer
+            format: int64
       requestBody:
-        description: the comment that is reported
+        description: the reason for reporting
         content:
-          application/json:
+          text/plain:
             schema:
-              $ref: '#/components/schemas/Comment'
+              type: string
+              example: foul language
         required: true
       responses:
         '200':
@@ -481,16 +498,16 @@ paths:
       summary: delete a report
       description: reports about reviews - deletes the report with this reportId if the userId is an admin
       parameters:
-        - name: userId
+        - name: reportId
           in: path
-          description: user that is trying to delete the report
+          description: the id of the report that is requested for deletion
           required: true
           schema:
             type: integer
             format: int64
-        - name: reportId
+        - name: userId
           in: path
-          description: the id of the report that is requested for deletion
+          description: user that is trying to delete the report
           required: true
           schema:
             type: integer
@@ -535,16 +552,16 @@ paths:
       summary: delete a report
       description: reports about comments deletes the report with this reportId if the userId is an admin
       parameters:
-        - name: userId
+        - name: reportId
           in: path
-          description: user that is trying to delete the report
+          description: the id of the report that is requested for deletion
           required: true
           schema:
             type: integer
             format: int64
-        - name: reportId
+        - name: userId
           in: path
-          description: the id of the report that is requested for deletion
+          description: user that is trying to delete the report
           required: true
           schema:
             type: integer
@@ -613,23 +630,16 @@ paths:
                 type: string
                 description: Error message
                 example: cannot find review.
-  /stats/avgRating/{bookId}/{userId}:
+  /stats/avgRating/{bookId}:
     get:
       tags:
         - public book statistics
       summary: the average rating for the book
-      description: returns the average rating for this bookId, calls report with a user that is not the author of the book
+      description: returns the average rating for this bookId
       parameters:
         - name: bookId
           in: path
           description: the bookId of the book to get the average rating for
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: userId
-          in: path
-          description: the user that requests the average rating
           required: true
           schema:
             type: integer
@@ -651,15 +661,7 @@ paths:
                 type: string
                 description: Error message
                 example: cannot find book.
-        '401':
-          description: cannot find user
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Error message
-                example: cannot find user.
-  /stats/interactions/{bookId}/{userId}:
+  /stats/interactions/{bookId}:
     get:
       tags:
         - public book statistics
@@ -669,13 +671,6 @@ paths:
         - name: bookId
           in: path
           description: the book to return number of reviews
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: userId
-          in: path
-          description: the user that requests number of reviews
           required: true
           schema:
             type: integer
@@ -697,14 +692,6 @@ paths:
                 type: string
                 description: Error message
                 example: cannot find book.
-        '401':
-          description: cannot find user
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Error message
-                example: cannot find user.
 
   /comment/add/{reviewId}/{userId}:
     post:
@@ -924,7 +911,7 @@ paths:
                 type: string
                 description: Error message
                 example: cannot find comment.
-  /comment/vote/{commentId}:
+  /comment/vote/{commentId}/{vote}:
     put:
       tags:
         - comment
@@ -938,14 +925,13 @@ paths:
           schema:
             type: integer
             format: int64
-      requestBody:
-        description: 1 for upvote or 0 for downvote
-        content:
-          application/json:
-            schema:
-              type: integer
-              format: int32
-              example: 0
+        - name: vote
+          in: path
+          description: 1 for upvote and 0 for downvote
+          required: true
+          schema:
+            type: integer
+            format: int32
       responses:
         '200':
           description: Successful operation
@@ -1025,9 +1011,7 @@ components:
     Review:
       type: object
       x-class-extra-annotation: "@javax.persistence.Entity"
-      x-field-extra-annotation: " @javax.persistence.ManyToOne(cascade = javax.persistence.CascadeType.PERSIST)
-      @com.fasterxml.jackson.annotation.JsonIdentityInfo(generator = com.fasterxml.jackson.annotation.ObjectIdGenerators.PropertyGenerator.class, property = \"id\")
-      @com.fasterxml.jackson.annotation.JsonIdentityReference(alwaysAsId = true)"
+      x-field-extra-annotation: " @javax.persistence.ManyToOne(cascade = javax.persistence.CascadeType.PERSIST)"
       properties:
         id:
           type: integer
@@ -1057,6 +1041,11 @@ components:
           x-field-extra-annotation: "@javax.persistence.OneToMany(cascade = javax.persistence.CascadeType.ALL, orphanRemoval = true)"
           items:
             $ref: '#/components/schemas/Comment'
+        reportList:
+          type: array
+          x-field-extra-annotation: "@javax.persistence.OneToMany(cascade = javax.persistence.CascadeType.ALL, orphanRemoval = true)"
+          items:
+            $ref: '#/components/schemas/ReportReview'
         upvote:
           type: integer
           format: int64
@@ -1092,15 +1081,18 @@ components:
     Comment:
       type: object
       x-class-extra-annotation: "@javax.persistence.Entity"
-      x-field-extra-annotation: "@javax.persistence.ManyToOne(cascade = javax.persistence.CascadeType.ALL)"
+      x-field-extra-annotation: "@javax.persistence.ManyToOne(cascade = javax.persistence.CascadeType.PERSIST)"
       properties:
         id:
           x-field-extra-annotation: "@javax.persistence.Id @javax.persistence.GeneratedValue(strategy = javax.persistence.GenerationType.IDENTITY)"
           type: integer
           format: int64
           example: 3
-        review:
-          $ref: '#/components/schemas/Review'
+        reviewId: # Added reviewId field
+          x-field-extra-annotation: "@javax.persistence.JoinColumn(name = \"id\")"
+          type: integer
+          format: int64
+          description: "The ID of the Review to which this Comment belongs."
         userId:
           type: integer
           format: int64
@@ -1120,6 +1112,11 @@ components:
           type: string
           format: date
           example: '2013-10-24'
+        reportList:
+          type: array
+          x-field-extra-annotation: "@javax.persistence.OneToMany(cascade = javax.persistence.CascadeType.ALL, orphanRemoval = true)"
+          items:
+            $ref: '#/components/schemas/ReportComment'
       required:
         - id
         - userId
@@ -1169,22 +1166,28 @@ components:
           type: integer
           format: int64
           example: 3
-        comment:
-          $ref: '#/components/schemas/Comment'
+        commentId: # Added reviewId field
+          x-field-extra-annotation: "@javax.persistence.JoinColumn(name = \"id\")"
+          type: integer
+          format: int64
+          description: "The ID of the comment that is reported."
         reason:
           type: string
           example: offensive
     ReportReview:
       type: object
-      x-class-extra-annotation: "@javax.persistence.Entity "
+      x-class-extra-annotation: "@javax.persistence.Entity"
       properties:
         id:
           x-field-extra-annotation: "@javax.persistence.Id @javax.persistence.GeneratedValue(strategy = javax.persistence.GenerationType.IDENTITY)"
           type: integer
           format: int64
           example: 3
-        review:
-          $ref: '#/components/schemas/Review'
+        reviewId: # Added reviewId field
+          x-field-extra-annotation: "@javax.persistence.JoinColumn(name = \"id\")"
+          type: integer
+          format: int64
+          description: "The ID of the Review that is reported."
         reason:
           type: string
           example: offensive

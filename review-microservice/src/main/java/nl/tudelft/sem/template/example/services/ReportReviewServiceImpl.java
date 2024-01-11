@@ -4,6 +4,7 @@ import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.model.ReportReview;
 import nl.tudelft.sem.template.example.repositories.ReportReviewRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -20,18 +21,37 @@ public class ReportReviewServiceImpl implements ReportReviewService{
         this.reviewRepo = reviewRepo;
     }
 
+//    @Override
+//    public ResponseEntity<ReportReview> report(Review review) {
+//        if (review == null || !reviewRepo.existsById(review.getId())) {
+//            return ResponseEntity.badRequest().build();
+//        }
+//
+//        ReportReview reportReview = new ReportReview();
+//        Review rev = reviewRepo.getOne(review.getId());
+//        rev.addReportListItem(reportReview);
+//        reportReview.setReview(rev);
+//
+//        reviewRepo.save(rev);
+//
+//        return ResponseEntity.ok(reportReview);
+//    }
+
     @Override
-    public ResponseEntity<ReportReview> report(Review review) {
-        if (review == null || !reviewRepo.existsById(review.getId())) {
+    public ResponseEntity<ReportReview> report(Long reviewId, String reason) {
+        if (reason == null || !reviewRepo.existsById(reviewId)) {
             return ResponseEntity.badRequest().build();
         }
 
         ReportReview reportReview = new ReportReview();
-        reportReview.setReview(review);
+        Review rev = reviewRepo.getOne(reviewId);
+        rev.addReportListItem(reportReview);
+        reportReview.setReason(reason);
+        reportReview.setReviewId(rev.getId());
 
-        repo.save(reportReview);
+        reviewRepo.save(rev);
 
-        return ResponseEntity.ok(reportReview);
+        return ResponseEntity.ok(rev.getReportList().get(rev.getReportList().size()-1));
     }
 
     @Override
@@ -67,15 +87,17 @@ public class ReportReviewServiceImpl implements ReportReviewService{
     @Override
     public ResponseEntity<String> delete(Long id, Long userId) {
         if(!repo.existsById(id)) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().header("no exist").build();
         }
         ReportReview reportReview = repo.findById(id).get();
         boolean isAdmin = isAdmin(userId);
         if(isAdmin){
-            repo.deleteById(id);
+            Review review = reviewRepo.getOne(reportReview.getReviewId());
+            review.getReportList().remove(reportReview);
+            reviewRepo.save(review);
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.badRequest().build();
+        return ResponseEntity.badRequest().header("not admin").build();
     }
 
     @Override

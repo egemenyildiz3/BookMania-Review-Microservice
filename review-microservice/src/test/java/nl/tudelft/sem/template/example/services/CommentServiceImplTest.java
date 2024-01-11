@@ -97,10 +97,11 @@ class CommentServiceImplTest {
         when(commentRepository.save(comment)).thenReturn(comment);
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+        when(commentRepository.getOne(1L)).thenReturn(comment);
         var result = service.update(2L, comment);
         verify(commentRepository).save(comment);
         verify(commentRepository).existsById(1L);
-        verify(commentRepository).findById(1L);
+//        verify(commentRepository).findById(1L);
         assertEquals(result.getBody(), comment);
         comment.text("great");
         result = service.update(2L, comment);
@@ -116,10 +117,11 @@ class CommentServiceImplTest {
         when(commentRepository.save(comment)).thenReturn(comment);
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+        when(commentRepository.getOne(1L)).thenReturn(comment);
         var result = service.update(2L, comment);
         verify(commentRepository).save(comment);
         verify(commentRepository).existsById(1L);
-        verify(commentRepository).findById(1L);
+//        verify(commentRepository).findById(1L);
         assertEquals(result.getBody(), comment);
         comment.text("fuck");
         result = service.update(2L, comment);
@@ -141,11 +143,12 @@ class CommentServiceImplTest {
     void testDeleteOwner() {
         Comment comment = new Comment(1L, 2L);
         Review review = new Review(3L, 5L, 10L);
-        comment.setReview(review);
+        comment.setReviewId(review.getId());
         review.addCommentListItem(comment);
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         when(reviewRepository.save(review)).thenReturn(review);
+        when(reviewRepository.getOne(3L)).thenReturn(review);
         var result = service.delete(1L, 2L);
         verify(commentRepository).existsById(1L);
         verify(commentRepository).findById(1L);
@@ -158,7 +161,7 @@ class CommentServiceImplTest {
     void testDeleteNotOwner() {
         Comment comment = new Comment(1L, 2L);
         Review review = new Review(3L, 5L, 10L);
-        comment.setReview(review);
+        comment.setReviewId(review.getId());
         review.addCommentListItem(comment);
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
@@ -181,12 +184,12 @@ class CommentServiceImplTest {
         Comment c4 = new Comment(4L,2L);
         Comment c5 = new Comment(5L,1L);
         Comment c6 = new Comment(6L,2L);
-        c1.setReview(r1);
-        c2.setReview(r1);
-        c3.setReview(r2);
-        c4.setReview(r1);
-        c5.setReview(r1);
-        c6.setReview(r1);
+        c1.setReviewId(r1.getId());
+        c2.setReviewId(r1.getId());
+        c3.setReviewId(r2.getId());
+        c4.setReviewId(r1.getId());
+        c5.setReviewId(r1.getId());
+        c6.setReviewId(r1.getId());
 
         when(reviewRepository.existsById(17L)).thenReturn(true);
         when(reviewRepository.existsById(2L)).thenReturn(false);

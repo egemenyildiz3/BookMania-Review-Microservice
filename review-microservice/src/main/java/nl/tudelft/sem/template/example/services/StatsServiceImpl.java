@@ -17,7 +17,7 @@ public class StatsServiceImpl implements  StatsService {
     }
 
     @Override
-    public ResponseEntity<Double> avgRating (Long bookId, Long userId) {
+    public ResponseEntity<Double> avgRating (Long bookId) {
         if(!bookDataRepository.existsById(bookId)) {
             return ResponseEntity.badRequest().build();
         }
@@ -33,7 +33,7 @@ public class StatsServiceImpl implements  StatsService {
     }
 
     @Override
-    public ResponseEntity<Long> interactions(Long bookId, Long userId) {
+    public ResponseEntity<Long> interactions(Long bookId) {
         if(!bookDataRepository.existsById(bookId)) {
             return ResponseEntity.badRequest().build();
         }

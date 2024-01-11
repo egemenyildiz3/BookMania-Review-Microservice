@@ -45,23 +45,24 @@ public class ReviewServiceImpl implements ReviewService{
             return ResponseEntity.badRequest().build();
         }
         boolean book = communicationService.existsBook(review.getBookId());
-        if(book){
+        if(!book){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .header("Invalid Book", "book id not found")
                     .build();
         }
         boolean user = communicationService.existsUser(review.getUserId());
-        if(user){
+        if(!user){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .header("Invalid User", "user id not found")
                     .build();
         }
         if(checkProfanities(review.getText()))
             return ResponseEntity.status(406).header("Profanities", "Profanities were detected in text").build();
-
+        review.setId(0L);
         review.setDownvote(0L);
         review.setUpvote(0L);
         review.setCommentList(new ArrayList<>());
+        review.setReportList(new ArrayList<>());
         review.lastEditTime(LocalDate.now());
         review.timeCreated(LocalDate.now());
         Review saved = repo.save(review);
@@ -106,12 +107,13 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Override
     public ResponseEntity<Review> update(Long userId, Review review) {
-        if (review == null || !repo.existsById(review.getId())){
+
+       if (review == null || !repo.existsById(review.getId())){
             return ResponseEntity.badRequest().header("Invalid ReviewId", "review Id not found").build();
         }
         //check for user in database
         boolean user = communicationService.existsUser(userId);
-        if(user){
+        if(!user){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .header("Invalid User", "user id not found ")
                     .build();
@@ -125,8 +127,16 @@ public class ReviewServiceImpl implements ReviewService{
         }
         if(checkProfanities(review.getText()))
             return ResponseEntity.status(406).header("Profanities", "Profanities were detected in text").build();
-        review.lastEditTime(LocalDate.now());
-        Review saved = repo.save(review);
+
+
+        Review dataReview = repo.getOne(review.getId());
+        dataReview.setLastEditTime(LocalDate.now());
+        dataReview.setText(review.getText());
+        dataReview.setTitle(review.getTitle());
+        dataReview.setRating(review.getRating());
+        dataReview.setSpoiler(review.getSpoiler());
+        dataReview.setBookNotion(review.getBookNotion());
+        Review saved = repo.save(dataReview);
         return ResponseEntity.ok(saved);
     }
 
@@ -154,7 +164,7 @@ public class ReviewServiceImpl implements ReviewService{
         if(!repo.existsById(reviewId) || get(reviewId).getBody() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).header("Invalid ReviewId", "review Id not found").build();
         }
-        Review review = get(reviewId).getBody();
+        Review review = (Review) get(reviewId).getBody();
         review.spoiler(true);
         repo.save(review);
         return ResponseEntity.ok().build();
@@ -165,7 +175,7 @@ public class ReviewServiceImpl implements ReviewService{
         if(!repo.existsById(reviewId) || get(reviewId).getBody() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).header("Invalid ReviewId", "review Id not found").build();
         }
-        Review review = get(reviewId).getBody();
+        Review review = (Review) get(reviewId).getBody();
         if (body == 1) {
             if (review.getUpvote() == null) {
                 review.setUpvote(0L);
