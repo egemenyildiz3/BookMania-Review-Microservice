@@ -3,10 +3,7 @@ package nl.tudelft.sem.template.example.RESTcontrollers;
 import nl.tudelft.sem.template.api.GetReportApi;
 import nl.tudelft.sem.template.example.repositories.BookDataRepository;
 import nl.tudelft.sem.template.example.repositories.ReviewRepository;
-import nl.tudelft.sem.template.example.services.CommunicationServiceImpl;
-import nl.tudelft.sem.template.example.services.GetReportService;
-import nl.tudelft.sem.template.example.services.GetReportServiceImpl;
-import nl.tudelft.sem.template.example.services.ReviewServiceImpl;
+import nl.tudelft.sem.template.example.services.*;
 import nl.tudelft.sem.template.model.BookData;
 import nl.tudelft.sem.template.model.Review;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +18,8 @@ public class GetReportController implements GetReportApi {
 
     private final GetReportServiceImpl service;
 
-    public GetReportController(BookDataRepository repo, ReviewRepository rr, CommunicationServiceImpl cs) {
-        this.service = new GetReportServiceImpl(repo, rr, cs);
+    public GetReportController(BookDataRepository repo, ReviewRepository rr, CommunicationServiceImpl cs, CommentService co) {
+        this.service = new GetReportServiceImpl(repo, rr, cs, co);
     }
 
 

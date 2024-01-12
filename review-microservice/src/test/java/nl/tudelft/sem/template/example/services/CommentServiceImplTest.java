@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.example.services;
 
+import nl.tudelft.sem.template.example.Exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.example.repositories.CommentRepository;
 import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.Comment;
@@ -11,6 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -197,5 +199,40 @@ class CommentServiceImplTest {
         assertEquals(failResult.getStatusCode(), HttpStatus.BAD_REQUEST);
 
     }
+    @Test
+    void findMostUpvotedComment() {
+        Review reviewOne = new Review(5L, 15L, 15L, "rev1", "rev1t", 5L);
+        Review reviewTwo = new Review(10L, 10L, 15L, "rev1", "rev1t", 5L);
+        Comment commentOne = new Comment(1L, 5L, 15L, "a");
+        Comment commentTwo = new Comment(2L, 10L, 20L, "b");
+        Comment commentThree = new Comment(3L, 10L, 25L, "c");
+        commentOne.setUpvote(25L);
+        commentTwo.setUpvote(15L);
+        commentThree.setUpvote(20L);
+        List<Comment> comments = List.of(new Comment[] {commentOne,commentTwo, commentThree});
+        when(commentRepository.findAll()).thenReturn(comments);
+        when(reviewRepository.getOne(5L)).thenReturn(reviewOne);
+        when(reviewRepository.getOne(10L)).thenReturn(reviewTwo);
 
+        var result = service.findMostUpvotedComment(10L);
+
+        assertEquals(result.getBody(), 3L);
+    }
+
+    @Test
+    void findMostUpvotedCommentNoResults(){
+        Review reviewOne = new Review(5L, 15L, 15L, "rev1", "rev1t", 5L);
+        Review reviewTwo = new Review(10L, 10L, 15L, "rev1", "rev1t", 5L);
+        Comment commentOne = new Comment(1L, 5L, 15L, "a");
+        Comment commentTwo = new Comment(2L, 10L, 20L, "b");
+        Comment commentThree = new Comment(3L, 10L, 25L, "c");
+        commentOne.setUpvote(25L);
+        commentTwo.setUpvote(15L);
+        commentThree.setUpvote(20L);
+        List<Comment> comments = List.of(new Comment[] {commentOne,commentTwo, commentThree});
+        when(commentRepository.findAll()).thenReturn(comments);
+        when(reviewRepository.getOne(5L)).thenReturn(reviewOne);
+        when(reviewRepository.getOne(10L)).thenReturn(reviewTwo);
+        assertThrows(CustomBadRequestException.class, () -> service.findMostUpvotedComment(11L));
+    }
 }

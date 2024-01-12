@@ -4,6 +4,7 @@ import java.util.*;
 import java.time.*;
 import java.util.stream.Collectors;
 
+import nl.tudelft.sem.template.example.Exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.example.repositories.CommentRepository;
 import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.Comment;
@@ -109,5 +110,20 @@ public class CommentServiceImpl implements CommentService {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();
+    }
+
+    public ResponseEntity<Long> findMostUpvotedComment(Long bookId){
+        List<Comment> allComments = repository.findAll();
+        Optional<Comment> result =
+        allComments.stream().filter(x -> {
+            Review associatedReview = reviewRepository.getOne(x.getReviewId());
+            if(associatedReview == null) return false;
+            return Objects.equals(associatedReview.getBookId(), bookId);
+        })
+                .max(Comparator.comparingLong(Comment::getUpvote));
+        if (result.isEmpty()){
+            throw new CustomBadRequestException("No comments found");
+        }
+        return ResponseEntity.ok(result.get().getId());
     }
 }

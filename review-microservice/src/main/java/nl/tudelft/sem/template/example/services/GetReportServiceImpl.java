@@ -16,11 +16,13 @@ public class GetReportServiceImpl implements GetReportService{
     private final BookDataRepository bookDataRepository;
     private final ReviewRepository reviewRepository;
     private final CommunicationServiceImpl communicationService;
+    private final CommentService commentService;
 
-    public GetReportServiceImpl(BookDataRepository bdr, ReviewRepository rr, CommunicationServiceImpl cs){
+    public GetReportServiceImpl(BookDataRepository bdr, ReviewRepository rr, CommunicationServiceImpl cs, CommentService co){
         this.bookDataRepository = bdr;
         this.reviewRepository = rr;
         this.communicationService = cs;
+        this.commentService = co;
     }
 
     @Override
@@ -49,6 +51,10 @@ public class GetReportServiceImpl implements GetReportService{
 
             if(!reviewIds.isEmpty()){
                 result.setMostUpvotedReview(reviewIds.get(0));
+            }
+            var comments = commentService.findMostUpvotedComment(bookId);
+            if(comments.getStatusCode().is2xxSuccessful()) {
+                result.setMostUpvotedComment(comments.getBody());
             }
             return ResponseEntity.ok(result);
         }

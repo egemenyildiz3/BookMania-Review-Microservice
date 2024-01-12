@@ -13,4 +13,6 @@ public interface CommentService {
     ResponseEntity<List<Comment>> getAll(Long reviewId);
     ResponseEntity<Comment> update(Long userId, Comment comment);
     ResponseEntity<String> delete(Long commentId, Long userId);
+
+    public ResponseEntity<Long> findMostUpvotedComment(Long bookId);
 }

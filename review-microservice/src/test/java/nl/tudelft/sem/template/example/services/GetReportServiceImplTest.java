@@ -9,6 +9,7 @@ import nl.tudelft.sem.template.model.Review;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,13 +26,15 @@ class GetReportServiceImplTest {
     private BookDataRepository bookDataRepository;
     private ReviewRepository reviewRepository;
     private CommunicationServiceImpl communicationService;
+    private CommentService commentService;
 
     @BeforeEach
     void setup() {
         this.bookDataRepository = mock(BookDataRepository.class);
         this.reviewRepository = mock(ReviewRepository.class);
         this.communicationService = mock(CommunicationServiceImpl.class);
-        this.service = new GetReportServiceImpl(this.bookDataRepository, this.reviewRepository, this.communicationService);
+        this.commentService = mock(CommentService.class);
+        this.service = new GetReportServiceImpl(this.bookDataRepository, this.reviewRepository, this.communicationService, commentService);
 
         when(communicationService.existsUser(any(Long.class))).thenReturn(true);
         when(communicationService.existsBook(any(Long.class))).thenReturn(true);
@@ -99,6 +102,7 @@ class GetReportServiceImplTest {
         Review mostUpvoted = new Review(5L, id, 20L, "Review", "text", 5L);
         reviews.add(mostUpvoted.getId());
         when(reviewRepository.findMostUpvotedReviewId(eq(id), any(Pageable.class))).thenReturn(reviews);
+        when(commentService.findMostUpvotedComment(id)).thenReturn(ResponseEntity.badRequest().build());
 
         BookData result = service.getReport(id, 5L, "report").getBody();
 
@@ -121,7 +125,7 @@ class GetReportServiceImplTest {
 
         List<Long> reviews = new ArrayList<>();
         when(reviewRepository.findMostUpvotedReviewId(eq(id), any(Pageable.class))).thenReturn(reviews);
-
+        when(commentService.findMostUpvotedComment(id)).thenReturn(ResponseEntity.badRequest().build());
         BookData result = service.getReport(id, 5L, "report").getBody();
 
         assertEquals(data, result);
