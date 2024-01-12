@@ -114,8 +114,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public ResponseEntity<String> addVote(Long commentId, Integer body) {
-        if(!repository.existsById(commentId) || get(commentId).getBody() == null || !(List.of(0, 1).contains(body))) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).header("Invalid commentId", "comment Id not found").build();
+        if(!repository.existsById(commentId) || get(commentId).getBody() == null) {
+            return ResponseEntity.badRequest().body("Comment id does not exist.");
+        }
+
+        if (!(List.of(0, 1).contains(body))) {
+            return ResponseEntity.badRequest().body("The only accepted bodies are 0 for downvote and 1 for upvote.");
         }
         Comment comment = get(commentId).getBody();
         if(body == 1) {
@@ -130,7 +134,9 @@ public class CommentServiceImpl implements CommentService {
             comment.downvote(comment.getDownvote() + 1);
         }
         repository.save(comment);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Vote added, new vote values are:\nupvotes: " +
+                ((comment.getUpvote() == null) ? 0 : comment.getUpvote()) +
+                "\ndownvotes: " + ((comment.getDownvote() == null) ? 0 : comment.getDownvote()));
     }
 
 
