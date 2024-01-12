@@ -1,12 +1,9 @@
 package nl.tudelft.sem.template.example.services;
 
 import nl.tudelft.sem.template.example.repositories.CommentRepository;
-import nl.tudelft.sem.template.example.repositories.ReportReviewRepository;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.ReportComment;
 import nl.tudelft.sem.template.example.repositories.ReportCommentRepository;
-import nl.tudelft.sem.template.model.ReportReview;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -21,21 +18,6 @@ public class ReportCommentServiceImpl implements ReportCommentService{
         this.repo = repo;
         this.commentRepo = commentRepo;
     }
-//    @Override
-//    public ResponseEntity<ReportComment> report(String reason) {
-//        comment.setReview(null);
-//        if ( == null || !commentRepo.existsById(comment.getId())) {
-//            return ResponseEntity.badRequest().header("fefe").build();
-//        }
-//        ReportComment reportComment = new ReportComment();
-//        Comment com = commentRepo.getOne(comment.getId());
-//        reportComment.setComment(com);
-//        com.addReportListItem(reportComment);
-//        //repo.save(reportComment);
-//        commentRepo.save(com);
-//
-//        return ResponseEntity.ok(reportComment);
-//    }
 
     @Override
     public ResponseEntity<ReportComment> report(Long commentId, String reason) {
@@ -47,7 +29,6 @@ public class ReportCommentServiceImpl implements ReportCommentService{
         reportComment.setCommentId(com.getId());
         reportComment.setReason(reason);
         com.addReportListItem(reportComment);
-        //repo.save(reportComment);
         commentRepo.save(com);
 
         return ResponseEntity.ok(reportComment);
@@ -108,9 +89,7 @@ public class ReportCommentServiceImpl implements ReportCommentService{
         }
         boolean isAdmin = isAdmin(userId);
         if(isAdmin){
-            for (ReportComment report : repo.findAllByCommentId(commentId)) {
-                repo.delete(report);
-            }
+            repo.deleteAll(repo.findAllByCommentId(commentId));
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();
