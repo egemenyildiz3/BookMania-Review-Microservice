@@ -1,9 +1,10 @@
 package nl.tudelft.sem.template.example.services;
 
-import nl.tudelft.sem.template.example.repositories.CommentRepository;
-import nl.tudelft.sem.template.example.repositories.ReviewRepository;
+import nl.tudelft.sem.template.review.repositories.CommentRepository;
+import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.Review;
+import nl.tudelft.sem.template.review.services.CommentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
