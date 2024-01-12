@@ -1,10 +1,14 @@
 package nl.tudelft.sem.template.example.services;
 
-import nl.tudelft.sem.template.example.Exceptions.CustomBadRequestException;
-import nl.tudelft.sem.template.example.Exceptions.CustomPermissionsException;
-import nl.tudelft.sem.template.example.Exceptions.CustomProfanitiesException;
+import nl.tudelft.sem.template.model.BookData;
+import nl.tudelft.sem.template.review.Exceptions.CustomBadRequestException;
+import nl.tudelft.sem.template.review.Exceptions.CustomPermissionsException;
+import nl.tudelft.sem.template.review.Exceptions.CustomProfanitiesException;
 import nl.tudelft.sem.template.model.Review;
-import nl.tudelft.sem.template.example.repositories.ReviewRepository;
+import nl.tudelft.sem.template.review.repositories.ReviewRepository;
+import nl.tudelft.sem.template.review.services.CommunicationServiceImpl;
+import nl.tudelft.sem.template.review.services.GetReportServiceImpl;
+import nl.tudelft.sem.template.review.services.ReviewServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +37,14 @@ class ReviewServiceImplTest {
     public void setup() {
         repository = mock(ReviewRepository.class);
         communicationService = mock(CommunicationServiceImpl.class);
-        service = new ReviewServiceImpl(repository,communicationService);
+        GetReportServiceImpl getReportService = mock(GetReportServiceImpl.class);
+        when(getReportService.addRatingAndNotion(any(),any(),any())).thenReturn(ResponseEntity.of(Optional.of(new BookData(1L))));
+
+        when(getReportService.removeRatingAndNotion(any(),any(),any())).thenReturn(ResponseEntity.of(Optional.of(new BookData(1L))));
+        when(getReportService.updateRatingAndNotion(any(),any(),any(),any(),any())).thenReturn(ResponseEntity.of(Optional.of(new BookData(1L))));
+        when(getReportService.createBookDataInRepository(any())).thenReturn(ResponseEntity.of(Optional.of(new BookData(1L))));
+        service = new ReviewServiceImpl(getReportService,repository,communicationService);
+
 
     }
 
@@ -92,7 +103,7 @@ class ReviewServiceImplTest {
         when(repository.existsById(1L)).thenReturn(true);
         when(repository.findById(1L)).thenReturn(Optional.of(review));
         var result = service.get(1L);
-        verify(repository).findById(1L);
+        verify(repository,times(2)).findById(1L);
         verify(repository).existsById(1L);
         assertEquals(result.getBody(),review);
 
@@ -168,6 +179,21 @@ class ReviewServiceImplTest {
     }
 
     @Test
+    void updateInvalidUser() {
+        Review review = new Review(1L,2L,10L, "Review", "review", 5L);
+        review.id(1L);
+        review.userId(10L);
+        review.setText("fuck");
+        when(repository.save(review)).thenReturn(review);
+        when(repository.existsById(1L)).thenReturn(true);
+        when(communicationService.existsUser(10L)).thenReturn(false);
+        when(communicationService.isAdmin(10L)).thenReturn(true);
+        assertThrows(CustomBadRequestException.class, () -> service.update(10L,review));
+        verify(repository,never()).save(review);
+    }
+
+
+    @Test
     void updateNull(){
         assertThrows(CustomBadRequestException.class, () -> service.update(1L,null));
     }
@@ -195,6 +221,17 @@ class ReviewServiceImplTest {
         verify(repository,never()).deleteById(1L);
     }
 
+
+    @Test
+    void deleteNotAdminOrOwner() {
+        Review review = new Review(1L,2L,10L, "Review", "review", 5L);
+        when(repository.existsById(1L)).thenReturn(true);
+        when(repository.findById(1L)).thenReturn(Optional.of(review));
+        when(communicationService.isAdmin(9L)).thenReturn(false);
+        assertThrows(CustomPermissionsException.class, () -> service.delete(1L,9L));
+    }
+
+
     @Test
     void testAddSpoiler() {
         Long reviewId = 1L;
@@ -211,6 +248,9 @@ class ReviewServiceImplTest {
         assertTrue(review.getSpoiler());
         verify(repository, times(1)).save(review);
     }
+
+
+
 
     @Test
     void testAddUpvote() {
@@ -231,6 +271,7 @@ class ReviewServiceImplTest {
         assertEquals(review.getUpvote(), 1);
         verify(repository, times(1)).save(review);
     }
+
 
     @Test
     void testAddDownvote() {
