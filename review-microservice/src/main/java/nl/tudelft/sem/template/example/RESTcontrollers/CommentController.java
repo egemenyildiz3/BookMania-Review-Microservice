@@ -46,7 +46,7 @@ public class CommentController implements CommentApi {
     }
 
     @Override
-    public ResponseEntity<String> commentVoteCommentIdPut(Long commentId, Integer body) {
+    public ResponseEntity<String> commentVoteCommentIdVotePut(Long commentId, Integer body) {
         return service.addVote(commentId, body);
     }
 }

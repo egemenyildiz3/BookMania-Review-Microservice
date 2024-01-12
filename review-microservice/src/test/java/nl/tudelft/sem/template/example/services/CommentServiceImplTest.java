@@ -200,9 +200,9 @@ class CommentServiceImplTest {
 
     @Test
     void wrongBodyVoteTest() {
-        Review r1 = new Review(17L, 1L, 1L);
-        Comment c1 = new Comment(1L,1L);
-        c1.setReview(r1);
+        Review r1 = new Review(17L, 1L, 1L, "Review", "review", 5L);
+        Comment c1 = new Comment(1L, 17L, 1L, "comment");
+
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(c1));
         when(commentRepository.save(any(Comment.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -213,10 +213,8 @@ class CommentServiceImplTest {
 
     @Test
     void upvoteAndDownvoteTest() {
-        Review r1 = new Review(17L, 1L, 1L);
-        Comment c1 = new Comment(1L,1L);
-
-        c1.setReview(r1);
+        Review r1 = new Review(17L, 1L, 1L, "Review", "review", 5L);
+        Comment c1 = new Comment(1L, 17L, 1L, "comment");
 
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(c1));
@@ -231,10 +229,8 @@ class CommentServiceImplTest {
 
     @Test
     void multipleUpvoteDownvoteTest() {
-        Review r1 = new Review(17L, 1L, 1L);
-        Comment c1 = new Comment(1L,1L);
-
-        c1.setReview(r1);
+        Review r1 = new Review(17L, 1L, 1L, "Review", "review", 5L);
+        Comment c1 = new Comment(1L, 17L, 1L, "comment");
 
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(c1));
