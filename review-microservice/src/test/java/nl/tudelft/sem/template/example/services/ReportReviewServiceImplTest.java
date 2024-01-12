@@ -39,7 +39,7 @@ class ReportReviewServiceImplTest {
 
     @Test
     void report() {
-        Review review = new Review(1L, 10L, 23L);
+        Review review = new Review(1L, 10L, 23L, "Review", "review", 5L);
 
         when(reviewRepository.existsById(review.getId())).thenReturn(true);
         when(repository.save(ArgumentMatchers.any())).thenReturn(new ReportReview());
@@ -135,7 +135,7 @@ class ReportReviewServiceImplTest {
     @Test
     void delete() {
         ReportReview reportReview = new ReportReview();
-        Review rev = new Review(1L,2L,3L);
+        Review rev = new Review(1L, 2L, 3L, "Review", "review", 5L);
         reportReview.setReviewId(1L);
         rev.setReportList(new ArrayList<>());
         when(repository.existsById(1L)).thenReturn(true);

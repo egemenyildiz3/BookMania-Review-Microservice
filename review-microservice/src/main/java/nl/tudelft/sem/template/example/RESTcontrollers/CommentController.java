@@ -26,22 +26,22 @@ public class CommentController implements CommentApi {
     }
 
     @Override
-    public ResponseEntity<Comment> commentAddReviewIdUserIdPost(Long userId, Long reviewId, Comment comment) {
-        return service.add(userId, reviewId, comment);
+    public ResponseEntity<Comment> commentPost(Comment comment) {
+        return service.add(comment);
     }
 
     @Override
-    public ResponseEntity<List<Comment>> commentReviewIdGet(Long reviewId) {
+    public ResponseEntity<List<Comment>> commentSeeAllReviewIdGet(Long reviewId) {
         return service.getAll(reviewId);
     }
 
     @Override
-    public ResponseEntity<Comment> commentEditUserIdPut(Long userId, Comment comment) {
+    public ResponseEntity<Comment> commentUpdateUserIdPut(Long userId, Comment comment) {
         return service.update(userId, comment);
     }
 
     @Override
-    public ResponseEntity<Comment> commentGetOneCommentIdGet(Long commentId) {
+    public ResponseEntity<Comment> commentCommentIdGet(Long commentId) {
         return service.get(commentId);
     }
 }

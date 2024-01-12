@@ -37,21 +37,19 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public ResponseEntity<Comment> add(Long userId, Long reviewId, Comment comment) {
+    public ResponseEntity<Comment> add(Comment comment) {
 
-        if (comment == null || !reviewRepository.existsById(reviewId)) {
+        if (comment == null || !reviewRepository.existsById(comment.getReviewId())) {
             return ResponseEntity.badRequest().build();
         }
         if (checkProfanities(comment.getText())) {
             return ResponseEntity.badRequest().build();
         }
-        Review review = reviewRepository.findById(reviewId).get();
+        Review review = reviewRepository.findById(comment.getReviewId()).get();
         comment.setId(0L);
-        comment.setUserId(userId);
         comment.setDownvote(0L);
         comment.setUpvote(0L);
         comment.setTimeCreated(LocalDate.now());
-        comment.setReviewId(reviewId);
         comment.setReportList(new ArrayList<>());
         //Comment added = repository.save(comment);
         review.addCommentListItem(comment);

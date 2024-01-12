@@ -37,14 +37,6 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/Review'
-          '405':
-            description: Internal server error - cannot save review
-            content:
-              application/json:
-                schema:
-                  type: string
-                  description: Error message
-                  example: cannot save review.
           '400':
             description: Invalid book or user
             content:
@@ -268,7 +260,7 @@ paths:
                 type: string
                 description: Error message
                 example: cannot find review.
-  /review/pin/{reviewId}:
+  /review/pin/{reviewId}/{pinValue}:
     put:
       tags:
         - review
@@ -282,14 +274,12 @@ paths:
           schema:
             type: integer
             format: int64
-      requestBody:
-        description: the value to which we set the pinned boolean of the review
-        content:
-          application/json:
-            schema:
-              type: boolean
-              example: true
-        required: true
+        - name: pinValue
+          in: path
+          description: the value to which we set the pinned boolean of the review
+          required: true
+          schema:
+            type: boolean
       responses:
         '200':
           description: Successful operation
@@ -311,8 +301,8 @@ paths:
     get:
       tags:
         - review
-      summary: get the top reviews for the user
-      description: searches the database for the reviews that are made by that user and returns top three most recent ones
+      summary: get the top 3 reviews for the user
+      description: searches the database for the reviews that are made by that user and returns top three most upvoted ones
       parameters:
         - name: userId
           in: path
@@ -693,27 +683,12 @@ paths:
                 description: Error message
                 example: cannot find book.
 
-  /comment/add/{reviewId}/{userId}:
+  /comment:
     post:
       tags:
         - comment
       summary: create a new comment to a specific review
       description: creates and stores a new comment in the database that is associated with the user who created it and the review it was created to, check for profanities
-      parameters:
-        - name: userId
-          in: path
-          description: user who creates the comment
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: reviewId
-          in: path
-          description: the review for which the comment is created
-          required: true
-          schema:
-            type: integer
-            format: int64
       requestBody:
         description: Create a new comment to a review
         content:
@@ -753,7 +728,7 @@ paths:
                 description: Foul language
                 example: content contains profanities.
 
-  /comment/edit/{userId}:
+  /comment/update/{userId}:
     put:
       tags:
         - comment
@@ -851,7 +826,7 @@ paths:
                 type: string
                 description: Authentication error
                 example: user not owner or admin.
-  /comment/{reviewId}:
+  /comment/seeAll/{reviewId}:
     get:
       tags:
         - comment
@@ -882,7 +857,7 @@ paths:
                 type: string
                 description: Error message
                 example: cannot find review.
-  /comment/getOne/{commentId}:
+  /comment/{commentId}:
     get:
       tags:
         - comment
@@ -1078,6 +1053,9 @@ components:
         - id
         - bookId
         - userId
+        - title
+        - text
+        - rating
     Comment:
       type: object
       x-class-extra-annotation: "@javax.persistence.Entity"
@@ -1119,7 +1097,9 @@ components:
             $ref: '#/components/schemas/ReportComment'
       required:
         - id
+        - reviewId
         - userId
+        - text
     BookData:
       type: object
       x-class-extra-annotation: "@javax.persistence.Entity"
@@ -1174,6 +1154,10 @@ components:
         reason:
           type: string
           example: offensive
+      required:
+        - id
+        - commentId
+        - reason
     ReportReview:
       type: object
       x-class-extra-annotation: "@javax.persistence.Entity"
@@ -1191,3 +1175,7 @@ components:
         reason:
           type: string
           example: offensive
+      required:
+        - id
+        - reviewId
+        - reason
