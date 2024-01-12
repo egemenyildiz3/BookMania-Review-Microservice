@@ -1,9 +1,11 @@
 package nl.tudelft.sem.template.example.services;
 
-import nl.tudelft.sem.template.example.repositories.BookDataRepository;
-import nl.tudelft.sem.template.example.repositories.ReviewRepository;
+import nl.tudelft.sem.template.review.repositories.BookDataRepository;
+import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.BookData;
 import nl.tudelft.sem.template.model.Review;
+import nl.tudelft.sem.template.review.services.CommunicationServiceImpl;
+import nl.tudelft.sem.template.review.services.GetReportServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;

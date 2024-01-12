@@ -1,15 +1,15 @@
 package nl.tudelft.sem.template.example.services;
 
-import nl.tudelft.sem.template.example.repositories.CommentRepository;
-import nl.tudelft.sem.template.example.repositories.ReportCommentRepository;
+import nl.tudelft.sem.template.review.repositories.CommentRepository;
+import nl.tudelft.sem.template.review.repositories.ReportCommentRepository;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.ReportComment;
 import nl.tudelft.sem.template.model.Review;
+import nl.tudelft.sem.template.review.services.ReportCommentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
