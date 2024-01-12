@@ -10,6 +10,7 @@ import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.Review;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -110,4 +111,33 @@ public class CommentServiceImpl implements CommentService {
         }
         return ResponseEntity.badRequest().build();
     }
+
+    @Override
+    public ResponseEntity<String> addVote(Long commentId, Integer body) {
+        if(!repository.existsById(commentId) || get(commentId).getBody() == null) {
+            return ResponseEntity.badRequest().body("Comment id does not exist.");
+        }
+
+        if (!(List.of(0, 1).contains(body))) {
+            return ResponseEntity.badRequest().body("The only accepted bodies are 0 for downvote and 1 for upvote.");
+        }
+        Comment comment = get(commentId).getBody();
+        if(body == 1) {
+            if (comment.getUpvote() == null) {
+                comment.setUpvote(0L);
+            }
+            comment.upvote(comment.getUpvote() + 1);
+        } else {
+            if (comment.getDownvote() == null) {
+                comment.setDownvote(0L);
+            }
+            comment.downvote(comment.getDownvote() + 1);
+        }
+        repository.save(comment);
+        return ResponseEntity.ok("Vote added, new vote values are:\nupvotes: " +
+                ((comment.getUpvote() == null) ? 0 : comment.getUpvote()) +
+                "\ndownvotes: " + ((comment.getDownvote() == null) ? 0 : comment.getDownvote()));
+    }
+
+
 }

@@ -198,4 +198,63 @@ class CommentServiceImplTest {
 
     }
 
+    @Test
+    void wrongBodyVoteTest() {
+        Review r1 = new Review(17L, 1L, 1L, "Review", "review", 5L);
+        Comment c1 = new Comment(1L, 17L, 1L, "comment");
+
+        when(commentRepository.existsById(1L)).thenReturn(true);
+        when(commentRepository.findById(1L)).thenReturn(Optional.of(c1));
+        when(commentRepository.save(any(Comment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        ResponseEntity<String> res1 = service.addVote(1L, 7);
+
+        assertEquals(res1.getStatusCode(), HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void upvoteAndDownvoteTest() {
+        Review r1 = new Review(17L, 1L, 1L, "Review", "review", 5L);
+        Comment c1 = new Comment(1L, 17L, 1L, "comment");
+
+        when(commentRepository.existsById(1L)).thenReturn(true);
+        when(commentRepository.findById(1L)).thenReturn(Optional.of(c1));
+        when(commentRepository.save(any(Comment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ResponseEntity<String> res1 = service.addVote(1L, 1);
+        ResponseEntity<String> res2 = service.addVote(1L, 0);
+
+        assertEquals(res1.getStatusCode(), HttpStatus.OK);
+        assertEquals(res2.getStatusCode(), HttpStatus.OK);
+    }
+
+    @Test
+    void multipleUpvoteDownvoteTest() {
+        Review r1 = new Review(17L, 1L, 1L, "Review", "review", 5L);
+        Comment c1 = new Comment(1L, 17L, 1L, "comment");
+
+        when(commentRepository.existsById(1L)).thenReturn(true);
+        when(commentRepository.findById(1L)).thenReturn(Optional.of(c1));
+        when(commentRepository.save(any(Comment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.addVote(1L, 1);
+        service.addVote(1L, 1);
+        service.addVote(1L, 1);
+        service.addVote(1L, 1);
+
+        ResponseEntity<String> res1 = service.addVote(1L, 1);
+
+        service.addVote(1L, 0);
+        service.addVote(1L, 0);
+        service.addVote(1L, 0);
+        service.addVote(1L, 0);
+        service.addVote(1L, 0);
+
+        ResponseEntity<String> res2 = service.addVote(1L, 0);
+
+        assertEquals(res1.getStatusCode(), HttpStatus.OK);
+        assertEquals(res2.getStatusCode(), HttpStatus.OK);
+        assertEquals(5, c1.getUpvote());
+        assertEquals(6, c1.getDownvote());
+    }
+
 }

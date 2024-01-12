@@ -169,6 +169,13 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Override
     public ResponseEntity<String> addVote(Long reviewId, Integer body) {
+        if (!repo.existsById(reviewId) || get(reviewId).getBody() == null) {
+            return ResponseEntity.badRequest().body("Review id does not exist.");
+        }
+
+        if (!(List.of(0, 1).contains(body))) {
+            return ResponseEntity.badRequest().body("The only accepted bodies are 0 for downvote and 1 for upvote.");
+        }
         Review review = get(reviewId).getBody();
         assert review != null;
         if (body == 1 ) {
@@ -177,7 +184,9 @@ public class ReviewServiceImpl implements ReviewService{
             review.downvote(review.getDownvote() + 1);
         }
         repo.save(review);
-        return ResponseEntity.ok("Vote added.");
+        return ResponseEntity.ok("Vote added, new vote values are:\nupvotes: " +
+                ((review.getUpvote() == null) ? 0 : review.getUpvote()) +
+                "\ndownvotes: " + ((review.getDownvote() == null) ? 0 : review.getDownvote()));
     }
 
     @Override
