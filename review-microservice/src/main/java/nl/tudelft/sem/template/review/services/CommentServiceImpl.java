@@ -4,14 +4,12 @@ import java.util.*;
 import java.time.*;
 import java.util.stream.Collectors;
 
+import nl.tudelft.sem.template.review.Exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.Review;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 
 
 import org.springframework.http.ResponseEntity;
@@ -114,6 +112,21 @@ public class CommentServiceImpl implements CommentService {
         return ResponseEntity.badRequest().build();
     }
 
+    public ResponseEntity<Long> findMostUpvotedComment(Long bookId){
+        List<Comment> allComments = repository.findAll();
+        Optional<Comment> result =
+        allComments.stream().filter(x -> {
+            Review associatedReview = reviewRepository.getOne(x.getReviewId());
+            if(associatedReview == null) return false;
+            return Objects.equals(associatedReview.getBookId(), bookId);
+        })
+                .max(Comparator.comparingLong(Comment::getUpvote));
+        if (result.isEmpty()){
+            throw new CustomBadRequestException("No comments found");
+        }
+        return ResponseEntity.ok(result.get().getId());
+    }
+
     @Override
     public ResponseEntity<String> addVote(Long commentId, Integer body) {
         if(!repository.existsById(commentId) || get(commentId).getBody() == null) {
@@ -140,6 +153,4 @@ public class CommentServiceImpl implements CommentService {
                 ((comment.getUpvote() == null) ? 0 : comment.getUpvote()) +
                 "\ndownvotes: " + ((comment.getDownvote() == null) ? 0 : comment.getDownvote()));
     }
-
-
 }

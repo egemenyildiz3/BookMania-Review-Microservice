@@ -103,35 +103,51 @@ jacocoTestCoverageVerification() {
 	}
 }
 
-// Define a task to run Checkstyle
-task customCheckstyle(type: Checkstyle) {
-	// Set the Checkstyle configuration file
-	configFile = file("${rootDir}/config/checkstyle/checkstyle.xml") // Modify the path as needed
+checkstyle {
+	toolVersion "10.12.5"
+	// Link Checkstyle task to customCheckstyle
+	configFile = file("${projectDir}/../config/checkstyle/checkstyle.xml")
+	ignoreFailures = true // Set to true if you want the build to ignore Checkstyle failures
+	showViolations = true // Set to true to display Checkstyle violations in the console
 
-	// Apply Checkstyle to the main source set while excluding generated code
-	source = sourceSets.main.allJava.filter { file ->
-		// Exclude directories or files associated with generated code
-		!file.path.contains('generated') // Example condition, modify as per your generated code path
+	checkstyleMain {
+		source = project.sourceSets.main.allJava.filter { file ->
+			// Exclude directories or files associated with generated code
+			!file.path.contains('build') // Example condition, modify as per your generated code path
+		}
+		excludes = ['**/generated/.*', '**/build/.*']
+	}
+
+	checkstyleTest {
+		source = project.sourceSets.test.allJava.filter { file ->
+			// Exclude directories or files associated with generated code
+			!file.path.contains('build') // Example condition, modify as per your generated code path
+		}
+		excludes = ['**/generated/.*', '**/build/.*']
 	}
 }
 
-checkstyle {
-	toolVersion "8.37"
-	// Link Checkstyle task to customCheckstyle
-	configFile = customCheckstyle.configFile
-	ignoreFailures = false // Set to true if you want the build to ignore Checkstyle failures
-	showViolations = true // Set to true to display Checkstyle violations in the console
-
-}
 
 pmd {
 	incrementalAnalysis = true
 	ignoreFailures = true
-	sourceSets = [sourceSets.main]
 	// Exclude specific rules or files/directories
 	pmdMain {
-		excludes = ['**/generated/.*']
+		source = project.sourceSets.main.allJava.filter { file ->
+			// Exclude directories or files associated with generated code
+			!file.path.contains('build') // Example condition, modify as per your generated code path
+		}
+		excludes = ['**/generated/.*', '**/build/.*']
 	}
+
+	pmdTest {
+		source = project.sourceSets.test.allJava.filter { file ->
+			// Exclude directories or files associated with generated code
+			!file.path.contains('generated') // Example condition, modify as per your generated code path
+		}
+		excludes = ['**/generated/.*', '**/build/.*']
+	}
+
 }
 
 apply plugin: 'info.solidsoft.pitest'

@@ -1,5 +1,7 @@
 package nl.tudelft.sem.template.review.services;
 
+import nl.tudelft.sem.template.review.Exceptions.CustomBadRequestException;
+import nl.tudelft.sem.template.review.Exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.BookDataRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.BookData;
@@ -14,29 +16,26 @@ public class GetReportServiceImpl implements GetReportService{
     private final BookDataRepository bookDataRepository;
     private final ReviewRepository reviewRepository;
     private final CommunicationServiceImpl communicationService;
+    private final CommentService commentService;
 
-    public GetReportServiceImpl(BookDataRepository bdr, ReviewRepository rr, CommunicationServiceImpl cs){
+    public GetReportServiceImpl(BookDataRepository bdr, ReviewRepository rr, CommunicationServiceImpl cs, CommentService co){
         this.bookDataRepository = bdr;
         this.reviewRepository = rr;
         this.communicationService = cs;
+        this.commentService = co;
     }
 
     @Override
     public ResponseEntity<BookData> getReport(Long bookId, Long userId, String info) {
-        if(userId == null || bookId == null || info == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
+        if(userId == null) throw new CustomBadRequestException("UserId cannot be null");
+        if(bookId == null) throw new CustomBadRequestException("bookId cannot be null");
+        if(info == null) throw new CustomBadRequestException("info cannot be null");
         if(!communicationService.existsUser(userId)){
-                return ResponseEntity.status(401)
-                        .header("Error", "cannot find user.")
-                        .build();
+                throw new CustomUserExistsException("User doesn't exist");
         }
 
         if(!communicationService.existsBook(bookId)){
-            return ResponseEntity.status(400)
-                    .header("Error", "cannot find book.")
-                    .build();
+            throw new CustomBadRequestException("Book doesn't exist");
         }
 
         // If the bookData doesn't exist yet, then create an empty one for the repository, and work with it later
@@ -53,6 +52,10 @@ public class GetReportServiceImpl implements GetReportService{
             if(!reviewIds.isEmpty()){
                 result.setMostUpvotedReview(reviewIds.get(0));
             }
+            var comments = commentService.findMostUpvotedComment(bookId);
+            if(comments.getStatusCode().is2xxSuccessful()) {
+                result.setMostUpvotedComment(comments.getBody());
+            }
             return ResponseEntity.ok(result);
         }
         if(info.equals("rating")){
@@ -64,9 +67,7 @@ public class GetReportServiceImpl implements GetReportService{
             return ResponseEntity.ok((result));
         }
 
-        return ResponseEntity.status(400)
-                .header("Error", "invalid info type.")
-                .build();
+        throw new CustomBadRequestException("Invalid info type");
     }
 
     @Override
@@ -102,9 +103,7 @@ public class GetReportServiceImpl implements GetReportService{
         // If you're trying to delete a review, and there is no bookData object yet
         // then something has gone horribly wrong
         if(!bookDataRepository.existsById(bookId)){
-            return ResponseEntity.status(400)
-                    .header("Error", "bookData doesn't exist.")
-                    .build();
+            throw new CustomBadRequestException("BookData doesn't exist yet");
         }
 
         BookData bd = initializeLazyObjectFromDatabase(bookDataRepository.getOne(bookId));
@@ -141,14 +140,10 @@ public class GetReportServiceImpl implements GetReportService{
 
     public ResponseEntity<BookData> createBookDataInRepository(Long bookId) {
         if(bookId == null){
-            return ResponseEntity.status(400)
-                    .header("Error", "bookId is null.")
-                    .build();
+            throw new CustomBadRequestException("BookId cannot be null");
         }
         if(bookDataRepository.existsById(bookId)){
-            return ResponseEntity.status(400)
-                    .header("Error", "bookData already exists.")
-                    .build();
+            throw new CustomBadRequestException("BookData already exists");
         }
 
 

@@ -1,8 +1,11 @@
 package nl.tudelft.sem.template.review.RESTcontrollers;
 
 import nl.tudelft.sem.template.api.ReviewApi;
+import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.review.repositories.BookDataRepository;
+import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
+import nl.tudelft.sem.template.review.services.CommentServiceImpl;
 import nl.tudelft.sem.template.review.services.CommunicationServiceImpl;
 import nl.tudelft.sem.template.review.services.GetReportServiceImpl;
 import nl.tudelft.sem.template.review.services.ReviewServiceImpl;
@@ -17,9 +20,10 @@ public class ReviewController implements ReviewApi {
 
     private final ReviewServiceImpl service;
 
-    public ReviewController(BookDataRepository bookDataRepository, ReviewRepository repo) {
+    public ReviewController(BookDataRepository bookDataRepository, ReviewRepository repo, CommentRepository cr) {
         CommunicationServiceImpl communicationService = new CommunicationServiceImpl();
-        GetReportServiceImpl getReportService = new GetReportServiceImpl(bookDataRepository,repo,communicationService);
+        CommentServiceImpl commentService = new CommentServiceImpl(cr,repo);
+        GetReportServiceImpl getReportService = new GetReportServiceImpl(bookDataRepository,repo,communicationService, commentService);
         this.service = new ReviewServiceImpl(getReportService,repo,communicationService);
     }
 

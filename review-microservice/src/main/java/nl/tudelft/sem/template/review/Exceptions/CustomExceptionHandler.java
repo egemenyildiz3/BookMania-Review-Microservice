@@ -19,4 +19,9 @@ public class CustomExceptionHandler {
     public ResponseEntity<String> handleNoPermissionRequest(CustomPermissionsException e){
         return ResponseEntity.status(403).body(e.getMessage());
     }
+
+    @ExceptionHandler(CustomUserExistsException.class)
+    public ResponseEntity<String> handleUserDoesntExistRequest(CustomUserExistsException e){
+        return ResponseEntity.status(401).body(e.getMessage());
+    }
 }
