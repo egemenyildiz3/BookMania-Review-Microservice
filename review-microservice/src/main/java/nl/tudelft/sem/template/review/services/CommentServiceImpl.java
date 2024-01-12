@@ -122,7 +122,7 @@ public class CommentServiceImpl implements CommentService {
         })
                 .max(Comparator.comparingLong(Comment::getUpvote));
         if (result.isEmpty()){
-            throw new CustomBadRequestException("No comments found");
+            return ResponseEntity.badRequest().body(null);
         }
         return ResponseEntity.ok(result.get().getId());
     }
