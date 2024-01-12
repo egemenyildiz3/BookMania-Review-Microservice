@@ -1,5 +1,7 @@
 package nl.tudelft.sem.template.example.services;
 
+import nl.tudelft.sem.template.example.Exceptions.CustomBadRequestException;
+import nl.tudelft.sem.template.example.Exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.example.repositories.BookDataRepository;
 import nl.tudelft.sem.template.example.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.BookData;
@@ -52,20 +54,17 @@ class GetReportServiceImplTest {
 
     @Test
     void getReportNullUser(){
-        var result = service.getReport(10L, null, "report");
-        assertEquals(400, result.getStatusCode().value());
+        assertThrows(CustomBadRequestException.class, () -> service.getReport(10L, null, "report"));
     }
 
     @Test
     void getReportNullBook(){
-        var result = service.getReport(null, 5L, "report");
-        assertEquals(400, result.getStatusCode().value());
+        assertThrows(CustomBadRequestException.class, () -> service.getReport(null, 5L, "report"));
     }
 
     @Test
     void getReportNullInfo(){
-        var result = service.getReport(10L, 5L, null);
-        assertEquals(400, result.getStatusCode().value());
+        assertThrows(CustomBadRequestException.class, () -> service.getReport(10L, 5L, null));
     }
 
     @Test
@@ -73,8 +72,7 @@ class GetReportServiceImplTest {
         Long user = 10L;
         when(communicationService.existsUser(any(Long.class))).thenReturn(false);
         when(communicationService.existsUser(user)).thenReturn(false);
-        var result = service.getReport(10L, 5L, "report");
-        assertEquals(401, result.getStatusCode().value());
+        assertThrows(CustomUserExistsException.class, () -> service.getReport(10L, 5L, "report"));
     }
 
     @Test
@@ -82,8 +80,7 @@ class GetReportServiceImplTest {
         Long book = 20L;
         when(communicationService.existsBook(any(Long.class))).thenReturn(false);
         when(communicationService.existsUser(book)).thenReturn(false);
-        var result = service.getReport(book, 5L, "report");
-        assertEquals(400, result.getStatusCode().value());
+        assertThrows(CustomBadRequestException.class, () -> service.getReport(book, 5L, "report"));
     }
 
     @Test
@@ -177,9 +174,7 @@ class GetReportServiceImplTest {
         when(bookDataRepository.existsById(id)).thenReturn(true);
         when(bookDataRepository.getOne(id)).thenReturn(data);
 
-        var result = service.getReport(id, 5L, "bla");
-
-        assertEquals(400, result.getStatusCode().value());
+        assertThrows(CustomBadRequestException.class, () -> service.getReport(id, 5L, "bla"));
     }
 
     @Test
@@ -277,9 +272,7 @@ class GetReportServiceImplTest {
 
         when(bookDataRepository.existsById(id)).thenReturn(false);
 
-        var result = service.addRatingAndNotion(id, 3L, Review.BookNotionEnum.POSITIVE);
-
-        assertEquals(400, result.getStatusCode().value());
+        assertThrows(CustomBadRequestException.class, () -> service.addRatingAndNotion(id, 3L, Review.BookNotionEnum.POSITIVE));
     }
 
     @Test
@@ -331,10 +324,8 @@ class GetReportServiceImplTest {
         long id = 20L;
 
         when(bookDataRepository.existsById(id)).thenReturn(false);
-
-        var result = service.removeRatingAndNotion(id, 2L, Review.BookNotionEnum.NEUTRAL);
-
-        assertEquals(400, result.getStatusCode().value());
+        assertThrows(CustomBadRequestException.class,
+                () -> service.removeRatingAndNotion(id, 2L, Review.BookNotionEnum.NEUTRAL));
     }
 
     @Test
@@ -369,10 +360,8 @@ class GetReportServiceImplTest {
     @Test
     void updateRatingAndNotionNull () {
         Long id = null;
-        var result = service.updateRatingAndNotion(id, 3L, Review.BookNotionEnum.NEGATIVE
-                , 5L, Review.BookNotionEnum.POSITIVE);
-
-        assertEquals(400, result.getStatusCode().value());
+        assertThrows(CustomBadRequestException.class, () -> service.updateRatingAndNotion(id, 3L, Review.BookNotionEnum.NEGATIVE
+                , 5L, Review.BookNotionEnum.POSITIVE));
     }
 
     @Test
@@ -395,8 +384,7 @@ class GetReportServiceImplTest {
     void createBookDataInRepositoryAlreadyExists() {
         long id = 10L;
         when(bookDataRepository.existsById(id)).thenReturn(true);
-        var result = service.createBookDataInRepository(id);
 
-        assertEquals(400, result.getStatusCode().value());
+        assertThrows(CustomBadRequestException.class, () -> service.createBookDataInRepository(id));
     }
 }
