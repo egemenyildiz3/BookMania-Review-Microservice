@@ -224,8 +224,8 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Override
     public ResponseEntity<String> pinReview(Long reviewId, Boolean body) {
-        if(!repo.existsById(reviewId) || get(reviewId).getBody() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).header("Invalid ReviewId", "review Id not found").build();
+        if(!repo.existsById(reviewId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid review id");
         }
         Review review = get(reviewId).getBody();
         review.setPinned(body);

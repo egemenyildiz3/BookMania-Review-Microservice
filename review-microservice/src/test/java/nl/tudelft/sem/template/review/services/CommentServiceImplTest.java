@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.example.services;
+package nl.tudelft.sem.template.review.services;
 
 import nl.tudelft.sem.template.review.Exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.repositories.CommentRepository;

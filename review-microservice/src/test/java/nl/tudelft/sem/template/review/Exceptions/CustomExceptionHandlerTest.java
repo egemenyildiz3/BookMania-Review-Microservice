@@ -39,4 +39,15 @@ class CustomExceptionHandlerTest {
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
         assertEquals("No permission", responseEntity.getBody());
     }
+
+    @Test
+    public void testCustomUserExistsException() {
+        CustomExceptionHandler exceptionHandler = new CustomExceptionHandler();
+        CustomUserExistsException customUserExistsException = new CustomUserExistsException("Not a user");
+
+        ResponseEntity<String> responseEntity = exceptionHandler.handleUserDoesntExistRequest(customUserExistsException);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
+        assertEquals("Not a user", responseEntity.getBody());
+    }
 }
