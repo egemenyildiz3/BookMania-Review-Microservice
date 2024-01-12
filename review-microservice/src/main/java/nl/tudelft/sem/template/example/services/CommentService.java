@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface CommentService {
-    ResponseEntity<Comment> add(Long userId, Long reviewId, Comment comment);
+    ResponseEntity<Comment> add(Comment comment);
     ResponseEntity<Comment> get(Long commentId);
     ResponseEntity<List<Comment>> getAll(Long reviewId);
     ResponseEntity<Comment> update(Long userId, Comment comment);

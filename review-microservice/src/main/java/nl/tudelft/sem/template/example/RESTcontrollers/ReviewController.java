@@ -53,7 +53,7 @@ public class ReviewController implements ReviewApi {
     }
 
     @Override
-    public ResponseEntity<String> reviewVoteReviewIdPut(Long reviewId, Integer body) {
+    public ResponseEntity<String> reviewVoteReviewIdVotePut(Long reviewId, Integer body) {
         return service.addVote(reviewId, body);
     }
 
@@ -63,7 +63,7 @@ public class ReviewController implements ReviewApi {
     }
 
     @Override
-    public ResponseEntity<String> reviewPinReviewIdPut(Long reviewId, Boolean body) {
+    public ResponseEntity<String> reviewPinReviewIdPinValuePut(Long reviewId, Boolean body) {
         return service.pinReview(reviewId, body);
     }
 }

@@ -10,9 +10,9 @@ import java.util.List;
 
 @Repository
 public interface ReportCommentRepository extends JpaRepository<ReportComment, Long> {
-    @Query("SELECT rc FROM ReportComment rc WHERE rc.comment.id = :commentId")
+    @Query("SELECT rc FROM ReportComment rc WHERE rc.commentId = :commentId")
     List<ReportComment> findAllByCommentId(@Param("commentId") Long commentId);
 
-    @Query("SELECT CASE WHEN COUNT(rc) > 0 THEN true ELSE false END FROM ReportComment rc WHERE rc.comment.id = :commentId")
+    @Query("SELECT CASE WHEN COUNT(rc) > 0 THEN true ELSE false END FROM ReportComment rc WHERE rc.commentId = :commentId")
     boolean existsByCommentId(@Param("commentId")  Long commentId);
 }

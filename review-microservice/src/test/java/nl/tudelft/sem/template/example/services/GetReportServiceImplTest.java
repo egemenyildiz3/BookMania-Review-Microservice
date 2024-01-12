@@ -99,7 +99,7 @@ class GetReportServiceImplTest {
         when(bookDataRepository.getOne(id)).thenReturn(data);
 
         List<Long> reviews = new ArrayList<>();
-        Review mostUpvoted = new Review(5L, id, 20L);
+        Review mostUpvoted = new Review(5L, id, 20L, "Review", "text", 5L);
         reviews.add(mostUpvoted.getId());
         when(reviewRepository.findMostUpvotedReviewId(eq(id), any(Pageable.class))).thenReturn(reviews);
 

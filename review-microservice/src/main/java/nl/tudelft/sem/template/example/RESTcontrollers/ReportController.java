@@ -31,8 +31,20 @@ public class ReportController implements ReportApi {
     }
 
     @Override
-    public ResponseEntity<ReportReview> reportReviewPost(Review review) {
-        return reportReviewService.report(review);
+    public ResponseEntity<ReportReview> reportReviewReviewIdPost(Long reviewId, String body) {
+        return reportReviewService.report(reviewId, body);
+    }
+
+//
+//    @Override
+//    public ResponseEntity<ReportReview> reportReviewPost(String reason) {
+//
+//        return reportReviewService.report(reason);
+//    }
+
+    @Override
+    public ResponseEntity<ReportComment> reportCommentCommentIdPost(Long commentId, String body) {
+        return reportCommentService.report(commentId, body);
     }
 
     @Override
@@ -40,10 +52,10 @@ public class ReportController implements ReportApi {
         return reportCommentService.delete(userId, reportId);
     }
 
-    @Override
-    public ResponseEntity<ReportComment> reportCommentPost(Comment comment) {
-        return reportCommentService.report(comment);
-    }
+//    @Override
+//    public ResponseEntity<ReportComment> reportCommentPost(Comment comment) {
+//        return reportCommentService.report(comment);
+//    }
 }
 
 

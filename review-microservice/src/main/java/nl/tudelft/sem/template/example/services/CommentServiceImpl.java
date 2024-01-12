@@ -38,19 +38,20 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public ResponseEntity<Comment> add(Long userId, Long reviewId, Comment comment) {
+    public ResponseEntity<Comment> add(Comment comment) {
 
-        if (comment == null || !reviewRepository.existsById(reviewId)) {
+        if (comment == null || !reviewRepository.existsById(comment.getReviewId())) {
             return ResponseEntity.badRequest().build();
         }
         if (checkProfanities(comment.getText())) {
             return ResponseEntity.badRequest().build();
         }
-        Review review = reviewRepository.findById(reviewId).get();
-
-        comment.setUserId(userId);
+        Review review = reviewRepository.findById(comment.getReviewId()).get();
+        comment.setId(0L);
+        comment.setDownvote(0L);
+        comment.setUpvote(0L);
         comment.setTimeCreated(LocalDate.now());
-        comment.setReview(review);
+        comment.setReportList(new ArrayList<>());
         //Comment added = repository.save(comment);
         review.addCommentListItem(comment);
         reviewRepository.save(review);
@@ -73,7 +74,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         List<Comment> comments = repository.findAll().stream()
-                .filter(c -> c.getReview().getId().equals(reviewId))
+                .filter(c -> c.getReviewId().equals(reviewId))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(comments);
@@ -83,15 +84,15 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public ResponseEntity<Comment> update(Long userId, Comment comment) {
         if (comment == null || !Objects.equals(comment.getUserId(), userId) || !repository.existsById(comment.getId())) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().header("blah").build();
         }
-        System.out.println(comment.getId());
-        System.out.println(comment.getReview());
-        comment.setReview(repository.findById(comment.getId()).get().getReview());
+
         if (checkProfanities(comment.getText())) {
             return ResponseEntity.badRequest().build();
         }
-        Comment updated = repository.save(comment);
+        Comment dataCom = repository.getOne(comment.getId());
+        dataCom.setText(comment.getText());
+        Comment updated = repository.save(dataCom);
         return ResponseEntity.ok(updated);
     }
 
@@ -101,7 +102,7 @@ public class CommentServiceImpl implements CommentService {
             return ResponseEntity.badRequest().build();
         }
         Comment comment = repository.findById(commentId).get();
-        Review rev = comment.getReview();
+        Review rev = reviewRepository.getOne(comment.getReviewId());
         if (Objects.equals(userId, comment.getUserId())) {
             //repository.deleteById(commentId);
             rev.getCommentList().remove(comment);
