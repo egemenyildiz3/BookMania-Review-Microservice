@@ -3,9 +3,7 @@ package nl.tudelft.sem.template.review.services;
 import java.util.List;
 import nl.tudelft.sem.template.model.Review;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 
-@Service
 public interface ReviewService {
     ResponseEntity<Review> add(Review review);
 

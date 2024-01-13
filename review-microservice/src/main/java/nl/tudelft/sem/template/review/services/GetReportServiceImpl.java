@@ -8,9 +8,11 @@ import nl.tudelft.sem.template.model.BookData;
 import nl.tudelft.sem.template.model.Review;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class GetReportServiceImpl implements GetReportService{
 
     private final BookDataRepository bookDataRepository;

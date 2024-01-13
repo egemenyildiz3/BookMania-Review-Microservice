@@ -17,16 +17,23 @@ import nl.tudelft.sem.template.review.domain.review.filter.MostRecentFilter;
 import nl.tudelft.sem.template.review.domain.review.filter.MostRelevantFilter;
 import nl.tudelft.sem.template.review.domain.review.filter.ReviewFilter;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository repo;
     private final CommunicationServiceImpl communicationService;
 
     private final GetReportServiceImpl getReportService;
 
-    @Autowired
+    /**
+     * Initializes a new instance of the class with the provided dependencies.
+     *
+     * @param getReportService       The GetReportService instance for retrieving reports.
+     * @param repo                   The repo instance for data storage and retrieval.
+     * @param communicationService   The CommunicationService instance for using other teams apis.
+     */
     public ReviewServiceImpl(GetReportServiceImpl getReportService,
                              ReviewRepository repo,
                              CommunicationServiceImpl communicationService) {

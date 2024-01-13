@@ -13,12 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
+@Service
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository repository;
     private final ReviewRepository reviewRepository;
-    @Autowired
+
     public CommentServiceImpl(CommentRepository repository, ReviewRepository reviewRepository) {
         this.reviewRepository = reviewRepository;
         this.repository = repository;

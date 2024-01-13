@@ -4,9 +4,11 @@ import nl.tudelft.sem.template.review.repositories.BookDataRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.BookData;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Service
 public class StatsServiceImpl implements  StatsService {
     private final BookDataRepository bookDataRepository;
     private final ReviewRepository reviewRepository;
