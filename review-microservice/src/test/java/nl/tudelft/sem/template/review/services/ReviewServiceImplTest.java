@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.example.services;
+package nl.tudelft.sem.template.review.services;
 
 import nl.tudelft.sem.template.model.BookData;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
@@ -57,6 +57,11 @@ class ReviewServiceImplTest {
         var result = service.add(review);
         verify(repository).save(review);
         assertEquals(result.getBody(),review);
+        assertEquals(result.getBody().getUpvote(),0L);
+        assertEquals(result.getBody().getDownvote(),0L);
+        assertEquals(result.getBody().getReportList().size(),0);
+        assertEquals(result.getBody().getCommentList().size(),0);
+        assertEquals(result.getBody().getId(),0);
 
         Review r1 = new Review(1L,2L,10L, "Review", "review", 5L);
         r1.text("FUCK");
@@ -94,7 +99,7 @@ class ReviewServiceImplTest {
     void checkProfanities() {
         assertTrue(ReviewServiceImpl.checkProfanities("This book is fucking bad"));
         assertFalse(ReviewServiceImpl.checkProfanities("This book is so fun"));
-
+        assertFalse(ReviewServiceImpl.checkProfanities(null));
     }
 
     @Test
@@ -122,18 +127,29 @@ class ReviewServiceImplTest {
         Review review = new Review(1L,2L,10L, "Review", "review", 5L);
         review.id(1L);
         review.userId(10L);
-        when(repository.save(review)).thenReturn(review);
+        review.setBookNotion(Review.BookNotionEnum.NEGATIVE);
+        review.setSpoiler(false);
+        Review review1 = new Review(1L,2L,10L, "Rev", "rev", 3L);
+        review1.setBookNotion(Review.BookNotionEnum.NEUTRAL);
+        review1.setSpoiler(true);
+        when(repository.save(review1)).thenReturn(review1);
         when(repository.existsById(1L)).thenReturn(true);
-        when(repository.getOne(1L)).thenReturn(review);
+        when(repository.getOne(1L)).thenReturn(review1);
         when(communicationService.existsUser(10L)).thenReturn(true);
         when(communicationService.isAdmin(2L)).thenReturn(false);
 
         var result = service.update(10L,review);
-        verify(repository).save(review);
-        assertEquals(result.getBody(),review);
+        verify(repository).save(review1);
         review.text("hahaha");
         result = service.update(10L,review);
-        assertEquals(result.getBody(),review);
+        assertEquals(result.getBody(),review1);
+
+        assertEquals(result.getBody().getText(),review.getText());
+        assertEquals(result.getBody().getTitle(),review.getTitle());
+        assertEquals(result.getBody().getSpoiler(),review.getSpoiler());
+        assertEquals(result.getBody().getRating(),review.getRating());
+        assertEquals(result.getBody().getBookNotion(),review.getBookNotion());
+        assertEquals(result.getBody().getLastEditTime(),LocalDate.now());
     }
     @Test
     void updateNotOwnerOrAdmin() {
@@ -195,7 +211,11 @@ class ReviewServiceImplTest {
 
     @Test
     void updateNull(){
+        when(repository.existsById(1L)).thenReturn(true);
         assertThrows(CustomBadRequestException.class, () -> service.update(1L,null));
+        when(repository.existsById(1L)).thenReturn(false);
+        assertThrows(CustomBadRequestException.class, () -> service.update(1L,null));
+
     }
 
     @Test
@@ -204,6 +224,7 @@ class ReviewServiceImplTest {
         when(repository.existsById(1L)).thenReturn(true);
         when(repository.findById(1L)).thenReturn(Optional.of(review));
         doNothing().when(repository).deleteById(1L);
+        when(communicationService.isAdmin(10L)).thenReturn(true);
         var result = service.delete(1L,10L);
         verify(repository).findById(1L);
         verify(repository).deleteById(1L);
@@ -230,6 +251,28 @@ class ReviewServiceImplTest {
         when(communicationService.isAdmin(9L)).thenReturn(false);
         assertThrows(CustomPermissionsException.class, () -> service.delete(1L,9L));
     }
+
+    @Test
+    void deleteAdminButNotOwner() {
+        Review review = new Review(1L,2L,10L, "Review", "review", 5L);
+        when(repository.existsById(1L)).thenReturn(true);
+        when(repository.findById(1L)).thenReturn(Optional.of(review));
+        when(communicationService.isAdmin(10L)).thenReturn(true);
+        var result = service.delete(1L,10L);
+        verify(repository).findById(1L);
+        verify(repository).deleteById(1L);
+        assertEquals(result.getStatusCode(),HttpStatus.OK);    }
+
+    @Test
+    void deleteOwnerButNotAdmin() {
+        Review review = new Review(1L,2L,10L, "Review", "review", 5L);
+        when(repository.existsById(1L)).thenReturn(true);
+        when(repository.findById(1L)).thenReturn(Optional.of(review));
+        when(communicationService.isAdmin(10L)).thenReturn(false);
+        var result = service.delete(1L,10L);
+        verify(repository).findById(1L);
+        verify(repository).deleteById(1L);
+        assertEquals(result.getStatusCode(),HttpStatus.OK);    }
 
 
     @Test
@@ -272,6 +315,42 @@ class ReviewServiceImplTest {
         verify(repository, times(1)).save(review);
     }
 
+    @Test
+    void addVoteInvalidId(){
+        Long reviewId = 1L;
+        Integer upvote = 1;
+        Review review = new Review(1L,2L,10L, "Review", "review", 5L);
+        review.setUpvote(0L);
+        review.setDownvote(0L);
+
+        when(repository.existsById(reviewId)).thenReturn(false);
+
+        ResponseEntity<String> response = service.addVote(reviewId, upvote);
+
+        assertTrue(response.getStatusCode().is4xxClientError());
+        assertEquals(response.getBody(), "Review id does not exist.");
+        verify(repository, times(0)).save(review);
+
+    }
+
+    @Test
+    void addVoteInvalidVote(){
+        Long reviewId = 1L;
+        Integer upvote = 2;
+        Review review = new Review(1L,2L,10L, "Review", "review", 5L);
+        review.setUpvote(0L);
+        review.setDownvote(0L);
+
+        when(repository.existsById(reviewId)).thenReturn(true);
+
+        ResponseEntity<String> response = service.addVote(reviewId, upvote);
+
+        assertTrue(response.getStatusCode().is4xxClientError());
+        assertEquals(response.getBody(), "The only accepted bodies are 0 for downvote and 1 for upvote.");
+        verify(repository, times(0)).save(review);
+
+    }
+
 
     @Test
     void testAddDownvote() {
@@ -291,6 +370,11 @@ class ReviewServiceImplTest {
         assertEquals(review.getUpvote(),0L);
         assertEquals(review.getDownvote(), 1);
         verify(repository, times(1)).save(review);
+    }
+
+    @Test
+    void getFilterNull(){
+        assertNull(service.getFilter("hello"));
     }
 
     @Test
@@ -457,6 +541,14 @@ class ReviewServiceImplTest {
 
         ResponseEntity<String> response = service.pinReview(1L, true);
         System.out.println(response);
+        assertTrue(r1.getPinned());
         assertTrue(response.getStatusCode().is2xxSuccessful());
+    }
+    @Test
+    void pinInvalid() {
+        Long userId = 17L;
+        Review r1 = new Review(1L, 2L, userId, "Review", "review", 5L);
+        when(repository.existsById(1L)).thenReturn(false);
+        assertThrows(CustomBadRequestException.class, () -> service.pinReview(1L,true));
     }
 }
