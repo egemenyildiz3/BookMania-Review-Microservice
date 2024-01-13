@@ -1,8 +1,8 @@
 package nl.tudelft.sem.template.review.services;
 
 
-import nl.tudelft.sem.template.review.Exceptions.CustomBadRequestException;
-import nl.tudelft.sem.template.review.Exceptions.CustomUserExistsException;
+import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
+import nl.tudelft.sem.template.review.exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.BookDataRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.BookData;

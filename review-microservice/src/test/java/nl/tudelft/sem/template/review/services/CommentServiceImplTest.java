@@ -1,8 +1,6 @@
 package nl.tudelft.sem.template.review.services;
 
-import nl.tudelft.sem.template.review.Exceptions.CustomBadRequestException;
-import nl.tudelft.sem.template.review.repositories.CommentRepository;
-import nl.tudelft.sem.template.review.repositories.ReviewRepository;
+import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.Comment;
@@ -15,7 +13,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -236,7 +233,7 @@ class CommentServiceImplTest {
         when(commentRepository.findAll()).thenReturn(comments);
         when(reviewRepository.getOne(5L)).thenReturn(reviewOne);
         when(reviewRepository.getOne(10L)).thenReturn(reviewTwo);
-        assertThrows(CustomBadRequestException.class, () -> service.findMostUpvotedComment(11L));
+        assertNull(service.findMostUpvotedComment(16L).getBody());
     }
 
     @Test

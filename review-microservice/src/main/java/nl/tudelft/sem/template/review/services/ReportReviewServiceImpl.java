@@ -1,16 +1,15 @@
 package nl.tudelft.sem.template.review.services;
 
-import nl.tudelft.sem.template.review.repositories.ReviewRepository;
-import nl.tudelft.sem.template.model.Review;
+import java.util.List;
 import nl.tudelft.sem.template.model.ReportReview;
+import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.repositories.ReportReviewRepository;
+import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
-public class ReportReviewServiceImpl implements ReportReviewService{
+public class ReportReviewServiceImpl implements ReportReviewService {
 
     private final ReportReviewRepository repo;
     private final ReviewRepository reviewRepo;
@@ -34,12 +33,12 @@ public class ReportReviewServiceImpl implements ReportReviewService{
 
         reviewRepo.save(rev);
 
-        return ResponseEntity.ok(rev.getReportList().get(rev.getReportList().size()-1));
+        return ResponseEntity.ok(rev.getReportList().get(rev.getReportList().size() - 1));
     }
 
     @Override
     public ResponseEntity<ReportReview> get(Long id) {
-        if(!repo.existsById(id)) {
+        if (!repo.existsById(id)) {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(repo.findById(id).get());
@@ -54,7 +53,7 @@ public class ReportReviewServiceImpl implements ReportReviewService{
     @Override
     public ResponseEntity<List<ReportReview>> getAllReportedReviews(Long userId) {
         boolean isAdmin = isAdmin(userId);
-        if(isAdmin){
+        if (isAdmin) {
             List<ReportReview> allReportedReviews = repo.findAll();
             return ResponseEntity.ok(allReportedReviews);
         }
@@ -69,12 +68,12 @@ public class ReportReviewServiceImpl implements ReportReviewService{
 
     @Override
     public ResponseEntity<String> delete(Long id, Long userId) {
-        if(!repo.existsById(id)) {
+        if (!repo.existsById(id)) {
             return ResponseEntity.badRequest().header("no exist").build();
         }
         ReportReview reportReview = repo.findById(id).get();
         boolean isAdmin = isAdmin(userId);
-        if(isAdmin){
+        if (isAdmin) {
             Review review = reviewRepo.getOne(reportReview.getReviewId());
             review.getReportList().remove(reportReview);
             reviewRepo.save(review);
@@ -83,7 +82,7 @@ public class ReportReviewServiceImpl implements ReportReviewService{
         return ResponseEntity.badRequest().header("not admin").build();
     }
 
-    @Override
+    /*@Override
     public ResponseEntity<String> deleteReportsForReview(Long reviewId, Long userId) {
         if(!repo.existsByReviewId(reviewId)) {
             return ResponseEntity.badRequest().build();
@@ -94,9 +93,9 @@ public class ReportReviewServiceImpl implements ReportReviewService{
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();
-    }
+    }*/
 
-    public static boolean isAdmin(Long userId){
+    public static boolean isAdmin(Long userId) {
         //TODO: call the method from user microservice that returns the role of user
         // return true if admin
         return true;

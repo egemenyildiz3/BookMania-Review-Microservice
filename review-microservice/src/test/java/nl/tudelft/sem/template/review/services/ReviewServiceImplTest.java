@@ -1,9 +1,9 @@
 package nl.tudelft.sem.template.review.services;
 
 import nl.tudelft.sem.template.model.BookData;
-import nl.tudelft.sem.template.review.Exceptions.CustomBadRequestException;
-import nl.tudelft.sem.template.review.Exceptions.CustomPermissionsException;
-import nl.tudelft.sem.template.review.Exceptions.CustomProfanitiesException;
+import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
+import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
+import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.review.services.CommunicationServiceImpl;

@@ -10,7 +10,9 @@ public interface GetReportService {
     ResponseEntity<BookData> createBookDataInRepository(Long bookId);
 
     ResponseEntity<BookData> addRatingAndNotion(Long bookId, Long rating, Review.BookNotionEnum notion);
+
     ResponseEntity<BookData> removeRatingAndNotion(Long bookId, Long rating, Review.BookNotionEnum notion);
+
     ResponseEntity<BookData> updateRatingAndNotion(Long bookId, Long oldRating, Review.BookNotionEnum oldNotion,
                                                    Long newRating, Review.BookNotionEnum newNotion);
 }

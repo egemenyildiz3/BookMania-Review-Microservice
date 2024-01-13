@@ -1,38 +1,57 @@
 package nl.tudelft.sem.template.review.services;
 
-import nl.tudelft.sem.template.review.Exceptions.CustomBadRequestException;
-import nl.tudelft.sem.template.review.Exceptions.CustomPermissionsException;
-import nl.tudelft.sem.template.review.Exceptions.CustomProfanitiesException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import nl.tudelft.sem.template.model.Review;
+import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
+import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
+import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
 import nl.tudelft.sem.template.review.domain.review.filter.HighestRatedFilter;
 import nl.tudelft.sem.template.review.domain.review.filter.MostRecentFilter;
 import nl.tudelft.sem.template.review.domain.review.filter.MostRelevantFilter;
 import nl.tudelft.sem.template.review.domain.review.filter.ReviewFilter;
-import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-
-public class ReviewServiceImpl implements ReviewService{
+@Service
+public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository repo;
     private final CommunicationServiceImpl communicationService;
 
     private final GetReportServiceImpl getReportService;
 
-    @Autowired
-    public ReviewServiceImpl(GetReportServiceImpl getReportService,ReviewRepository repo, CommunicationServiceImpl communicationService) {
+    /**
+     * Initializes a new instance of the class with the provided dependencies.
+     *
+     * @param getReportService       The GetReportService instance for retrieving reports.
+     * @param repo                   The repo instance for data storage and retrieval.
+     * @param communicationService   The CommunicationService instance for using other teams apis.
+     */
+    public ReviewServiceImpl(GetReportServiceImpl getReportService,
+                             ReviewRepository repo,
+                             CommunicationServiceImpl communicationService) {
         this.communicationService = communicationService;
         this.getReportService = getReportService;
         this.repo = repo;
     }
 
 
-    private static final List<String> profanities = Arrays.asList("fuck","shit", "motherfucker", "bastard","cunt", "bitch");
+    private static final List<String> profanities =
+            Arrays.asList("fuck", "shit", "motherfucker", "bastard", "cunt", "bitch");
 
+    /**
+     * Gets the correct filter that is needed.
+     *
+     * @param type The needed filter
+     * @return The needed implementation of
+     */
     public ReviewFilter getFilter(String type) {
         if (type.equals("mostRecent")) {
             return new MostRecentFilter();
@@ -48,21 +67,24 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Override
     public ResponseEntity<Review> add(Review review) {
-        if(review == null) {
+        if (review == null) {
             throw new CustomBadRequestException("Review cannot be null.");
         }
         boolean existsBook = communicationService.existsBook(review.getBookId());
-        if(!existsBook)
+        if (!existsBook) {
             throw new CustomBadRequestException("Invalid book id.");
+        }
 
 
         boolean existsUser = communicationService.existsUser(review.getUserId());
-        if(!existsUser)
+        if (!existsUser) {
             throw new CustomBadRequestException("Invalid user id.");
+        }
 
 
-        if(checkProfanities(review.getText()))
+        if (checkProfanities(review.getText())) {
             throw new CustomProfanitiesException("Profanities detected in text. Please remove them.");
+        }
         getReportService.addRatingAndNotion(review.getBookId(), review.getRating(), review.getBookNotion());
 
         review.setId(0L);
@@ -75,11 +97,18 @@ public class ReviewServiceImpl implements ReviewService{
         Review saved = repo.save(review);
         return ResponseEntity.ok(saved);
     }
-    public static boolean checkProfanities(String s){
-        if(s!=null){
-            for (String p: profanities){
-                if(s.toLowerCase().contains(p)){
-                   return true;
+
+    /**
+     * Checks if the given string has profanities in it.
+     *
+     * @param s The string that is checked.
+     * @return Whether there are profanities in the string
+     */
+    public static boolean checkProfanities(String s) {
+        if (s != null) {
+            for (String p : profanities) {
+                if (s.toLowerCase().contains(p)) {
+                    return true;
                 }
             }
         }
@@ -88,11 +117,13 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Override
     public ResponseEntity<Review> get(Long reviewId) {
-        if(!repo.existsById(reviewId))
+        if (!repo.existsById(reviewId)) {
             throw new CustomBadRequestException("Invalid review id.");
-        Review review = new Review(1L,2L,10L, "Review", "review", 5L);
-        if(repo.findById(reviewId).isPresent())
+        }
+        Review review = new Review(1L, 2L, 10L, "Review", "review", 5L);
+        if (repo.findById(reviewId).isPresent()) {
             review = repo.findById(reviewId).get();
+        }
         return ResponseEntity.ok(review);
     }
 
@@ -117,26 +148,34 @@ public class ReviewServiceImpl implements ReviewService{
     @Override
     public ResponseEntity<Review> update(Long userId, Review review) {
 
-       if (review == null || !repo.existsById(review.getId()))
-           throw new CustomBadRequestException("Invalid review id.");
+        if (review == null || !repo.existsById(review.getId())) {
+            throw new CustomBadRequestException("Invalid review id.");
+        }
 
         //check for user in database
         boolean existsUser = communicationService.existsUser(userId);
-        if(!existsUser)
+        if (!existsUser) {
             throw new CustomBadRequestException("Invalid user id.");
+        }
 
 
         //check for owner or admin
         boolean isAdmin = communicationService.isAdmin(userId);
-        if(!isAdmin && !Objects.equals(review.getUserId(), userId))
+        if (!isAdmin && !Objects.equals(review.getUserId(), userId)) {
             throw new CustomPermissionsException("User is not owner or admin.");
+        }
 
 
-        if(checkProfanities(review.getText()))
+        if (checkProfanities(review.getText())) {
             throw new CustomProfanitiesException("Profanities detected in text. Please remove them.");
+        }
 
         Review dataReview = repo.getOne(review.getId());
-        getReportService.updateRatingAndNotion(dataReview.getBookId(),dataReview.getRating(),dataReview.getBookNotion(),review.getRating(),review.getBookNotion());
+        getReportService.updateRatingAndNotion(dataReview.getBookId(),
+                dataReview.getRating(),
+                dataReview.getBookNotion(),
+                review.getRating(),
+                review.getBookNotion());
 
 
         dataReview.setLastEditTime(LocalDate.now());
@@ -151,15 +190,23 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Override
     public ResponseEntity<String> delete(Long reviewId, Long userId) {
-        if(!repo.existsById(reviewId))
+        if (!repo.existsById(reviewId)) {
             throw new CustomBadRequestException("Invalid review id.");
+        }
 
-        Review review = repo.findById(reviewId).get();
-        boolean isAdmin = communicationService.isAdmin(userId);//call method for admin check from users
+        Optional<Review> optionalReview = repo.findById(reviewId);
+        Review review;
+        if (optionalReview.isPresent()) {
+            review = optionalReview.get();
+        } else {
+            throw new CustomBadRequestException("Cannot find review.");
+        }
+
+        boolean isAdmin = communicationService.isAdmin(userId); // call method for admin check from users
 
         //check for owner or admin
-        if(Objects.equals(userId, review.getUserId()) || isAdmin){
-            getReportService.removeRatingAndNotion(review.getBookId(),review.getRating(),review.getBookNotion());
+        if (Objects.equals(userId, review.getUserId()) || isAdmin) {
+            getReportService.removeRatingAndNotion(review.getBookId(), review.getRating(), review.getBookNotion());
             repo.deleteById(reviewId);
             return ResponseEntity.ok().build();
         }
@@ -168,6 +215,7 @@ public class ReviewServiceImpl implements ReviewService{
 
 
     }
+
     @Override
     public ResponseEntity<String> addSpoiler(Long reviewId) {
         Review review = get(reviewId).getBody();
@@ -188,15 +236,15 @@ public class ReviewServiceImpl implements ReviewService{
         }
         Review review = get(reviewId).getBody();
         assert review != null;
-        if (body == 1 ) {
+        if (body == 1) {
             review.upvote(review.getUpvote() + 1);
         } else {
             review.downvote(review.getDownvote() + 1);
         }
         repo.save(review);
-        return ResponseEntity.ok("Vote added, new vote values are:\nupvotes: " +
-                ((review.getUpvote() == null) ? 0 : review.getUpvote()) +
-                "\ndownvotes: " + ((review.getDownvote() == null) ? 0 : review.getDownvote()));
+        return ResponseEntity.ok("Vote added, new vote values are:\nupvotes: "
+                + ((review.getUpvote() == null) ? 0 : review.getUpvote())
+                + "\ndownvotes: " + ((review.getDownvote() == null) ? 0 : review.getDownvote()));
     }
 
     @Override
@@ -224,10 +272,11 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Override
     public ResponseEntity<String> pinReview(Long reviewId, Boolean body) {
-        if(!repo.existsById(reviewId)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid review id");
+        if (!repo.existsById(reviewId) || get(reviewId).getBody() == null) {
+            throw new CustomBadRequestException("Review Id not found or invalid");
         }
         Review review = get(reviewId).getBody();
+        assert review != null;
         review.setPinned(body);
         repo.save(review);
         return ResponseEntity.ok().build();

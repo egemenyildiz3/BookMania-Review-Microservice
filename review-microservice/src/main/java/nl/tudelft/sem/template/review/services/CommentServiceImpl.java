@@ -1,35 +1,39 @@
 package nl.tudelft.sem.template.review.services;
 
-import java.util.*;
-import java.time.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
-import nl.tudelft.sem.template.review.Exceptions.CustomBadRequestException;
-import nl.tudelft.sem.template.review.repositories.CommentRepository;
-import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.Review;
-import org.springframework.beans.factory.annotation.Autowired;
-
-
+import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
+import nl.tudelft.sem.template.review.repositories.CommentRepository;
+import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
+@Service
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository repository;
     private final ReviewRepository reviewRepository;
-    @Autowired
+
     public CommentServiceImpl(CommentRepository repository, ReviewRepository reviewRepository) {
         this.reviewRepository = reviewRepository;
         this.repository = repository;
     }
 
-    private static final List<String> profanities = Arrays.asList("fuck", "shit", "motherfucker", "bastard", "cunt", "bitch");
+    private static final List<String> profanities =
+            Arrays.asList("fuck", "shit", "motherfucker", "bastard", "cunt", "bitch");
 
-    public static boolean checkProfanities(String text){
-        if(text != null){
-            for (String character: profanities){
-                if(text.toLowerCase().contains(character)){
+    public static boolean checkProfanities(String text) {
+        if (text != null) {
+            for (String character : profanities) {
+                if (text.toLowerCase().contains(character)) {
                     return true;
                 }
             }
@@ -46,17 +50,19 @@ public class CommentServiceImpl implements CommentService {
         if (checkProfanities(comment.getText())) {
             return ResponseEntity.badRequest().build();
         }
-        Review review = reviewRepository.findById(comment.getReviewId()).get();
+
         comment.setId(0L);
         comment.setDownvote(0L);
         comment.setUpvote(0L);
         comment.setTimeCreated(LocalDate.now());
         comment.setReportList(new ArrayList<>());
-        //Comment added = repository.save(comment);
+
+        Review review = reviewRepository.findById(comment.getReviewId()).get();
+
         review.addCommentListItem(comment);
         reviewRepository.save(review);
         review.getCommentList().sort(Comparator.comparing(Comment::getTimeCreated));
-        return ResponseEntity.ok(review.getCommentList().get(review.getCommentList().size()-1));
+        return ResponseEntity.ok(review.getCommentList().get(review.getCommentList().size() - 1));
     }
 
     @Override
@@ -101,7 +107,15 @@ public class CommentServiceImpl implements CommentService {
         if (!repository.existsById(commentId)) {
             return ResponseEntity.badRequest().build();
         }
-        Comment comment = repository.findById(commentId).get();
+
+        Optional<Comment> optionalComment = repository.findById(commentId);
+        Comment comment;
+        if (optionalComment.isPresent()) {
+            comment = optionalComment.get();
+        } else {
+            throw new CustomBadRequestException("Cannot find comment.");
+        }
+
         Review rev = reviewRepository.getOne(comment.getReviewId());
         if (Objects.equals(userId, comment.getUserId())) {
             //repository.deleteById(commentId);
@@ -112,24 +126,25 @@ public class CommentServiceImpl implements CommentService {
         return ResponseEntity.badRequest().build();
     }
 
-    public ResponseEntity<Long> findMostUpvotedComment(Long bookId){
+    public ResponseEntity<Long> findMostUpvotedComment(Long bookId) {
         List<Comment> allComments = repository.findAll();
-        Optional<Comment> result =
-        allComments.stream().filter(x -> {
+
+        Optional<Comment> result = allComments.stream().filter(x -> {
             Review associatedReview = reviewRepository.getOne(x.getReviewId());
-            if(associatedReview == null) return false;
             return Objects.equals(associatedReview.getBookId(), bookId);
         })
                 .max(Comparator.comparingLong(Comment::getUpvote));
-        if (result.isEmpty()){
-            throw new CustomBadRequestException("No comments found");
+
+        if (result.isEmpty()) {
+            return ResponseEntity.badRequest().body(null);
         }
+
         return ResponseEntity.ok(result.get().getId());
     }
 
     @Override
     public ResponseEntity<String> addVote(Long commentId, Integer body) {
-        if(!repository.existsById(commentId) || get(commentId).getBody() == null) {
+        if (!repository.existsById(commentId) || get(commentId).getBody() == null) {
             return ResponseEntity.badRequest().body("Comment id does not exist.");
         }
 
@@ -137,7 +152,8 @@ public class CommentServiceImpl implements CommentService {
             return ResponseEntity.badRequest().body("The only accepted bodies are 0 for downvote and 1 for upvote.");
         }
         Comment comment = get(commentId).getBody();
-        if(body == 1) {
+        assert comment != null;
+        if (body == 1) {
             if (comment.getUpvote() == null) {
                 comment.setUpvote(0L);
             }
@@ -149,8 +165,8 @@ public class CommentServiceImpl implements CommentService {
             comment.downvote(comment.getDownvote() + 1);
         }
         repository.save(comment);
-        return ResponseEntity.ok("Vote added, new vote values are:\nupvotes: " +
-                ((comment.getUpvote() == null) ? 0 : comment.getUpvote()) +
-                "\ndownvotes: " + ((comment.getDownvote() == null) ? 0 : comment.getDownvote()));
+        return ResponseEntity.ok("Vote added, new vote values are:\nupvotes: "
+                + ((comment.getUpvote() == null) ? 0 : comment.getUpvote())
+                + "\ndownvotes: " + ((comment.getDownvote() == null) ? 0 : comment.getDownvote()));
     }
 }

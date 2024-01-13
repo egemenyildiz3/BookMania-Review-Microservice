@@ -1,14 +1,13 @@
-package nl.tudelft.sem.template.review.RESTcontrollers;
+package nl.tudelft.sem.template.review.restcontrollers;
 
+import java.util.List;
 import nl.tudelft.sem.template.api.CommentApi;
+import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.review.services.CommentServiceImpl;
-import nl.tudelft.sem.template.model.Comment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 public class CommentController implements CommentApi {

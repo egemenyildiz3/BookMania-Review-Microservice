@@ -1,21 +1,20 @@
-package nl.tudelft.sem.template.review.RESTcontrollers;
+package nl.tudelft.sem.template.review.restcontrollers;
 
+import java.util.List;
 import nl.tudelft.sem.template.api.ReportedApi;
-import nl.tudelft.sem.template.review.repositories.ReportReviewRepository;
-import nl.tudelft.sem.template.review.repositories.ReviewRepository;
-import nl.tudelft.sem.template.review.services.ReportReviewServiceImpl;
+import nl.tudelft.sem.template.model.ReportComment;
 import nl.tudelft.sem.template.model.ReportReview;
 import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReportCommentRepository;
+import nl.tudelft.sem.template.review.repositories.ReportReviewRepository;
+import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.review.services.ReportCommentServiceImpl;
-import nl.tudelft.sem.template.model.ReportComment;
+import nl.tudelft.sem.template.review.services.ReportReviewServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
-public class ReportedController implements ReportedApi{
+public class ReportedController implements ReportedApi {
     private final ReportReviewServiceImpl reportReviewService;
     private final ReportCommentServiceImpl reportCommentService;
 
