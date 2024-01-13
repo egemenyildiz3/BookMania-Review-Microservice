@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.Review;
-import nl.tudelft.sem.template.review.Exceptions.CustomBadRequestException;
+import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
