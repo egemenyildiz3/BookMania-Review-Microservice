@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.review.RESTcontrollers;
+package nl.tudelft.sem.template.review.restcontrollers;
 
 import nl.tudelft.sem.template.api.StatsApi;
 import nl.tudelft.sem.template.review.repositories.BookDataRepository;
