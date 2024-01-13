@@ -153,20 +153,17 @@ public class CommentServiceImpl implements CommentService {
         }
         Comment comment = get(commentId).getBody();
         assert comment != null;
-        if (body == 1) {
-            if (comment.getUpvote() == null) {
-                comment.setUpvote(0L);
-            }
-            comment.upvote(comment.getUpvote() + 1);
-        } else {
-            if (comment.getDownvote() == null) {
-                comment.setDownvote(0L);
-            }
-            comment.downvote(comment.getDownvote() + 1);
-        }
+        checkBody(comment, body);
         repository.save(comment);
         return ResponseEntity.ok("Vote added, new vote values are:\nupvotes: "
-                + ((comment.getUpvote() == null) ? 0 : comment.getUpvote())
-                + "\ndownvotes: " + ((comment.getDownvote() == null) ? 0 : comment.getDownvote()));
+                + comment.getUpvote() + "\ndownvotes: " + comment.getDownvote());
+    }
+
+    private void checkBody(Comment comment, Integer body) {
+        if (body == 1) {
+            comment.upvote(comment.getUpvote() + 1);
+        } else {
+            comment.downvote(comment.getDownvote() + 1);
+        }
     }
 }
