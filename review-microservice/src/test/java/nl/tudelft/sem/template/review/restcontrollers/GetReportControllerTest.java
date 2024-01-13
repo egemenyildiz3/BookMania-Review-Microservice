@@ -1,40 +1,54 @@
-// package nl.tudelft.sem.template.review.RESTcontrollers;
+ package nl.tudelft.sem.template.review.restcontrollers;
 
-// import nl.tudelft.sem.template.model.Review;
-// import org.junit.jupiter.api.Test;
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.boot.test.context.SpringBootTest;
-// import org.springframework.boot.test.web.client.TestRestTemplate;
-// import org.springframework.boot.web.server.LocalServerPort;
-// import org.springframework.http.HttpStatus;
-// import org.springframework.http.ResponseEntity;
+ import com.fasterxml.jackson.databind.ObjectMapper;
+ import nl.tudelft.sem.template.model.BookData;
+ import nl.tudelft.sem.template.model.Review;
+ import nl.tudelft.sem.template.review.services.GetReportServiceImpl;
+ import org.junit.jupiter.api.Test;
+ import org.mockito.InjectMocks;
+ import org.mockito.Mock;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.boot.test.context.SpringBootTest;
+ import org.springframework.boot.test.web.client.TestRestTemplate;
+ import org.springframework.boot.web.server.LocalServerPort;
+ import org.springframework.http.HttpStatus;
+ import org.springframework.http.MediaType;
+ import org.springframework.http.ResponseEntity;
+ import org.springframework.test.web.servlet.MockMvc;
+ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-// import java.util.Map;
+ import java.util.Map;
 
-// import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.mockito.Mockito.*;
+ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-// @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-// class GetReportControllerTest {
+ @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+ class GetReportControllerTest {
 
-//     @LocalServerPort
-//     private int port;
+     @LocalServerPort
+     private int port;
 
-//     @Autowired
-//     private TestRestTemplate restTemplate;
+     @Mock
+     GetReportServiceImpl service;
 
-//     @Test
-//     void testGetItemById() {
-//         // Create a test item and save it to the in-memory database
-//         Review rev = new Review(1L,2L,10L,"wow","review",5L);
-//         rev = restTemplate.postForObject("/api/review", rev, Review.class);
+     @InjectMocks
+     private GetReportController controller;
 
-//         // Make a request to the controller endpoint
-//         ResponseEntity<Review> responseEntity = restTemplate.getForEntity("/api/getReport/{bookId}/{userId}/{info}", Review.class, Map.of("bookId",2L, "userId", 1L, "info","report"));
+     @Test
+     void testGetItemById() throws Exception {
+         BookData bd = new BookData(1L);
+         when(service.getReport(1L, 1L, "report")).thenReturn(ResponseEntity.ok(bd));
+         MockMvc mvc = MockMvcBuilders.standaloneSetup(controller).build();
 
-//         // Verify the response
-//         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-//         assertEquals(rev.getBookId(), responseEntity.getBody().getId());
-//         // Add more assertions based on your specific use case
-//     }
-// }
+         mvc.perform(get("/getReport/1/1/report"))
+                 .andExpect(status().isOk())
+                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+         verify(service, times(1)).getReport(1L, 1L, "report");
+
+     }
+ }
