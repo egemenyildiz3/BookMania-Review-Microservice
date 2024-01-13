@@ -1,16 +1,15 @@
 package nl.tudelft.sem.template.review.services;
 
-import nl.tudelft.sem.template.review.repositories.CommentRepository;
+import java.util.List;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.ReportComment;
+import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReportCommentRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
-public class ReportCommentServiceImpl implements ReportCommentService{
+public class ReportCommentServiceImpl implements ReportCommentService {
     private final ReportCommentRepository repo;
     private final CommentRepository commentRepo;
 
@@ -21,7 +20,7 @@ public class ReportCommentServiceImpl implements ReportCommentService{
 
     @Override
     public ResponseEntity<ReportComment> report(Long commentId, String reason) {
-        if ( reason == null || !commentRepo.existsById(commentId)) {
+        if (reason == null || !commentRepo.existsById(commentId)) {
             return ResponseEntity.badRequest().header("bad").build();
         }
         ReportComment reportComment = new ReportComment();
@@ -38,7 +37,7 @@ public class ReportCommentServiceImpl implements ReportCommentService{
 
     @Override
     public ResponseEntity<ReportComment> get(Long id) {
-        if(!repo.existsById(id)) {
+        if (!repo.existsById(id)) {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(repo.findById(id).get());
@@ -53,7 +52,7 @@ public class ReportCommentServiceImpl implements ReportCommentService{
     @Override
     public ResponseEntity<List<ReportComment>> getAllReportedComments(Long userId) {
         boolean isAdmin = isAdmin(userId);
-        if(isAdmin){
+        if (isAdmin) {
             List<ReportComment> allReportedComments = repo.findAll();
             return ResponseEntity.ok(allReportedComments);
         }
@@ -68,13 +67,13 @@ public class ReportCommentServiceImpl implements ReportCommentService{
 
     @Override
     public ResponseEntity<String> delete(Long id, Long userId) {
-        if(!repo.existsById(id)) {
+        if (!repo.existsById(id)) {
             return ResponseEntity.badRequest().build();
         }
         ReportComment reportComment = repo.findById(id).get();
         Comment reported = commentRepo.getOne(reportComment.getCommentId());
         boolean isAdmin = isAdmin(userId);
-        if(isAdmin){
+        if (isAdmin) {
             reported.getReportList().remove(reportComment);
             commentRepo.save(reported);
             return ResponseEntity.ok().build();
@@ -82,7 +81,7 @@ public class ReportCommentServiceImpl implements ReportCommentService{
         return ResponseEntity.badRequest().build();
     }
 
-    @Override
+    /*@Override
     public ResponseEntity<String> deleteReportsForComment(Long commentId, Long userId) {
         if(!repo.existsByCommentId(commentId)) {
             return ResponseEntity.badRequest().build();
@@ -93,9 +92,9 @@ public class ReportCommentServiceImpl implements ReportCommentService{
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.badRequest().build();
-    }
+    }*/
 
-    public static boolean isAdmin(Long userId){
+    public static boolean isAdmin(Long userId) {
         //TODO: call the method from user microservice that returns the role of user
         // return true if admin
         return true;

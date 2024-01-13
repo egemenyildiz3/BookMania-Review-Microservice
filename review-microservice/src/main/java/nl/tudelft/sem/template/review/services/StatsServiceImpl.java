@@ -1,12 +1,11 @@
 package nl.tudelft.sem.template.review.services;
 
+import java.util.Optional;
+import nl.tudelft.sem.template.model.BookData;
 import nl.tudelft.sem.template.review.repositories.BookDataRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
-import nl.tudelft.sem.template.model.BookData;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class StatsServiceImpl implements  StatsService {
@@ -19,8 +18,8 @@ public class StatsServiceImpl implements  StatsService {
     }
 
     @Override
-    public ResponseEntity<Double> avgRating (Long bookId) {
-        if(!bookDataRepository.existsById(bookId)) {
+    public ResponseEntity<Double> avgRating(Long bookId) {
+        if (!bookDataRepository.existsById(bookId)) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -36,7 +35,7 @@ public class StatsServiceImpl implements  StatsService {
 
     @Override
     public ResponseEntity<Long> interactions(Long bookId) {
-        if(!bookDataRepository.existsById(bookId)) {
+        if (!bookDataRepository.existsById(bookId)) {
             return ResponseEntity.badRequest().build();
         }
 
