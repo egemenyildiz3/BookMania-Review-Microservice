@@ -1,10 +1,8 @@
 package nl.tudelft.sem.template.review.services;
 
-import nl.tudelft.sem.template.model.ReportComment;
-import nl.tudelft.sem.template.model.Comment;
-import org.springframework.http.ResponseEntity;
-
 import java.util.List;
+import nl.tudelft.sem.template.model.ReportComment;
+import org.springframework.http.ResponseEntity;
 
 
 public interface ReportCommentService {
@@ -20,6 +18,6 @@ public interface ReportCommentService {
 
     ResponseEntity<String> delete(Long id, Long userId);
 
-    ResponseEntity<String> deleteReportsForComment(Long commentId, Long userId);
+    //ResponseEntity<String> deleteReportsForComment(Long commentId, Long userId);
 }
 

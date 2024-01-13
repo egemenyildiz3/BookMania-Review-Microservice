@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.review.Exceptions;
+package nl.tudelft.sem.template.review.exceptions;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;

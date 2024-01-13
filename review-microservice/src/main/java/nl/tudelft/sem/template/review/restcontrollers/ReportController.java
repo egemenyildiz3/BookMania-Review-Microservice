@@ -1,14 +1,14 @@
-package nl.tudelft.sem.template.review.RESTcontrollers;
+package nl.tudelft.sem.template.review.restcontrollers;
 
 import nl.tudelft.sem.template.api.ReportApi;
-import nl.tudelft.sem.template.review.repositories.ReportReviewRepository;
-import nl.tudelft.sem.template.review.repositories.ReviewRepository;
+import nl.tudelft.sem.template.model.ReportComment;
+import nl.tudelft.sem.template.model.ReportReview;
 import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReportCommentRepository;
+import nl.tudelft.sem.template.review.repositories.ReportReviewRepository;
+import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.review.services.ReportCommentServiceImpl;
 import nl.tudelft.sem.template.review.services.ReportReviewServiceImpl;
-import nl.tudelft.sem.template.model.ReportReview;
-import nl.tudelft.sem.template.model.ReportComment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,7 +20,7 @@ public class ReportController implements ReportApi {
     public ReportController(ReportReviewRepository reportReviewRepository, ReviewRepository reviewRepo,
                             ReportCommentRepository reportCommentRepository, CommentRepository commentRepository) {
         this.reportReviewService = new ReportReviewServiceImpl(reportReviewRepository, reviewRepo);
-        this.reportCommentService = new ReportCommentServiceImpl(reportCommentRepository,commentRepository);
+        this.reportCommentService = new ReportCommentServiceImpl(reportCommentRepository, commentRepository);
     }
 
     @Override
@@ -33,13 +33,6 @@ public class ReportController implements ReportApi {
         return reportReviewService.report(reviewId, body);
     }
 
-//
-//    @Override
-//    public ResponseEntity<ReportReview> reportReviewPost(String reason) {
-//
-//        return reportReviewService.report(reason);
-//    }
-
     @Override
     public ResponseEntity<ReportComment> reportCommentCommentIdPost(Long commentId, String body) {
         return reportCommentService.report(commentId, body);
@@ -50,10 +43,6 @@ public class ReportController implements ReportApi {
         return reportCommentService.delete(userId, reportId);
     }
 
-//    @Override
-//    public ResponseEntity<ReportComment> reportCommentPost(Comment comment) {
-//        return reportCommentService.report(comment);
-//    }
 }
 
 

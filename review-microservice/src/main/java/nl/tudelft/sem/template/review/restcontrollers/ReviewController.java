@@ -1,7 +1,8 @@
-package nl.tudelft.sem.template.review.RESTcontrollers;
+package nl.tudelft.sem.template.review.restcontrollers;
 
+import java.util.List;
 import nl.tudelft.sem.template.api.ReviewApi;
-import nl.tudelft.sem.template.model.Comment;
+import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.repositories.BookDataRepository;
 import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
@@ -9,29 +10,35 @@ import nl.tudelft.sem.template.review.services.CommentServiceImpl;
 import nl.tudelft.sem.template.review.services.CommunicationServiceImpl;
 import nl.tudelft.sem.template.review.services.GetReportServiceImpl;
 import nl.tudelft.sem.template.review.services.ReviewServiceImpl;
-import nl.tudelft.sem.template.model.Review;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 public class ReviewController implements ReviewApi {
 
     private final ReviewServiceImpl service;
 
+    /**
+     * Initializes a new instance of the ReviewServiceImpl class with the provided dependencies.
+     *
+     * @param bookDataRepository    The BookDataRepository instance for accessing book data.
+     * @param repo                  The ReviewRepository instance for data storage and retrieval.
+     * @param cr                    The CommentRepository instance for comment data storage and retrieval.
+     */
     public ReviewController(BookDataRepository bookDataRepository, ReviewRepository repo, CommentRepository cr) {
         CommunicationServiceImpl communicationService = new CommunicationServiceImpl();
-        CommentServiceImpl commentService = new CommentServiceImpl(cr,repo);
-        GetReportServiceImpl getReportService = new GetReportServiceImpl(bookDataRepository,repo,communicationService, commentService);
-        this.service = new ReviewServiceImpl(getReportService,repo,communicationService);
+        CommentServiceImpl commentService = new CommentServiceImpl(cr, repo);
+        GetReportServiceImpl getReportService = new GetReportServiceImpl(bookDataRepository, repo,
+                communicationService, commentService);
+
+        this.service = new ReviewServiceImpl(getReportService, repo, communicationService);
     }
 
 
 
     @Override
     public ResponseEntity<String> reviewDeleteReviewIdUserIdDelete(Long reviewId, Long userId) {
-        return service.delete(reviewId,userId);
+        return service.delete(reviewId, userId);
     }
 
     @Override
@@ -51,7 +58,7 @@ public class ReviewController implements ReviewApi {
 
     @Override
     public ResponseEntity<Review> reviewUpdateUserIdPut(Long userId, Review review) {
-        return service.update(userId,review);
+        return service.update(userId, review);
     }
 
     @Override

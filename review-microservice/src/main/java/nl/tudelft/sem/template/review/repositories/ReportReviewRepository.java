@@ -1,12 +1,11 @@
 package nl.tudelft.sem.template.review.repositories;
 
+import java.util.List;
 import nl.tudelft.sem.template.model.ReportReview;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public interface ReportReviewRepository extends JpaRepository<ReportReview, Long> {
