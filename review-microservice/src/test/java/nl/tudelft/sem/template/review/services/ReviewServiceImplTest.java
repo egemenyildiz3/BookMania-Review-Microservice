@@ -549,9 +549,6 @@ class ReviewServiceImplTest {
         Long userId = 17L;
         Review r1 = new Review(1L, 2L, userId, "Review", "review", 5L);
         when(repository.existsById(1L)).thenReturn(false);
-
-        ResponseEntity<String> response = service.pinReview(1L, true);
-        assertTrue(response.getStatusCode().is4xxClientError());
-        assertEquals(response.getBody(),"Invalid review id");
+        assertThrows(CustomBadRequestException.class, () -> service.pinReview(1L,true));
     }
 }
