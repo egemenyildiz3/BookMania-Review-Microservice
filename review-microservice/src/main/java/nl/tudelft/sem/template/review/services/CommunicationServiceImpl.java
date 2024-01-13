@@ -80,7 +80,6 @@ public class CommunicationServiceImpl {
             e.printStackTrace();
         }
         return true;
-        //return true;
     }
 
     public boolean existsUser(Long userId) {
