@@ -233,7 +233,7 @@ class CommentServiceImplTest {
         when(commentRepository.findAll()).thenReturn(comments);
         when(reviewRepository.getOne(5L)).thenReturn(reviewOne);
         when(reviewRepository.getOne(10L)).thenReturn(reviewTwo);
-        assertThrows(CustomBadRequestException.class, () -> service.findMostUpvotedComment(11L));
+        assertNull(service.findMostUpvotedComment(16L).getBody());
     }
 
     @Test
