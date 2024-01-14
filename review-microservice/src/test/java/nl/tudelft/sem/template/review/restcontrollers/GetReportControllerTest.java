@@ -1,6 +1,8 @@
  package nl.tudelft.sem.template.review.restcontrollers;
 
  import nl.tudelft.sem.template.model.BookData;
+ import nl.tudelft.sem.template.review.repositories.BookDataRepository;
+ import nl.tudelft.sem.template.review.services.CommunicationServiceImpl;
  import nl.tudelft.sem.template.review.services.GetReportServiceImpl;
  import org.junit.jupiter.api.Test;
  import org.junit.runner.RunWith;
@@ -26,6 +28,11 @@
      @Mock
      GetReportServiceImpl service;
 
+     @Mock
+     BookDataRepository bookDataRepository;
+     @Mock
+     CommunicationServiceImpl communicationService;
+
      @InjectMocks
      private GetReportController controller;
 
@@ -33,6 +40,10 @@
      void testGetItemById() throws Exception {
          BookData bd = new BookData(1L);
          when(service.getReport(1L, 1L, "report")).thenReturn(ResponseEntity.ok(bd));
+         when(communicationService.existsBook(1L)).thenReturn(true);
+         when(communicationService.existsUser(1L)).thenReturn(true);
+         when(bookDataRepository.existsById(1L)).thenReturn(true);
+
          MockMvc mvc = MockMvcBuilders.standaloneSetup(controller).build();
 
          mvc.perform(get("/getReport/1/1/report"))
@@ -42,4 +53,5 @@
          verify(service, times(1)).getReport(1L, 1L, "report");
 
      }
+
  }
