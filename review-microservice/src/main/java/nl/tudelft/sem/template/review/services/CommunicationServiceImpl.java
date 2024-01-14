@@ -43,19 +43,16 @@ public class CommunicationServiceImpl {
 
             } else {
                 System.out.println("Failed with status code " + responseCode);
-                return true;
+                return false;
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        if(Objects.equals(server,userMicroUrl)){
-            if(admin)
-                return response.toString().toLowerCase().contains("admin");
-            else
-                return response.toString().toLowerCase().contains("role");
-        }else {
-            return response.toString().toLowerCase().contains("genre");
+        if(admin) {
+            return response.toString().toLowerCase().contains("admin");
         }
+        return true;
+
     }
 
     public boolean isAdmin(Long userId) {
