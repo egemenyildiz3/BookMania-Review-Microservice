@@ -1,32 +1,194 @@
-// package nl.tudelft.sem.template.review.RESTcontrollers;
+ package nl.tudelft.sem.template.review.restcontrollers;
 
-// import nl.tudelft.sem.template.model.Review;
-// import org.junit.jupiter.api.Test;
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.boot.test.context.SpringBootTest;
-// import org.springframework.boot.test.web.client.TestRestTemplate;
-// import org.springframework.boot.web.server.LocalServerPort;
-// import org.springframework.http.HttpStatus;
-// import org.springframework.http.ResponseEntity;
+ import com.fasterxml.jackson.databind.ObjectMapper;
+ import com.fasterxml.jackson.databind.SerializationFeature;
+ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+ import nl.tudelft.sem.template.model.Review;
+ import nl.tudelft.sem.template.review.services.ReviewServiceImpl;
+ import org.junit.jupiter.api.Test;
+ import org.junit.runner.RunWith;
+ import org.mockito.InjectMocks;
+ import org.mockito.Mock;
+ import org.mockito.junit.MockitoJUnitRunner;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.boot.test.context.SpringBootTest;
+ import org.springframework.boot.test.web.client.TestRestTemplate;
+ import org.springframework.boot.web.server.LocalServerPort;
+ import org.springframework.http.HttpStatus;
+ import org.springframework.http.MediaType;
+ import org.springframework.http.ResponseEntity;
+ import org.springframework.test.web.servlet.MockMvc;
+ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-// import java.util.Optional;
+ import java.net.URI;
+ import java.util.List;
+ import java.util.Optional;
 
-// import static org.junit.jupiter.api.Assertions.*;
+ import static org.junit.jupiter.api.Assertions.*;
+ import static org.mockito.Mockito.*;
+ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-// @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+ @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+ @RunWith(MockitoJUnitRunner.class)
+ class ReviewControllerTest {
+     @Mock
+     ReviewServiceImpl service;
 
-// class ReviewControllerTest {
-//     @LocalServerPort
-//     private int port;
-
-//     @Autowired
-//     private TestRestTemplate restTemplate;
+     @InjectMocks
+     ReviewController controller;
 
 
-//     @Test
-//     void add() {
-//         Review rev = new Review(1L,2L,10L,"wow","review",5L);
-//         Review reviewResponseEntity = restTemplate.postForObject("/api/review", rev,Review.class);
-//         assertEquals(rev.getId(), reviewResponseEntity.getId());
-//     }
-// }
+     @Test
+     void add() throws Exception {
+         Review rev = new Review(1L,2L,10L,"wow","review",5L);
+         when(service.add(rev)).thenReturn(ResponseEntity.ok(rev));
+         MockMvc mvc = MockMvcBuilders.standaloneSetup(controller).build();
+
+         ObjectMapper objectMapper = new ObjectMapper();
+         objectMapper.registerModule(new JavaTimeModule());
+         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
+
+         String json = objectMapper.writeValueAsString(rev);
+
+
+         mvc.perform(post("/review")
+                         .contentType(MediaType.APPLICATION_JSON)
+                         .content(json))
+                 .andExpect(status().isOk())
+                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+
+
+         verify(service, times(1)).add(rev);
+     }
+     @Test
+     void getTest() throws Exception {
+         Review rev = new Review(1L,2L,10L,"wow","review",5L);
+         when(service.get(1L)).thenReturn(ResponseEntity.ok(rev));
+         MockMvc mvc = MockMvcBuilders.standaloneSetup(controller).build();
+
+         mvc.perform(get("/review/1"))
+                 .andExpect(status().isOk())
+                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+
+
+         verify(service, times(1)).get(1L);
+     }
+
+     @Test
+     void deleteTest() throws Exception {
+         Review rev = new Review(1L,2L,10L,"wow","review",5L);
+         when(service.delete(1L,10L)).thenReturn(ResponseEntity.ok().build());
+         MockMvc mvc = MockMvcBuilders.standaloneSetup(controller).build();
+
+         mvc.perform(delete("/review/delete/1/10"))
+                 .andExpect(status().isOk());
+
+
+
+         verify(service, times(1)).delete(1L,10L);
+     }
+
+     @Test
+     void updateTest() throws Exception {
+         Review rev = new Review(1L,2L,10L,"wow","review",5L);
+         when(service.update(1L,rev)).thenReturn(ResponseEntity.ok(rev));
+         MockMvc mvc = MockMvcBuilders.standaloneSetup(controller).build();
+
+         ObjectMapper objectMapper = new ObjectMapper();
+         objectMapper.registerModule(new JavaTimeModule());
+         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
+
+         String json = objectMapper.writeValueAsString(rev);
+
+
+         mvc.perform(put("/review/update/1")
+                                 .contentType(MediaType.APPLICATION_JSON)
+                                 .content(json)
+                         )
+                 .andExpect(status().isOk())
+                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+
+
+         verify(service, times(1)).update(1L,rev);
+     }
+
+     @Test
+     void spoilerTest() throws Exception {
+         Review rev = new Review(1L,2L,10L,"wow","review",5L);
+         when(service.addSpoiler(1L)).thenReturn(ResponseEntity.ok("Spoiler added."));
+         MockMvc mvc = MockMvcBuilders.standaloneSetup(controller).build();
+
+         ObjectMapper objectMapper = new ObjectMapper();
+         objectMapper.registerModule(new JavaTimeModule());
+         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
+
+         String json = objectMapper.writeValueAsString(rev);
+
+
+         mvc.perform(put("/review/spoiler/1")
+                         .contentType(MediaType.APPLICATION_JSON)
+                         .content(String.valueOf(true))
+                 )
+                 .andExpect(status().isOk())
+                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+
+
+         verify(service, times(1)).addSpoiler(1L);
+     }
+
+     @Test
+     void pinTest() throws Exception {
+         Review rev = new Review(1L,2L,10L,"wow","review",5L);
+         when(service.pinReview(1L,true)).thenReturn(ResponseEntity.ok("Review pinned."));
+         MockMvc mvc = MockMvcBuilders.standaloneSetup(controller).build();
+
+         ObjectMapper objectMapper = new ObjectMapper();
+         objectMapper.registerModule(new JavaTimeModule());
+         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
+
+         String json = objectMapper.writeValueAsString(rev);
+
+
+         mvc.perform(put("/review/pin/1/true")
+
+                 )
+                 .andExpect(status().isOk())
+                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+
+
+         verify(service, times(1)).pinReview(1L,true);
+     }
+
+
+     @Test
+     void voteTest() throws Exception {
+         Review rev = new Review(1L,2L,10L,"wow","review",5L);
+         when(service.addVote(1L,1)).thenReturn(ResponseEntity.ok("Vote added."));
+         MockMvc mvc = MockMvcBuilders.standaloneSetup(controller).build();
+
+
+
+         mvc.perform(put("/review/vote/1/1")
+
+                 )
+                 .andExpect(status().isOk())
+                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+
+
+         verify(service, times(1)).addVote(1L,1);
+     }
+
+
+ }

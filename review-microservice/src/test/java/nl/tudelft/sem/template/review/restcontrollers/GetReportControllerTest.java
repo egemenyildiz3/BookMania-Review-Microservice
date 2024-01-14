@@ -5,8 +5,10 @@
  import nl.tudelft.sem.template.model.Review;
  import nl.tudelft.sem.template.review.services.GetReportServiceImpl;
  import org.junit.jupiter.api.Test;
+ import org.junit.runner.RunWith;
  import org.mockito.InjectMocks;
  import org.mockito.Mock;
+ import org.mockito.junit.MockitoJUnitRunner;
  import org.springframework.beans.factory.annotation.Autowired;
  import org.springframework.boot.test.context.SpringBootTest;
  import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -27,10 +29,8 @@
 
 
  @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+ @RunWith(MockitoJUnitRunner.class)
  class GetReportControllerTest {
-
-     @LocalServerPort
-     private int port;
 
      @Mock
      GetReportServiceImpl service;

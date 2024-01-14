@@ -279,6 +279,6 @@ public class ReviewServiceImpl implements ReviewService {
         assert review != null;
         review.setPinned(body);
         repo.save(review);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Review pinned.");
     }
 }
