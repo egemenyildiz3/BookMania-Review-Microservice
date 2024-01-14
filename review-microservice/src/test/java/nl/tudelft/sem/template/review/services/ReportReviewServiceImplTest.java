@@ -85,22 +85,6 @@ class ReportReviewServiceImplTest {
 
 
     @Test
-    void reportInvalidThrowsProfanitiesException() {
-        long validReviewId = 1L;
-        String validReason = "Inappropriate content";
-        Review mockReview = new Review();
-        mockReview.setId(validReviewId);
-        mockReview.setText("This contains a profanity: shit");
-        mockReview.setUserId(123L);
-
-        when(reviewRepository.existsById(validReviewId)).thenReturn(true);
-        when(reviewRepository.getOne(validReviewId)).thenReturn(mockReview);
-        when(communicationService.existsUser(mockReview.getUserId())).thenReturn(true);
-
-        assertThrows(CustomProfanitiesException.class, () -> service.report(validReviewId, validReason));
-    }
-
-    @Test
     void getValid() {
         long validReportId = 1L;
         ReportReview mockReportReview = new ReportReview();
@@ -198,11 +182,12 @@ class ReportReviewServiceImplTest {
         ReportReview mockReportReview = new ReportReview();
         mockReportReview.setId(validReportId);
         mockReportReview.setReviewId(456L);
-
+        Review rev = new Review();
+        rev.setReportList(new ArrayList<>());
         when(repository.existsById(validReportId)).thenReturn(true);
         when(repository.findById(validReportId)).thenReturn(Optional.of(mockReportReview));
         when(communicationService.isAdmin(adminUserId)).thenReturn(true);
-        when(reviewRepository.getOne(mockReportReview.getReviewId())).thenReturn(new Review());
+        when(reviewRepository.getOne(mockReportReview.getReviewId())).thenReturn(rev);
 
         ResponseEntity<String> result = service.delete(validReportId, adminUserId);
 
@@ -215,6 +200,8 @@ class ReportReviewServiceImplTest {
         long nonAdminUserId = 456L;
 
         when(repository.existsById(validReportId)).thenReturn(true);
+        when(repository.findById(validReportId)).thenReturn(Optional.of(new ReportReview()));
+
         when(communicationService.isAdmin(nonAdminUserId)).thenReturn(false);
 
         assertThrows(CustomPermissionsException.class, () -> service.delete(validReportId, nonAdminUserId));
@@ -235,11 +222,12 @@ class ReportReviewServiceImplTest {
     void deleteReportsForReviewValid() {
         long validReviewId = 1L;
         long adminUserId = 123L;
-
+        Review rev = new Review();
+        rev.setReportList(new ArrayList<>());
         when(reviewRepository.existsById(validReviewId)).thenReturn(true);
         when(communicationService.isAdmin(adminUserId)).thenReturn(true);
-        when(repository.findAllByReviewId(validReviewId)).thenReturn(Collections.singletonList(new ReportReview()));
-        when(reviewRepository.getOne(validReviewId)).thenReturn(new Review());
+        when(repository.findAllByReviewId(validReviewId)).thenReturn(Collections.singletonList(new ReportReview(1L,validReviewId,"reason")));
+        when(reviewRepository.getOne(validReviewId)).thenReturn(rev);
 
         ResponseEntity<String> result = service.deleteReportsForReview(validReviewId, adminUserId);
 

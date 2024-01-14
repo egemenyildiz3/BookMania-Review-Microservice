@@ -37,6 +37,7 @@ class ReportCommentServiceImplTest {
     public void setup() {
         repository = mock(ReportCommentRepository.class);
         commentRepository = mock(CommentRepository.class);
+        communicationService = mock(CommunicationServiceImpl.class);
         service = new ReportCommentServiceImpl(repository, communicationService, commentRepository);
     }
 
@@ -150,6 +151,9 @@ class ReportCommentServiceImplTest {
         long nonAdminUserId = 456L;
 
         when(repository.existsById(validReportId)).thenReturn(true);
+        when(repository.findById(validReportId)).thenReturn(Optional.of(new ReportComment()));
+        when(communicationService.existsUser(nonAdminUserId)).thenReturn(true);
+
         when(communicationService.isAdmin(nonAdminUserId)).thenReturn(false);
 
         assertThrows(CustomPermissionsException.class, () -> service.delete(validReportId, nonAdminUserId));

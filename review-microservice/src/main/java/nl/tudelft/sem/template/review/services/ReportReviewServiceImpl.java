@@ -48,10 +48,6 @@ public class ReportReviewServiceImpl implements ReportReviewService {
             throw new CustomBadRequestException("Invalid user id.");
         }
 
-        if (ReviewServiceImpl.checkProfanities(review.getText())) {
-            throw new CustomProfanitiesException("Profanities detected in text. Please remove them.");
-        }
-
         ReportReview reportReview = new ReportReview();
         Review rev = reviewRepo.getOne(reviewId);
         rev.addReportListItem(reportReview);
@@ -87,11 +83,9 @@ public class ReportReviewServiceImpl implements ReportReviewService {
         if (!isAdmin) {
             throw new CustomPermissionsException("User is not owner or admin.");
         }
-        else if (isAdmin) {
+
             List<ReportReview> allReportedReviews = repo.findAll();
             return ResponseEntity.ok(allReportedReviews);
-        }
-        return ResponseEntity.badRequest().build();
     }
 
     @Override
@@ -125,7 +119,7 @@ public class ReportReviewServiceImpl implements ReportReviewService {
             reviewRepo.save(review);
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.badRequest().header("not admin").build();
+        throw new CustomPermissionsException("User is not admin");
 
     }
 
@@ -138,15 +132,14 @@ public class ReportReviewServiceImpl implements ReportReviewService {
         if (!isAdmin) {
             throw new CustomPermissionsException("User is not owner or admin.");
         }
-        else if (isAdmin) {
+
             List<ReportReview> allReportedReviews = repo.findAllByReviewId(reviewId);
             for (ReportReview reportReview : allReportedReviews) {
                 Review review = reviewRepo.getOne(reportReview.getReviewId());
                 review.getReportList().remove(reportReview);
                 reviewRepo.save(review);
             }
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.badRequest().build();
+            return ResponseEntity.ok("Deleted all reports");
+
     }
 }

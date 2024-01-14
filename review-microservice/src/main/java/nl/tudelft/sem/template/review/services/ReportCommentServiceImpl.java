@@ -48,9 +48,6 @@ public class ReportCommentServiceImpl implements ReportCommentService {
             throw new CustomBadRequestException("Invalid user id.");
         }
 
-        if (CommentServiceImpl.checkProfanities(comment.getText())) {
-            throw new CustomProfanitiesException("Profanities detected in text. Please remove them.");
-        }
 
         ReportComment reportComment = new ReportComment();
         Comment com = commentRepo.getOne(commentId);
@@ -85,13 +82,11 @@ public class ReportCommentServiceImpl implements ReportCommentService {
     public ResponseEntity<List<ReportComment>> getAllReportedComments(Long userId) {
         boolean isAdmin = communicationService.isAdmin(userId);
         if (!isAdmin) {
-            throw new CustomPermissionsException("User is not owner or admin.");
+            throw new CustomPermissionsException("User is not admin.");
         }
-        else if (isAdmin) {
+
             List<ReportComment> allReportedComments = repo.findAll();
             return ResponseEntity.ok(allReportedComments);
-        }
-        return ResponseEntity.badRequest().build();
     }
 
     @Override
@@ -123,7 +118,7 @@ public class ReportCommentServiceImpl implements ReportCommentService {
             commentRepo.save(comment);
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.badRequest().header("not admin").build();
+        throw new CustomPermissionsException("User is not admin.");
     }
 
     @Override
@@ -135,15 +130,14 @@ public class ReportCommentServiceImpl implements ReportCommentService {
         if (!isAdmin) {
             throw new CustomPermissionsException("User is not owner or admin.");
         }
-        else if (isAdmin) {
+
             List<ReportComment> allReportedComments = repo.findAllByCommentId(commentId);
             for (ReportComment reportComment : allReportedComments) {
                 Comment comment = commentRepo.getOne(reportComment.getCommentId());
                 comment.getReportList().remove(reportComment);
                 commentRepo.save(comment);
             }
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.badRequest().build();
+            return ResponseEntity.ok("Deleted all reports");
+
     }
 }
