@@ -8,6 +8,7 @@ import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReportCommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReportReviewRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
+import nl.tudelft.sem.template.review.services.CommunicationServiceImpl;
 import nl.tudelft.sem.template.review.services.ReportCommentServiceImpl;
 import nl.tudelft.sem.template.review.services.ReportReviewServiceImpl;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +20,9 @@ public class ReportedController implements ReportedApi {
     private final ReportCommentServiceImpl reportCommentService;
 
     public ReportedController(ReportReviewRepository reportReviewRepository, ReviewRepository reviewRepository,
-                              ReportCommentRepository reportCommentRepository, CommentRepository commentRepository) {
-        this.reportReviewService = new ReportReviewServiceImpl(reportReviewRepository, reviewRepository);
-        this.reportCommentService = new ReportCommentServiceImpl(reportCommentRepository, commentRepository);
+                              CommunicationServiceImpl communicationService, ReportCommentRepository reportCommentRepository, CommentRepository commentRepository) {
+        this.reportReviewService = new ReportReviewServiceImpl(reportReviewRepository, communicationService, reviewRepository);
+        this.reportCommentService = new ReportCommentServiceImpl(reportCommentRepository, communicationService, commentRepository);
     }
 
     @Override

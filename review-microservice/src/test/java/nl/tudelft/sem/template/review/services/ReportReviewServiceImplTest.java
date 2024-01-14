@@ -1,5 +1,8 @@
 package nl.tudelft.sem.template.review.services;
 
+import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
+import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
+import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
 import nl.tudelft.sem.template.review.repositories.ReportReviewRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.Review;
@@ -13,10 +16,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -28,141 +28,242 @@ class ReportReviewServiceImplTest {
 
     private ReportReviewRepository repository;
 
+    private CommunicationServiceImpl communicationService;
+
     private ReviewRepository reviewRepository;
 
     @BeforeEach
     public void setup() {
         repository = mock(ReportReviewRepository.class);
+        communicationService = mock(CommunicationServiceImpl.class);
         reviewRepository = mock(ReviewRepository.class);
-        service = new ReportReviewServiceImpl(repository, reviewRepository);
+        service = new ReportReviewServiceImpl(repository, communicationService, reviewRepository);
     }
 
     @Test
-    void report() {
-        Review review = new Review(1L, 10L, 23L, "Review", "review", 5L);
+    void reportValid() {
+        long validReviewId = 1L;
+        String validReason = "Inappropriate content";
+        Review mockReview = new Review();
+        mockReview.setId(validReviewId);
+        mockReview.setText("This is a valid review text.");
+        mockReview.setUserId(123L);
 
-        when(reviewRepository.existsById(review.getId())).thenReturn(true);
-        when(repository.save(ArgumentMatchers.any())).thenReturn(new ReportReview());
+        when(reviewRepository.existsById(validReviewId)).thenReturn(true);
+        when(reviewRepository.getOne(validReviewId)).thenReturn(mockReview);
+        when(communicationService.existsUser(mockReview.getUserId())).thenReturn(true);
 
-        when(reviewRepository.getOne(1L)).thenReturn(review);
-        ResponseEntity<ReportReview> result = service.report(review.getId(),"foul language");
+        ResponseEntity<ReportReview> result = service.report(validReviewId, validReason);
 
-        verify(reviewRepository).existsById(review.getId());
-        verify(reviewRepository).save(ArgumentMatchers.any());
-
-        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(200, result.getStatusCodeValue());
         assertNotNull(result.getBody());
+        assertEquals(validReason, result.getBody().getReason());
+        assertEquals(validReviewId, result.getBody().getReviewId());
     }
 
     @Test
-    void reportInvalid() {
-        ResponseEntity<ReportReview> result = service.report(1L,null);
+    void report_NullReviewId_ThrowsBadRequestException() {
+        long invalidReviewId = 999L;
+        long validReviewId = 1L;
+        String validReason = "Inappropriate content";
+        Review mockReview = new Review();
+        mockReview.setId(validReviewId);
+        mockReview.setUserId(123L);
 
-        verify(repository, never()).save(any());
-        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
-        assertNull(result.getBody());
+        when(reviewRepository.existsById(validReviewId)).thenReturn(true);
+        when(reviewRepository.getOne(validReviewId)).thenReturn(mockReview);
+        when(communicationService.existsUser(mockReview.getUserId())).thenReturn(false);
+
+        assertThrows(CustomBadRequestException.class, () -> service.report(validReviewId, validReason));
+
+        when(reviewRepository.existsById(invalidReviewId)).thenReturn(false);
+
+        assertThrows(CustomBadRequestException.class, () -> service.report(invalidReviewId, "Reason"));
+        assertThrows(CustomBadRequestException.class, () -> service.report(null, "Reason"));
+        assertThrows(CustomBadRequestException.class, () -> service.report(1L, null));
+    }
+
+
+    @Test
+    void reportInvalidThrowsProfanitiesException() {
+        long validReviewId = 1L;
+        String validReason = "Inappropriate content";
+        Review mockReview = new Review();
+        mockReview.setId(validReviewId);
+        mockReview.setText("This contains a profanity: shit");
+        mockReview.setUserId(123L);
+
+        when(reviewRepository.existsById(validReviewId)).thenReturn(true);
+        when(reviewRepository.getOne(validReviewId)).thenReturn(mockReview);
+        when(communicationService.existsUser(mockReview.getUserId())).thenReturn(true);
+
+        assertThrows(CustomProfanitiesException.class, () -> service.report(validReviewId, validReason));
     }
 
     @Test
-    void get() {
-        ReportReview reportReview = new ReportReview();
-        when(repository.existsById(1L)).thenReturn(true);
-        when(repository.findById(1L)).thenReturn(Optional.of(reportReview));
+    void getValid() {
+        long validReportId = 1L;
+        ReportReview mockReportReview = new ReportReview();
+        mockReportReview.setId(validReportId);
 
-        ResponseEntity<ReportReview> result = service.get(1L);
+        when(repository.existsById(validReportId)).thenReturn(true);
+        when(repository.findById(validReportId)).thenReturn(Optional.of(mockReportReview));
 
-        verify(repository).findById(1L);
-        verify(repository).existsById(1L);
-        assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertEquals(reportReview, result.getBody());
+        ResponseEntity<ReportReview> result = service.get(validReportId);
+
+        assertEquals(200, result.getStatusCodeValue());
+        assertNotNull(result.getBody());
+        assertEquals(validReportId, result.getBody().getId());
     }
 
     @Test
-    void getInvalid() {
-        ResponseEntity<ReportReview> result = service.get(0L);
+    void getInvalidThrowsBadRequestException() {
+        long invalidReportId = 999L;
+        long validReviewId = 1L;
+        ReportReview mockReportReview = new ReportReview();
+        mockReportReview.setReviewId(validReviewId);
 
-        verify(repository, never()).findById(0L);
-        verify(repository).existsById(0L);
-        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
-        assertNull(result.getBody());
+        when(repository.existsById(invalidReportId)).thenReturn(false);
+        when(reviewRepository.existsById(validReviewId)).thenReturn(true);
+        when(repository.findAllByReviewId(validReviewId)).thenReturn(Collections.singletonList(mockReportReview));
+
+        ResponseEntity<List<ReportReview>> result = service.getReportsForReview(validReviewId);
+
+        assertEquals(200, result.getStatusCodeValue());
+        assertNotNull(result.getBody());
+        assertEquals(1, result.getBody().size());
+        assertEquals(validReviewId, result.getBody().get(0).getReviewId());
+        assertThrows(CustomBadRequestException.class, () -> service.get(invalidReportId));
     }
 
     @Test
-    void getReportsForReview() {
-        List<ReportReview> reports = Arrays.asList(new ReportReview(), new ReportReview());
-        when(repository.findAllByReviewId(1L)).thenReturn(reports);
+    void getReportsForReviewInvalidThrowsBadRequestException() {
+        long invalidReviewId = 999L;
 
-        ResponseEntity<List<ReportReview>> result = service.getReportsForReview(1L);
+        when(reviewRepository.existsById(invalidReviewId)).thenReturn(false);
 
-        verify(repository).findAllByReviewId(1L);
-        assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertEquals(reports, result.getBody());
+        assertThrows(CustomBadRequestException.class, () -> service.getReportsForReview(invalidReviewId));
     }
-
 
     @Test
     void getAllReportedReviewsValid() {
-        when(repository.findAll()).thenReturn(Arrays.asList(new ReportReview(), new ReportReview()));
+        long adminUserId = 123L;
 
-        ResponseEntity<List<ReportReview>> result = service.getAllReportedReviews(1L);
+        when(communicationService.isAdmin(adminUserId)).thenReturn(true);
+        when(repository.findAll()).thenReturn(Collections.singletonList(new ReportReview()));
 
-        verify(repository).findAll();
-        assertEquals(HttpStatus.OK, result.getStatusCode());
+        ResponseEntity<List<ReportReview>> result = service.getAllReportedReviews(adminUserId);
+
+        assertEquals(200, result.getStatusCodeValue());
         assertNotNull(result.getBody());
-        assertEquals(2, result.getBody().size());
+        assertEquals(1, result.getBody().size());
     }
 
     @Test
-    void isReported() {
-        when(repository.existsByReviewId(1L)).thenReturn(true);
+    void getAllReportedReviewsInvalidThrowsPermissionsException() {
+        long nonAdminUserId = 456L;
 
-        ResponseEntity<Boolean> result = service.isReported(1L);
+        when(communicationService.isAdmin(nonAdminUserId)).thenReturn(false);
 
-        verify(repository).existsByReviewId(1L);
-        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertThrows(CustomPermissionsException.class, () -> service.getAllReportedReviews(nonAdminUserId));
+    }
+
+    @Test
+    void isReportedValid() {
+        long validReviewId = 1L;
+
+        when(reviewRepository.existsById(validReviewId)).thenReturn(true);
+        when(repository.existsByReviewId(validReviewId)).thenReturn(true);
+
+        ResponseEntity<Boolean> result = service.isReported(validReviewId);
+
+        assertEquals(200, result.getStatusCodeValue());
+        assertNotNull(result.getBody());
         assertTrue(result.getBody());
     }
 
     @Test
-    void isNotReported() {
-        ResponseEntity<Boolean> result = service.isReported(0L);
+    void isReportedInvalidThrowsBadRequestException() {
+        long invalidReviewId = 999L;
 
-        verify(repository).existsByReviewId(0L);
-        assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertFalse(result.getBody());
+        when(reviewRepository.existsById(invalidReviewId)).thenReturn(false);
+
+        assertThrows(CustomBadRequestException.class, () -> service.isReported(invalidReviewId));
     }
 
     @Test
-    void delete() {
-        ReportReview reportReview = new ReportReview();
-        Review rev = new Review(1L, 2L, 3L, "Review", "review", 5L);
-        reportReview.setReviewId(1L);
-        rev.setReportList(new ArrayList<>());
-        when(repository.existsById(1L)).thenReturn(true);
-        when(repository.findById(1L)).thenReturn(Optional.of(reportReview));
-        when(reviewRepository.getOne(1L)).thenReturn(rev);
+    void deleteValid() {
+        long validReportId = 1L;
+        long adminUserId = 123L;
+        ReportReview mockReportReview = new ReportReview();
+        mockReportReview.setId(validReportId);
+        mockReportReview.setReviewId(456L);
 
-        ResponseEntity<String> result = service.delete(1L, 1L);
+        when(repository.existsById(validReportId)).thenReturn(true);
+        when(repository.findById(validReportId)).thenReturn(Optional.of(mockReportReview));
+        when(communicationService.isAdmin(adminUserId)).thenReturn(true);
+        when(reviewRepository.getOne(mockReportReview.getReviewId())).thenReturn(new Review());
 
-        verify(repository).existsById(1L);
-        //verify(repository).deleteById(1L);
-        assertEquals(HttpStatus.OK, result.getStatusCode());
+        ResponseEntity<String> result = service.delete(validReportId, adminUserId);
+
+        assertEquals(200, result.getStatusCodeValue());
     }
 
     @Test
-    void deleteInvalid() {
-        ResponseEntity<String> result = service.delete(0L, 1L);
+    void deleteInvalidThrowsPermissionsException() {
+        long validReportId = 1L;
+        long nonAdminUserId = 456L;
 
-        verify(repository).existsById(0L);
-        verify(repository, never()).deleteById(0L);
-        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+        when(repository.existsById(validReportId)).thenReturn(true);
+        when(communicationService.isAdmin(nonAdminUserId)).thenReturn(false);
+
+        assertThrows(CustomPermissionsException.class, () -> service.delete(validReportId, nonAdminUserId));
     }
 
     @Test
-    void deleteReportsForReview() {
-        when(repository.existsByReviewId(1L)).thenReturn(true);
-        when(repository.findAllByReviewId(1L)).thenReturn(Arrays.asList(new ReportReview()));
+    void deleteInvalidThrowsBadRequestException() {
+        long invalidReportId = 999L;
+        long adminUserId = 123L;
+
+        when(repository.existsById(invalidReportId)).thenReturn(false);
+
+        assertThrows(CustomBadRequestException.class, () -> service.delete(invalidReportId, adminUserId));
     }
 
-    //getAllReportedCommentsInvalid, deleteReportsForCommentInvalid, deleteReportsForCommentNotAdmin
+
+    @Test
+    void deleteReportsForReviewValid() {
+        long validReviewId = 1L;
+        long adminUserId = 123L;
+
+        when(reviewRepository.existsById(validReviewId)).thenReturn(true);
+        when(communicationService.isAdmin(adminUserId)).thenReturn(true);
+        when(repository.findAllByReviewId(validReviewId)).thenReturn(Collections.singletonList(new ReportReview()));
+        when(reviewRepository.getOne(validReviewId)).thenReturn(new Review());
+
+        ResponseEntity<String> result = service.deleteReportsForReview(validReviewId, adminUserId);
+
+        assertEquals(200, result.getStatusCodeValue());
+    }
+
+    @Test
+    void deleteReportsForReviewInvalidThrowsPermissionsException() {
+        long validReviewId = 1L;
+        long nonAdminUserId = 456L;
+
+        when(reviewRepository.existsById(validReviewId)).thenReturn(true);
+        when(communicationService.isAdmin(nonAdminUserId)).thenReturn(false);
+
+        assertThrows(CustomPermissionsException.class, () -> service.deleteReportsForReview(validReviewId, nonAdminUserId));
+    }
+
+    @Test
+    void deleteReportsForReviewInvalidThrowsBadRequestException() {
+        long invalidReviewId = 999L;
+        long adminUserId = 123L;
+
+        when(reviewRepository.existsById(invalidReviewId)).thenReturn(false);
+
+        assertThrows(CustomBadRequestException.class, () -> service.deleteReportsForReview(invalidReviewId, adminUserId));
+    }
 }
