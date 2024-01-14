@@ -1,4 +1,4 @@
- package nl.tudelft.sem.template.review.restcontrollers.endpoints;
+ package nl.tudelft.sem.template.review.restcontrollers;
 
  import nl.tudelft.sem.template.model.BookData;
  import nl.tudelft.sem.template.review.restcontrollers.GetReportController;
