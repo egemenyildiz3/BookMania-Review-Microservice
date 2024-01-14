@@ -171,15 +171,18 @@
      }
 
 
+
      @Test
-     void voteTest() throws Exception {
+     void seeAll() throws Exception {
          Review rev = new Review(1L,2L,10L,"wow","review",5L);
-         when(service.addVote(1L,1)).thenReturn(ResponseEntity.ok("Vote added."));
+         Review rev2 = new Review(1L,2L,10L,"wow","review",5L);
+         List<Review> reviews = List.of(rev,rev2);
+         when(service.seeAll(2L,"mostRelevant")).thenReturn(ResponseEntity.ok(reviews));
          MockMvc mvc = MockMvcBuilders.standaloneSetup(controller).build();
 
 
 
-         mvc.perform(put("/review/vote/1/1")
+         mvc.perform(get("/review/seeAll/2/mostRelevant")
 
                  )
                  .andExpect(status().isOk())
@@ -187,8 +190,7 @@
 
 
 
-         verify(service, times(1)).addVote(1L,1);
+         verify(service, times(1)).seeAll(2L,"mostRelevant");
      }
-
 
  }

@@ -1,19 +1,13 @@
  package nl.tudelft.sem.template.review.restcontrollers;
 
- import com.fasterxml.jackson.databind.ObjectMapper;
  import nl.tudelft.sem.template.model.BookData;
- import nl.tudelft.sem.template.model.Review;
  import nl.tudelft.sem.template.review.services.GetReportServiceImpl;
  import org.junit.jupiter.api.Test;
  import org.junit.runner.RunWith;
  import org.mockito.InjectMocks;
  import org.mockito.Mock;
  import org.mockito.junit.MockitoJUnitRunner;
- import org.springframework.beans.factory.annotation.Autowired;
  import org.springframework.boot.test.context.SpringBootTest;
- import org.springframework.boot.test.web.client.TestRestTemplate;
- import org.springframework.boot.web.server.LocalServerPort;
- import org.springframework.http.HttpStatus;
  import org.springframework.http.MediaType;
  import org.springframework.http.ResponseEntity;
  import org.springframework.test.web.servlet.MockMvc;
