@@ -413,6 +413,8 @@ class ReviewServiceImplTest {
         r4.setUpvote(1L);
         r5.setUpvote(10000L);
 
+
+
         List<Review> correctList = List.of(r5,r,r4,r2);
 
         ResponseEntity<List<Review>> reviews = service.seeAll(2L, "highestRated");
@@ -442,6 +444,32 @@ class ReviewServiceImplTest {
         List<Review> correctList = List.of(r,r5,r4,r2);
 
         ResponseEntity<List<Review>> reviews = service.seeAll(2L, "mostRelevant");
+        assertEquals(reviews.getBody(), correctList);
+    }
+
+    @Test
+    void seeAllPinnedTest() {
+        Review r1 = new Review(1L, 1L, 10L, "Review", "review", 5L);
+        Review r2 = new Review(2L,1L,9L, "Review", "review", 5L);
+        Review r3 = new Review(3L,1L,8L, "Review", "review", 5L);
+        Review r4 = new Review(4L,1L,7L, "Review", "review", 5L);
+        Review r5 = new Review(5L,1L,6L, "Review", "review", 5L);
+
+        r1.setPinned(Boolean.TRUE);
+        r3.setPinned(Boolean.FALSE);
+        r4.setPinned(Boolean.TRUE);
+        r5.setPinned(Boolean.TRUE);
+
+        r1.setTimeCreated(LocalDate.of(2003,12,27));
+        r2.setTimeCreated(LocalDate.of(2020,9,27));
+        r3.setTimeCreated(LocalDate.of(2020,9,30));
+        r4.setTimeCreated(LocalDate.of(2019,1,27));
+        r5.setTimeCreated(LocalDate.of(2020,9,26));
+
+        when(repository.findAll()).thenReturn(List.of(r1,r2,r3,r4,r5));
+        List<Review> correctList = List.of(r5,r4,r1,r3,r2);
+
+        ResponseEntity<List<Review>> reviews = service.seeAll(1L, "mostRecent");
         assertEquals(reviews.getBody(), correctList);
     }
 

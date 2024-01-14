@@ -142,7 +142,22 @@ public class ReviewServiceImpl implements ReviewService {
 
         ReviewFilter reviewFilter = getFilter(filter);
 
-        return ResponseEntity.ok(reviewFilter.filter(listOfReviews));
+        List<Review> pinnedReviews = listOfReviews.stream()
+                .filter(r -> Boolean.TRUE.equals(r.getPinned())) // Null safe
+                .collect(Collectors.toList());
+
+        List<Review> unpinnedReviews = listOfReviews.stream()
+                .filter(r -> r.getPinned() == null || !r.getPinned())
+                .collect(Collectors.toList());
+
+        List<Review> sortedPinnedReviews = reviewFilter.filter(pinnedReviews);
+        List<Review> sortedUnpinnedReviews = reviewFilter.filter(unpinnedReviews);
+
+        List<Review> sortedReviews = new ArrayList<>();
+        sortedReviews.addAll(sortedPinnedReviews);
+        sortedReviews.addAll(sortedUnpinnedReviews);
+
+        return ResponseEntity.ok(sortedReviews);
     }
 
     @Override
