@@ -1,7 +1,6 @@
  package nl.tudelft.sem.template.review.restcontrollers;
 
  import nl.tudelft.sem.template.model.BookData;
- import nl.tudelft.sem.template.review.restcontrollers.GetReportController;
  import nl.tudelft.sem.template.review.services.GetReportServiceImpl;
  import org.junit.jupiter.api.Test;
  import org.junit.runner.RunWith;
@@ -14,9 +13,6 @@
  import org.springframework.test.web.servlet.MockMvc;
  import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
- import java.util.Map;
-
- import static org.junit.jupiter.api.Assertions.assertEquals;
  import static org.mockito.Mockito.*;
  import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
  import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
