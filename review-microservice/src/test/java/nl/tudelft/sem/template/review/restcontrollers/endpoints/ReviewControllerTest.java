@@ -1,9 +1,10 @@
- package nl.tudelft.sem.template.review.restcontrollers;
+ package nl.tudelft.sem.template.review.restcontrollers.endpoints;
 
  import com.fasterxml.jackson.databind.ObjectMapper;
  import com.fasterxml.jackson.databind.SerializationFeature;
  import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
  import nl.tudelft.sem.template.model.Review;
+ import nl.tudelft.sem.template.review.restcontrollers.ReviewController;
  import nl.tudelft.sem.template.review.services.ReviewServiceImpl;
  import org.junit.jupiter.api.Test;
  import org.junit.runner.RunWith;
@@ -18,6 +19,7 @@
  import org.springframework.http.MediaType;
  import org.springframework.http.ResponseEntity;
  import org.springframework.test.web.servlet.MockMvc;
+ import org.springframework.test.web.servlet.MvcResult;
  import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
  import java.net.URI;
@@ -74,7 +76,7 @@
                  .andExpect(status().isOk())
                  .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
-
+         //assertNotNull(mvcResult.getResponse());
 
          verify(service, times(1)).get(1L);
      }

@@ -1,6 +1,7 @@
- package nl.tudelft.sem.template.review.restcontrollers;
+ package nl.tudelft.sem.template.review.restcontrollers.endpoints;
 
  import nl.tudelft.sem.template.model.BookData;
+ import nl.tudelft.sem.template.review.restcontrollers.GetReportController;
  import nl.tudelft.sem.template.review.services.GetReportServiceImpl;
  import org.junit.jupiter.api.Test;
  import org.junit.runner.RunWith;
