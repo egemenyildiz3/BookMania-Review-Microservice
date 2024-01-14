@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.review.services;
 
 import java.util.Optional;
 import nl.tudelft.sem.template.model.BookData;
+import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.repositories.BookDataRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +20,9 @@ public class StatsServiceImpl implements  StatsService {
 
     @Override
     public ResponseEntity<Double> avgRating(Long bookId) {
-        if (!bookDataRepository.existsById(bookId)) {
-            return ResponseEntity.badRequest().build();
-        }
-
         Optional<BookData> optionalBookData = bookDataRepository.findById(bookId);
         if (optionalBookData.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            throw new CustomBadRequestException("Book not found.");
         }
 
         BookData bookData = optionalBookData.get();
@@ -36,7 +33,7 @@ public class StatsServiceImpl implements  StatsService {
     @Override
     public ResponseEntity<Long> interactions(Long bookId) {
         if (!bookDataRepository.existsById(bookId)) {
-            return ResponseEntity.badRequest().build();
+            throw new CustomBadRequestException("Book data not found.");
         }
 
         Long count = reviewRepository.countByBookId(bookId);
