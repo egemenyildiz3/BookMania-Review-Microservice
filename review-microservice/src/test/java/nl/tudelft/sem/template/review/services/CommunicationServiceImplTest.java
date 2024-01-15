@@ -143,4 +143,12 @@ class CommunicationServiceImplTest {
         wireMockServer1.verify(getRequestedFor(urlEqualTo("/book/getById/1")));
         wireMockServer1.stop();
     }
+
+    @Test
+    void defaultCases(){
+        assertTrue(service.isAdmin(1L));
+        assertTrue(service.existsBook(1L));
+        assertTrue(service.existsUser(1L));
+
+    }
 }
