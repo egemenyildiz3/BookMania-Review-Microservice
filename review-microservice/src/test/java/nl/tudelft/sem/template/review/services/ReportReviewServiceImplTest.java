@@ -1,10 +1,12 @@
 package nl.tudelft.sem.template.review.services;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import nl.tudelft.sem.template.review.repositories.ReportReviewRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.model.ReportReview;
-import nl.tudelft.sem.template.review.services.ReportReviewServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -12,14 +14,10 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 class ReportReviewServiceImplTest {
@@ -45,7 +43,7 @@ class ReportReviewServiceImplTest {
         when(repository.save(ArgumentMatchers.any())).thenReturn(new ReportReview());
 
         when(reviewRepository.getOne(1L)).thenReturn(review);
-        ResponseEntity<ReportReview> result = service.report(review.getId(),"foul language");
+        ResponseEntity<ReportReview> result = service.report(review.getId(), "foul language");
 
         verify(reviewRepository).existsById(review.getId());
         verify(reviewRepository).save(ArgumentMatchers.any());
@@ -56,7 +54,7 @@ class ReportReviewServiceImplTest {
 
     @Test
     void reportInvalid() {
-        ResponseEntity<ReportReview> result = service.report(1L,null);
+        ResponseEntity<ReportReview> result = service.report(1L, null);
 
         verify(repository, never()).save(any());
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
@@ -120,7 +118,7 @@ class ReportReviewServiceImplTest {
 
         verify(repository).existsByReviewId(1L);
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertTrue(result.getBody());
+        assertEquals(Boolean.TRUE, result.getBody());
     }
 
     @Test
@@ -129,7 +127,7 @@ class ReportReviewServiceImplTest {
 
         verify(repository).existsByReviewId(0L);
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertFalse(result.getBody());
+        assertNotEquals(Boolean.TRUE, result.getBody());
     }
 
     @Test
@@ -161,7 +159,7 @@ class ReportReviewServiceImplTest {
     @Test
     void deleteReportsForReview() {
         when(repository.existsByReviewId(1L)).thenReturn(true);
-        when(repository.findAllByReviewId(1L)).thenReturn(Arrays.asList(new ReportReview()));
+        when(repository.findAllByReviewId(1L)).thenReturn(List.of(new ReportReview()));
     }
 
     //getAllReportedCommentsInvalid, deleteReportsForCommentInvalid, deleteReportsForCommentNotAdmin

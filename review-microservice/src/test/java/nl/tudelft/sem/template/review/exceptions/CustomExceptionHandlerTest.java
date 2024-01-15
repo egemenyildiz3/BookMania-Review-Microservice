@@ -1,10 +1,10 @@
 package nl.tudelft.sem.template.review.exceptions;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class CustomExceptionHandlerTest {
     @Test
