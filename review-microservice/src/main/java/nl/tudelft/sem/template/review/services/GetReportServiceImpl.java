@@ -63,29 +63,41 @@ public class GetReportServiceImpl implements GetReportService {
 
         BookData result = initializeLazyObjectFromDatabase(bookDataRepository.getOne(bookId));
 
-        if (info.equals("report")) {
-            // TODO get all the comments and reviews of my boy and find the ones with the most upvoted ones
-            List<Long> reviewIds = reviewRepository.findMostUpvotedReviewId(bookId, PageRequest.of(0, 1));
-
-            if (!reviewIds.isEmpty()) {
-                result.setMostUpvotedReview(reviewIds.get(0));
+        switch (info) {
+            case "report" -> {
+                return getReportFromBook(bookId, result);
             }
-            var comments = commentService.findMostUpvotedComment(bookId);
-            if (comments.getStatusCode().is2xxSuccessful()) {
-                result.setMostUpvotedComment(comments.getBody());
+            case "rating" -> {
+                return getRatingFromBook(bookId, result);
             }
-            return ResponseEntity.ok(result);
+            case "interactions" -> {
+                return getInteractionsFromBook(result);
+            }
+            default -> throw new CustomBadRequestException("Invalid info type");
         }
-        if (info.equals("rating")) {
-            BookData rating = new BookData(bookId);
-            rating.setAvrRating(result.getAvrRating());
-            return ResponseEntity.ok(rating);
-        }
-        if (info.equals("interactions")) {
-            return ResponseEntity.ok((result));
-        }
+    }
 
-        throw new CustomBadRequestException("Invalid info type");
+    private ResponseEntity<BookData> getInteractionsFromBook(BookData result) {
+        return ResponseEntity.ok(result);
+    }
+
+    private ResponseEntity<BookData> getRatingFromBook(Long bookId, BookData result) {
+        BookData rating = new BookData(bookId);
+        rating.setAvrRating(result.getAvrRating());
+        return ResponseEntity.ok(rating);
+    }
+
+    private ResponseEntity<BookData> getReportFromBook(Long bookId, BookData result) {
+        List<Long> reviewIds = reviewRepository.findMostUpvotedReviewId(bookId, PageRequest.of(0, 1));
+
+        if (!reviewIds.isEmpty()) {
+            result.setMostUpvotedReview(reviewIds.get(0));
+        }
+        var comments = commentService.findMostUpvotedComment(bookId);
+        if (comments.getStatusCode().is2xxSuccessful()) {
+            result.setMostUpvotedComment(comments.getBody());
+        }
+        return ResponseEntity.ok(result);
     }
 
     @Override
@@ -98,23 +110,27 @@ public class GetReportServiceImpl implements GetReportService {
         }
 
         BookData bd = initializeLazyObjectFromDatabase(bookDataRepository.getOne(bookId));
-
-        int totalReviews = bd.getNegativeRev() + bd.getPositiveRev() + bd.getNeutralRev();
-        double totalRating = bd.getAvrRating() * totalReviews;
-        totalRating += rating;
-        totalReviews++;
-        bd.setAvrRating(totalRating / totalReviews);
-
-
-        switch (notion) {
-            case NEUTRAL -> bd.setNeutralRev(bd.getNeutralRev() + 1);
-            case NEGATIVE -> bd.setNegativeRev(bd.getNegativeRev() + 1);
-            default -> bd.setPositiveRev(bd.getPositiveRev() + 1);
-        }
+        calculateRatingAndNotion(bd, rating, notion, true);
 
         BookData saved = bookDataRepository.save(bd);
 
         return ResponseEntity.ok(saved);
+    }
+
+    private void calculateRatingAndNotion(BookData bd, Long rating, Review.BookNotionEnum notion, boolean add) {
+        int sign = add ? 1 : -1;
+        int totalReviews = bd.getNegativeRev() + bd.getPositiveRev() + bd.getNeutralRev();
+        double totalRating = bd.getAvrRating() * totalReviews;
+        totalRating += rating * sign;
+        totalReviews += sign;
+        bd.setAvrRating(totalRating / totalReviews);
+
+
+        switch (notion) {
+            case NEUTRAL -> bd.setNeutralRev(bd.getNeutralRev() + sign);
+            case NEGATIVE -> bd.setNegativeRev(bd.getNegativeRev() + sign);
+            default -> bd.setPositiveRev(bd.getPositiveRev() + sign);
+        }
     }
 
     @Override
@@ -126,23 +142,7 @@ public class GetReportServiceImpl implements GetReportService {
         }
 
         BookData bd = initializeLazyObjectFromDatabase(bookDataRepository.getOne(bookId));
-
-        int totalReviews = bd.getNegativeRev() + bd.getPositiveRev() + bd.getNeutralRev();
-        double totalRating = bd.getAvrRating() * totalReviews;
-        totalRating -= rating;
-        totalReviews--;
-        if (totalReviews > 0) {
-            bd.setAvrRating(totalRating / totalReviews);
-        } else {
-            bd.setAvrRating(0.0);
-        }
-
-
-        switch (notion) {
-            case NEUTRAL -> bd.setNeutralRev(bd.getNeutralRev() - 1);
-            case NEGATIVE -> bd.setNegativeRev(bd.getNegativeRev() - 1);
-            default -> bd.setPositiveRev(bd.getPositiveRev() - 1);
-        }
+        calculateRatingAndNotion(bd, rating, notion, false);
 
         BookData saved = bookDataRepository.save(bd);
 
