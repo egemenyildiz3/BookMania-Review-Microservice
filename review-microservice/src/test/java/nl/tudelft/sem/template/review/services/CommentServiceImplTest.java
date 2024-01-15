@@ -1,6 +1,9 @@
 package nl.tudelft.sem.template.review.services;
 
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
+import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
+import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
+import nl.tudelft.sem.template.review.exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.Comment;
@@ -24,6 +27,7 @@ import static org.mockito.Mockito.*;
 class CommentServiceImplTest {
 
     private CommentServiceImpl service;
+    private CommunicationServiceImpl communicationService;
     private CommentRepository commentRepository;
     private ReviewRepository reviewRepository;
 
@@ -31,7 +35,8 @@ class CommentServiceImplTest {
     void setup() {
         this.commentRepository = mock(CommentRepository.class);
         this.reviewRepository = mock(ReviewRepository.class);
-        this.service = new CommentServiceImpl(this.commentRepository, this.reviewRepository);
+        this.communicationService = mock(CommunicationServiceImpl.class);
+        this.service = new CommentServiceImpl(this.commentRepository, this.reviewRepository, this.communicationService);
     }
 
     @Test
@@ -48,6 +53,7 @@ class CommentServiceImplTest {
     void testAdd() {
         Review review = new Review(2L, 5L, 10L, "Review", "review", 5L);
         Comment comment = new Comment(3L, 2L, 10L, "comment");
+        when(communicationService.existsUser(10L)).thenReturn(true);
         when(reviewRepository.save(review)).thenReturn(review);
         when(reviewRepository.existsById(2L)).thenReturn(true);
         when(reviewRepository.findById(2L)).thenReturn(Optional.of(review));
@@ -60,13 +66,40 @@ class CommentServiceImplTest {
     }
 
     @Test
+    void testAddNull() {
+        Review review = new Review(2L, 5L, 10L, "Review", "review", 5L);
+        Comment comment = null;
+        when(reviewRepository.save(review)).thenReturn(review);
+        assertThrows(CustomBadRequestException.class, () -> service.add(comment));
+        verify(reviewRepository, never()).save(review);
+    }
+
+    @Test
+    void testAddInvalidReview() {
+        Review review = new Review(2L, 5L, 10L, "Review", "review", 5L);
+        Comment comment = new Comment(3L, 2L, 10L, "comment");
+        when(reviewRepository.existsById(2L)).thenReturn(false);
+        assertThrows(CustomBadRequestException.class, () -> service.add(comment));
+        verify(reviewRepository, never()).save(review);
+    }
+
+    @Test
+    void testAddInvalidUser() {
+        Review review = new Review(2L, 5L, 10L, "Review", "review", 5L);
+        Comment comment = new Comment(3L, 2L, 10L, "comment");
+        when(reviewRepository.save(review)).thenReturn(review);
+        when(communicationService.existsUser(10L)).thenReturn(false);
+        assertThrows(CustomUserExistsException.class, () -> service.add(comment));
+        verify(reviewRepository, never()).save(review);
+    }
+
+    @Test
     void testAddProfanities() {
         Review review = new Review(2L, 5L, 10L, "Review", "review", 5L);
         Comment comment = new Comment(3L, 2L, 10L, "fuck");
         when(reviewRepository.save(review)).thenReturn(review);
-        var result = service.add(comment);
+        assertThrows(CustomProfanitiesException.class, () -> service.add(comment));
         verify(reviewRepository, never()).save(review);
-        assertEquals(result.getStatusCode(), HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -84,10 +117,9 @@ class CommentServiceImplTest {
     @Test
     void testGetInvalid() {
         when(commentRepository.existsById(1L)).thenReturn(false);
-        var result = service.get(1L);
+        assertThrows(CustomBadRequestException.class, () -> service.get(1L));
         verify(commentRepository, never()).findById(1L);
         verify(commentRepository).existsById(1L);
-        assertEquals(result.getStatusCode(), HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -111,6 +143,23 @@ class CommentServiceImplTest {
     }
 
     @Test
+    void testUpdateNull() {
+        Comment comment = null;
+        assertThrows(CustomBadRequestException.class, () -> service.update(2L, comment));
+        verify(commentRepository, never()).save(comment);
+    }
+
+    @Test
+    void testUpdateInvalidComment() {
+        Comment comment = new Comment(1L, 2L, 10L, "comment");
+        comment.id(1L);
+        comment.userId(2L);
+        when(commentRepository.existsById(1L)).thenReturn(false);
+        assertThrows(CustomBadRequestException.class, () -> service.update(2L, comment));
+        verify(commentRepository, never()).save(comment);
+    }
+
+    @Test
     void testUpdateOwnerProfanities() {
         Comment comment = new Comment(1L, 2L, 10L, "comment");
         comment.id(1L);
@@ -125,8 +174,7 @@ class CommentServiceImplTest {
 //        verify(commentRepository).findById(1L);
         assertEquals(result.getBody(), comment);
         comment.text("fuck");
-        result = service.update(2L, comment);
-        assertEquals(result.getStatusCode(), HttpStatus.BAD_REQUEST);
+        assertThrows(CustomProfanitiesException.class, () -> service.update(2L, comment));
     }
 
     @Test
@@ -135,9 +183,8 @@ class CommentServiceImplTest {
         comment.id(1L);
         comment.userId(2L);
         when(commentRepository.save(comment)).thenReturn(comment);
-        var result = service.update(3L, comment);
+        assertThrows(CustomBadRequestException.class, () -> service.update(3L, comment));
         verify(commentRepository, never()).save(comment);
-        assertEquals(result.getStatusCode(), HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -167,12 +214,11 @@ class CommentServiceImplTest {
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         when(reviewRepository.save(review)).thenReturn(review);
-        var result = service.delete(1L, 3L);
+        assertThrows(CustomPermissionsException.class, () -> service.delete(3L, 5L));
         verify(commentRepository).existsById(1L);
         verify(commentRepository).findById(1L);
         verify(reviewRepository, never()).save(review);
         assertTrue(review.getCommentList().contains(comment));
-        assertEquals(result.getStatusCode(), HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -192,11 +238,10 @@ class CommentServiceImplTest {
 
         List<Comment> correctList = List.of(c1,c2,c4,c5,c6);
         ResponseEntity<List<Comment>> result = service.getAll(17L);
-        ResponseEntity<List<Comment>> failResult = service.getAll(2L);
 
         assertEquals(result.getBody(), correctList);
         assertEquals(result.getStatusCode(), HttpStatus.OK);
-        assertEquals(failResult.getStatusCode(), HttpStatus.BAD_REQUEST);
+        assertThrows(CustomBadRequestException.class, () -> service.getAll(2L));
 
     }
     @Test
@@ -233,7 +278,7 @@ class CommentServiceImplTest {
         when(commentRepository.findAll()).thenReturn(comments);
         when(reviewRepository.getOne(5L)).thenReturn(reviewOne);
         when(reviewRepository.getOne(10L)).thenReturn(reviewTwo);
-        assertNull(service.findMostUpvotedComment(16L).getBody());
+        assertThrows(CustomBadRequestException.class, () -> service.findMostUpvotedComment(5L));
     }
 
     @Test
@@ -244,9 +289,8 @@ class CommentServiceImplTest {
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(c1));
         when(commentRepository.save(any(Comment.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        ResponseEntity<String> res1 = service.addVote(1L, 7);
 
-        assertEquals(res1.getStatusCode(), HttpStatus.BAD_REQUEST);
+        assertThrows(CustomBadRequestException.class, () -> service.addVote(1L, 7));
     }
 
     @Test
