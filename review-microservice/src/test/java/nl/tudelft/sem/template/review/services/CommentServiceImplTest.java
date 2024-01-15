@@ -254,6 +254,9 @@ class CommentServiceImplTest {
         Review r1 = new Review(17L, 1L, 1L, "Review", "review", 5L);
         Comment c1 = new Comment(1L, 17L, 1L, "comment");
 
+        c1.setDownvote(0L);
+        c1.setUpvote(0L);
+
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(c1));
         when(commentRepository.save(any(Comment.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -269,6 +272,9 @@ class CommentServiceImplTest {
     void multipleUpvoteDownvoteTest() {
         Review r1 = new Review(17L, 1L, 1L, "Review", "review", 5L);
         Comment c1 = new Comment(1L, 17L, 1L, "comment");
+
+        c1.setDownvote(0L);
+        c1.setUpvote(0L);
 
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(c1));
