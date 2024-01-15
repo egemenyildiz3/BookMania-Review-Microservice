@@ -42,7 +42,7 @@ class CommunicationServiceImplTest {
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody("{\"role\":\"Admin\"}")));
-        boolean book = service.getResponse("http://localhost:8080", 1L,true);
+        boolean book = service.getResponse("http://localhost:8080", 1L,true, true);
         assertTrue(book);
         // Verify that the expected request was made
         wireMockServer.verify(getRequestedFor(urlEqualTo("/check/role/1")));

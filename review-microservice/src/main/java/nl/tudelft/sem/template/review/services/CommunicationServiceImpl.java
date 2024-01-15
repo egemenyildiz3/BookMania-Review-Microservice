@@ -16,7 +16,9 @@ public class CommunicationServiceImpl {
 
     public CommunicationServiceImpl() {
     }
-    public boolean getResponse(String server, Long id, boolean admin){
+    public boolean getResponse(String server, Long id, boolean admin, boolean working){
+        if(!working)
+            return true;
         String url;
         StringBuilder response = new StringBuilder();
         int responseCode;
@@ -57,20 +59,20 @@ public class CommunicationServiceImpl {
 
     public boolean isAdmin(Long userId) {
         //TODO make http request to endpoint for admin
-        return getResponse(userMicroUrl,userId,true);
+        return getResponse(userMicroUrl,userId,true, true);
         //return true;
     }
 
 
     public boolean existsBook(Long bookId) {
         //TODO make http request to endpoint for book
-        return getResponse(bookMicroUrl,bookId,false);
+        return getResponse(bookMicroUrl,bookId,false, true);
         //return true;
     }
 
     public boolean existsUser(Long userId) {
         //TODO make http request to endpoint for user
-        return getResponse(userMicroUrl,userId,false);
+        return getResponse(userMicroUrl,userId,false, true);
         //return true;
     }
 
