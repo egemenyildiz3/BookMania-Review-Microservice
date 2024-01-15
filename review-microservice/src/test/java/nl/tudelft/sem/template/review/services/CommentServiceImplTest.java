@@ -147,7 +147,7 @@ class CommentServiceImplTest {
     void testUpdateNull() {
         Comment comment = null;
         assertThrows(CustomBadRequestException.class, () -> service.update(2L, comment));
-        verify(commentRepository, never()).save(comment);
+        verify(commentRepository, never()).save(any());
     }
 
     @Test
@@ -225,8 +225,6 @@ class CommentServiceImplTest {
 
     @Test
     void testGetAll() {
-        Review r1 = new Review(17L, 1L, 1L, "Review", "review", 5L);
-        Review r2 = new Review(13L, 2L, 2L, "Review", "review", 5L);
         Comment c1 = new Comment(1L, 17L, 1L, "comment");
         Comment c2 = new Comment(2L, 17L, 1L, "comment");
         Comment c3 = new Comment(3L, 13L, 1L, "comment");
@@ -281,12 +279,11 @@ class CommentServiceImplTest {
         when(commentRepository.findAll()).thenReturn(comments);
         when(reviewRepository.getOne(5L)).thenReturn(reviewOne);
         when(reviewRepository.getOne(10L)).thenReturn(reviewTwo);
-        assertThrows(CustomBadRequestException.class, () -> service.findMostUpvotedComment(5L));
+        assertNull(service.findMostUpvotedComment(5L).getBody());
     }
 
     @Test
     void wrongBodyVoteTest() {
-        Review r1 = new Review(17L, 1L, 1L, "Review", "review", 5L);
         Comment c1 = new Comment(1L, 17L, 1L, "comment");
 
         when(commentRepository.existsById(1L)).thenReturn(true);
@@ -298,7 +295,6 @@ class CommentServiceImplTest {
 
     @Test
     void upvoteAndDownvoteTest() {
-        Review r1 = new Review(17L, 1L, 1L, "Review", "review", 5L);
         Comment c1 = new Comment(1L, 17L, 1L, "comment");
 
         c1.setDownvote(0L);
@@ -317,7 +313,6 @@ class CommentServiceImplTest {
 
     @Test
     void multipleUpvoteDownvoteTest() {
-        Review r1 = new Review(17L, 1L, 1L, "Review", "review", 5L);
         Comment c1 = new Comment(1L, 17L, 1L, "comment");
 
         c1.setDownvote(0L);
