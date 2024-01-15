@@ -88,6 +88,7 @@ class CommentServiceImplTest {
         Review review = new Review(2L, 5L, 10L, "Review", "review", 5L);
         Comment comment = new Comment(3L, 2L, 10L, "comment");
         when(reviewRepository.save(review)).thenReturn(review);
+        when(reviewRepository.existsById(2L)).thenReturn(true);
         when(communicationService.existsUser(10L)).thenReturn(false);
         assertThrows(CustomUserExistsException.class, () -> service.add(comment));
         verify(reviewRepository, never()).save(review);
@@ -98,6 +99,8 @@ class CommentServiceImplTest {
         Review review = new Review(2L, 5L, 10L, "Review", "review", 5L);
         Comment comment = new Comment(3L, 2L, 10L, "fuck");
         when(reviewRepository.save(review)).thenReturn(review);
+        when(reviewRepository.existsById(2L)).thenReturn(true);
+        when(communicationService.existsUser(10L)).thenReturn(true);
         assertThrows(CustomProfanitiesException.class, () -> service.add(comment));
         verify(reviewRepository, never()).save(review);
     }
@@ -208,13 +211,13 @@ class CommentServiceImplTest {
     @Test
     void testDeleteNotOwner() {
         Review review = new Review(2L, 5L, 10L, "Review", "review", 5L);
-        Comment comment = new Comment(3L, 2L, 10L, "comment");
+        Comment comment = new Comment(1L, 2L, 10L, "comment");
         comment.setReviewId(review.getId());
         review.addCommentListItem(comment);
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         when(reviewRepository.save(review)).thenReturn(review);
-        assertThrows(CustomPermissionsException.class, () -> service.delete(3L, 5L));
+        assertThrows(CustomPermissionsException.class, () -> service.delete(1L, 5L));
         verify(commentRepository).existsById(1L);
         verify(commentRepository).findById(1L);
         verify(reviewRepository, never()).save(review);
