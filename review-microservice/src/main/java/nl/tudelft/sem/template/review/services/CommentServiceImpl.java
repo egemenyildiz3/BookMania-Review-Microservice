@@ -30,6 +30,12 @@ public class CommentServiceImpl implements CommentService {
     private static final List<String> profanities =
             Arrays.asList("fuck", "shit", "motherfucker", "bastard", "cunt", "bitch");
 
+    /**
+     * Checks if a string contains any profanities from the defined profanities list.
+     *
+     * @param text - The text to check
+     * @return - True if profanities were found, false otherwise
+     */
     public static boolean checkProfanities(String text) {
         if (text != null) {
             for (String character : profanities) {
@@ -126,6 +132,12 @@ public class CommentServiceImpl implements CommentService {
         return ResponseEntity.badRequest().build();
     }
 
+    /**
+     * Finds the most upvoted comment for a book.
+     *
+     * @param bookId - The book whose comments to look for
+     * @return - The id of the most upvoted comment of null if no comment was found
+     */
     public ResponseEntity<Long> findMostUpvotedComment(Long bookId) {
         List<Comment> allComments = repository.findAll();
 
@@ -135,11 +147,9 @@ public class CommentServiceImpl implements CommentService {
         })
                 .max(Comparator.comparingLong(Comment::getUpvote));
 
-        if (result.isEmpty()) {
-            return ResponseEntity.badRequest().body(null);
-        }
+        return result.map(comment -> ResponseEntity.ok(comment.getId()))
+                .orElseGet(() -> ResponseEntity.badRequest().body(null));
 
-        return ResponseEntity.ok(result.get().getId());
     }
 
     @Override
