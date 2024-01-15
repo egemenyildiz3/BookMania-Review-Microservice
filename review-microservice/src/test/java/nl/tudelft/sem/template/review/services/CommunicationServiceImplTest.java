@@ -57,7 +57,7 @@ class CommunicationServiceImplTest {
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody("{\"role\":\"Admin\"}")));
-        boolean admin = service.isAdmin(1L);
+        boolean admin = service.getResponse("http://localhost:8080",1L,true,true);
         assertTrue(admin);
         // Verify that the expected request was made
         wireMockServer.verify(getRequestedFor(urlEqualTo("/check/role/1")));
@@ -72,7 +72,7 @@ class CommunicationServiceImplTest {
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody("{\"role\":\"Author\"}")));
-        boolean admin = service.isAdmin(1L);
+        boolean admin = service.getResponse("http://localhost:8080",1L,true,true);
         assertFalse(admin);
         // Verify that the expected request was made
         wireMockServer.verify(getRequestedFor(urlEqualTo("/check/role/1")));
@@ -86,7 +86,7 @@ class CommunicationServiceImplTest {
                         .withStatus(404)
                         .withHeader("Content-Type", "application/json")
                         .withBody("{\"error\":\"User account not found\"}")));
-        boolean user = service.existsUser(1L);
+        boolean user = service.getResponse("http://localhost:8080",1L,false,true);
         assertFalse(user);
         // Verify that the expected request was made
         wireMockServer.verify(getRequestedFor(urlEqualTo("/check/role/1")));
@@ -100,7 +100,7 @@ class CommunicationServiceImplTest {
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody("{\"role\":\"User\"}")));
-        boolean user = service.existsUser(1L);
+        boolean user = service.getResponse("http://localhost:8080",1L,false,true);
         assertTrue(user);
         // Verify that the expected request was made
         wireMockServer.verify(getRequestedFor(urlEqualTo("/check/role/1")));
@@ -118,8 +118,8 @@ class CommunicationServiceImplTest {
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody("{\"genre\":\"horror\"}")));
-        boolean user = service.existsBook(1L);
-        assertTrue(user);
+        boolean book = service.getResponse("http://localhost:8081",1L,false,true);
+        assertTrue(book);
         // Verify that the expected request was made
         wireMockServer1.verify(getRequestedFor(urlEqualTo("/book/getById/1")));
         wireMockServer1.stop();
@@ -137,8 +137,8 @@ class CommunicationServiceImplTest {
                         .withStatus(404)
                         .withHeader("Content-Type", "application/json")
                         .withBody("cannot find book")));
-        boolean user = service.existsBook(1L);
-        assertFalse(user);
+        boolean book = service.getResponse("http://localhost:8081",1L,false,true);
+        assertFalse(book);
         // Verify that the expected request was made
         wireMockServer1.verify(getRequestedFor(urlEqualTo("/book/getById/1")));
         wireMockServer1.stop();

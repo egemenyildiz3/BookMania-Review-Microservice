@@ -59,20 +59,20 @@ public class CommunicationServiceImpl {
 
     public boolean isAdmin(Long userId) {
         //TODO make http request to endpoint for admin
-        return getResponse(userMicroUrl,userId,true, true);
+        return getResponse(userMicroUrl,userId,true, false);//set the second boolean to true to make actual http request
         //return true;
     }
 
 
     public boolean existsBook(Long bookId) {
         //TODO make http request to endpoint for book
-        return getResponse(bookMicroUrl,bookId,false, true);
+        return getResponse(bookMicroUrl,bookId,false, false);
         //return true;
     }
 
     public boolean existsUser(Long userId) {
         //TODO make http request to endpoint for user
-        return getResponse(userMicroUrl,userId,false, true);
+        return getResponse(userMicroUrl,userId,false, false);
         //return true;
     }
 
