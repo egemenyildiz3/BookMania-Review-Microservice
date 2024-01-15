@@ -62,7 +62,7 @@ class ReportReviewServiceImplTest {
     }
 
     @Test
-    void report_NullReviewId_ThrowsBadRequestException() {
+    void reportInvalidThrowsBadRequestException() {
         long invalidReviewId = 999L;
         long validReviewId = 1L;
         String validReason = "Inappropriate content";
@@ -118,6 +118,23 @@ class ReportReviewServiceImplTest {
         assertEquals(1, result.getBody().size());
         assertEquals(validReviewId, result.getBody().get(0).getReviewId());
         assertThrows(CustomBadRequestException.class, () -> service.get(invalidReportId));
+    }
+
+    @Test
+    void getReportsForReviewValid() {
+        long validReviewId = 1L;
+        ReportReview mockReportReview = new ReportReview();
+        mockReportReview.setReviewId(validReviewId);
+
+        when(reviewRepository.existsById(validReviewId)).thenReturn(true);
+        when(repository.findAllByReviewId(validReviewId)).thenReturn(Collections.singletonList(mockReportReview));
+
+        ResponseEntity<List<ReportReview>> result = service.getReportsForReview(validReviewId);
+
+        assertEquals(200, result.getStatusCodeValue());
+        assertNotNull(result.getBody());
+        assertEquals(1, result.getBody().size());
+        assertEquals(validReviewId, result.getBody().get(0).getReviewId());
     }
 
     @Test

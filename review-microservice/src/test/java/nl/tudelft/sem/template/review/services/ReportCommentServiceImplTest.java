@@ -17,10 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -64,6 +61,30 @@ class ReportCommentServiceImplTest {
     }
 
     @Test
+    void reportInvalidThrowsBadRequestException() {
+        long invalidCommentId = 999L;
+        long validCommentId = 1L;
+        String validReason = "Inappropriate content";
+        long validReviewId = 30L;
+        long invalidReviewId = 999L;
+
+        Comment mockComment = new Comment();
+        mockComment.setId(validCommentId);
+        mockComment.setUserId(123L);
+        mockComment.setReviewId(validReviewId);
+
+        when(commentRepository.existsById(validCommentId)).thenReturn(true);
+        when(commentRepository.getOne(validCommentId)).thenReturn(mockComment);
+        when(communicationService.existsUser(mockComment.getUserId())).thenReturn(true);
+        when(commentRepository.existsById(invalidCommentId)).thenReturn(false);
+
+        assertThrows(CustomBadRequestException.class, () -> service.report(invalidCommentId, validReason));
+        assertThrows(CustomBadRequestException.class, () -> service.report(null, "Reason"));
+        assertThrows(CustomBadRequestException.class, () -> service.report(1L, null));
+
+    }
+
+    @Test
     void getValid() {
         long validReportId = 1L;
         ReportComment mockReportComment = new ReportComment();
@@ -80,24 +101,40 @@ class ReportCommentServiceImplTest {
     }
 
     @Test
-    void reportInvalidThrowsBadRequestException() {
-        long invalidCommentId = 999L;
-        String validReason = "Inappropriate content";
-
-        when(commentRepository.existsById(invalidCommentId)).thenReturn(false);
-
-        assertThrows(CustomBadRequestException.class, () -> service.report(invalidCommentId, validReason));
-    }
-
-    @Test
     void getInvalidThrowsBadRequestException() {
         long invalidReportId = 999L;
+        long validCommentId = 1L;
+        ReportComment mockReportComment = new ReportComment();
+        mockReportComment.setCommentId(validCommentId);
 
         when(repository.existsById(invalidReportId)).thenReturn(false);
+        when(commentRepository.existsById(validCommentId)).thenReturn(true);
+        when(repository.findAllByCommentId(validCommentId)).thenReturn(Collections.singletonList(mockReportComment));
 
+        ResponseEntity<List<ReportComment>> result = service.getReportsForComment(validCommentId);
+
+        assertEquals(200, result.getStatusCodeValue());
+        assertNotNull(result.getBody());
+        assertEquals(1, result.getBody().size());
+        assertEquals(validCommentId, result.getBody().get(0).getCommentId());
         assertThrows(CustomBadRequestException.class, () -> service.get(invalidReportId));
     }
+    @Test
+    void getReportsForCommentValid() {
+        long validCommentId = 1L;
+        ReportComment mockReportComment = new ReportComment();
+        mockReportComment.setCommentId(validCommentId);
 
+        when(commentRepository.existsById(validCommentId)).thenReturn(true);
+        when(repository.findAllByCommentId(validCommentId)).thenReturn(Collections.singletonList(mockReportComment));
+
+        ResponseEntity<List<ReportComment>> result = service.getReportsForComment(validCommentId);
+
+        assertEquals(200, result.getStatusCodeValue());
+        assertNotNull(result.getBody());
+        assertEquals(1, result.getBody().size());
+        assertEquals(validCommentId, result.getBody().get(0).getCommentId());
+    }
     @Test
     void getReportsForCommentInvalidThrowsBadRequestException() {
         long invalidCommentId = 999L;
@@ -108,32 +145,20 @@ class ReportCommentServiceImplTest {
     }
 
     @Test
-    void isReportedValidThrowsBadRequestException() {
-        long invalidCommentId = 999L;
+    void getAllReportedCommentsValid() {
+        long validUserId = 1L;
+        ReportComment mockReportComment = new ReportComment();
+        mockReportComment.setCommentId(validUserId);
 
-        when(commentRepository.existsById(invalidCommentId)).thenReturn(false);
+        when(communicationService.isAdmin(validUserId)).thenReturn(true);
+        when(repository.findAll()).thenReturn(Collections.singletonList(mockReportComment));
 
-        assertThrows(CustomBadRequestException.class, () -> service.isReported(invalidCommentId));
-    }
+        ResponseEntity<List<ReportComment>> result = service.getAllReportedComments(validUserId);
 
-    @Test
-    void deleteInvalidThrowsBadRequestException() {
-        long invalidReportId = 999L;
-        long adminUserId = 123L;
-
-        when(repository.existsById(invalidReportId)).thenReturn(false);
-
-        assertThrows(CustomBadRequestException.class, () -> service.delete(invalidReportId, adminUserId));
-    }
-
-    @Test
-    void deleteReportsForCommentInvalidThrowsBadRequestException() {
-        long invalidCommentId = 999L;
-        long adminUserId = 123L;
-
-        when(commentRepository.existsById(invalidCommentId)).thenReturn(false);
-
-        assertThrows(CustomBadRequestException.class, () -> service.deleteReportsForComment(invalidCommentId, adminUserId));
+        assertEquals(200, result.getStatusCodeValue());
+        assertNotNull(result.getBody());
+        assertEquals(1, result.getBody().size());
+        assertEquals(validUserId, result.getBody().get(0).getCommentId());
     }
 
     @Test
@@ -145,6 +170,56 @@ class ReportCommentServiceImplTest {
         assertThrows(CustomPermissionsException.class, () -> service.getAllReportedComments(nonAdminUserId));
     }
 
+    @Test
+    void isReportedValid() {
+        long validCommentId = 1L;
+        ReportComment mockReportComment = new ReportComment();
+        mockReportComment.setCommentId(validCommentId);
+
+        when(commentRepository.existsById(validCommentId)).thenReturn(true);
+        when(repository.existsByCommentId(validCommentId)).thenReturn(true);
+
+        ResponseEntity<Boolean> result = service.isReported(validCommentId);
+
+        assertEquals(200, result.getStatusCodeValue());
+        assertNotNull(result.getBody());
+        assertTrue(result.getBody());
+    }
+    @Test
+    void isReportedValidThrowsBadRequestException() {
+        long invalidCommentId = 999L;
+
+        when(commentRepository.existsById(invalidCommentId)).thenReturn(false);
+
+        assertThrows(CustomBadRequestException.class, () -> service.isReported(invalidCommentId));
+    }
+    @Test
+    void deleteValid() {
+        long validCommentId = 1L;
+        long adminUserId = 123L;
+        ReportComment mockReportComment = new ReportComment();
+        mockReportComment.setId(validCommentId);
+        mockReportComment.setCommentId(456L);
+        Comment com = new Comment();
+        com.setReportList(new ArrayList<>());
+        when(repository.existsById(validCommentId)).thenReturn(true);
+        when(repository.findById(validCommentId)).thenReturn(Optional.of(mockReportComment));
+        when(communicationService.isAdmin(adminUserId)).thenReturn(true);
+        when(commentRepository.getOne(mockReportComment.getCommentId())).thenReturn(com);
+
+        ResponseEntity<String> result = service.delete(validCommentId, adminUserId);
+
+        assertEquals(200, result.getStatusCodeValue());
+    }
+    @Test
+    void deleteInvalidThrowsBadRequestException() {
+        long invalidReportId = 999L;
+        long adminUserId = 123L;
+
+        when(repository.existsById(invalidReportId)).thenReturn(false);
+
+        assertThrows(CustomBadRequestException.class, () -> service.delete(invalidReportId, adminUserId));
+    }
     @Test
     void deleteInvalidThrowsPermissionsException() {
         long validReportId = 1L;
@@ -158,6 +233,33 @@ class ReportCommentServiceImplTest {
 
         assertThrows(CustomPermissionsException.class, () -> service.delete(validReportId, nonAdminUserId));
     }
+    @Test
+    void deleteReportsForCommentValid() {
+        long validCommentId = 1L;
+        long adminUserId = 123L;
+        ReportComment mockReportComment = new ReportComment();
+        mockReportComment.setId(validCommentId);
+        mockReportComment.setCommentId(456L);
+        Comment com = new Comment();
+        com.setReportList(new ArrayList<>());
+        when(commentRepository.existsById(validCommentId)).thenReturn(true);
+        when(commentRepository.getOne(validCommentId)).thenReturn(com);
+        when(communicationService.isAdmin(adminUserId)).thenReturn(true);
+
+        ResponseEntity<String> result = service.deleteReportsForComment(validCommentId, adminUserId);
+
+        assertEquals(200, result.getStatusCodeValue());
+    }
+    @Test
+    void deleteReportsForCommentInvalidThrowsBadRequestException() {
+        long invalidCommentId = 999L;
+        long adminUserId = 123L;
+
+        when(commentRepository.existsById(invalidCommentId)).thenReturn(false);
+
+        assertThrows(CustomBadRequestException.class, () -> service.deleteReportsForComment(invalidCommentId, adminUserId));
+    }
+
 
     @Test
     void deleteReportsForCommentInvalidThrowsPermissionsException() {
