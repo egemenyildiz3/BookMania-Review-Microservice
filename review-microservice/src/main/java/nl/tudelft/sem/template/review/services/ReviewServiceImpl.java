@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
@@ -142,7 +144,22 @@ public class ReviewServiceImpl implements ReviewService {
 
         ReviewFilter reviewFilter = getFilter(filter);
 
-        return ResponseEntity.ok(reviewFilter.filter(listOfReviews));
+        List<Review> pinnedReviews = listOfReviews.stream()
+                .filter(r -> Boolean.TRUE.equals(r.getPinned())) // Null safe
+                .collect(Collectors.toList());
+
+        List<Review> unpinnedReviews = listOfReviews.stream()
+                .filter(r -> r.getPinned() == null || !r.getPinned())
+                .collect(Collectors.toList());
+
+        List<Review> sortedPinnedReviews = reviewFilter.filter(pinnedReviews);
+        List<Review> sortedUnpinnedReviews = reviewFilter.filter(unpinnedReviews);
+
+        List<Review> sortedReviews = new ArrayList<>();
+        sortedReviews.addAll(sortedPinnedReviews);
+        sortedReviews.addAll(sortedUnpinnedReviews);
+
+        return ResponseEntity.ok(sortedReviews);
     }
 
     @Override
@@ -236,15 +253,18 @@ public class ReviewServiceImpl implements ReviewService {
         }
         Review review = get(reviewId).getBody();
         assert review != null;
+        checkBody(review, body);
+        repo.save(review);
+        return ResponseEntity.ok("Vote added, new vote values are:\nupvotes: "
+                + review.getUpvote() + "\ndownvotes: " + review.getDownvote());
+    }
+
+    private void checkBody(Review review, Integer body) {
         if (body == 1) {
             review.upvote(review.getUpvote() + 1);
         } else {
             review.downvote(review.getDownvote() + 1);
         }
-        repo.save(review);
-        return ResponseEntity.ok("Vote added, new vote values are:\nupvotes: "
-                + ((review.getUpvote() == null) ? 0 : review.getUpvote())
-                + "\ndownvotes: " + ((review.getDownvote() == null) ? 0 : review.getDownvote()));
     }
 
     @Override
@@ -279,6 +299,6 @@ public class ReviewServiceImpl implements ReviewService {
         assert review != null;
         review.setPinned(body);
         repo.save(review);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Review pinned.");
     }
 }

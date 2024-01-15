@@ -1,14 +1,17 @@
 package nl.tudelft.sem.template.review.services;
 
-import nl.tudelft.sem.template.model.ReportReview;
+
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReportCommentRepository;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.ReportComment;
 import nl.tudelft.sem.template.model.Review;
-import nl.tudelft.sem.template.review.services.ReportCommentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -18,9 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 class ReportCommentServiceImplTest {
@@ -54,6 +54,7 @@ class ReportCommentServiceImplTest {
 
         ResponseEntity<ReportComment> result = service.report(validCommentId, validReason);
 
+
         assertEquals(200, result.getStatusCodeValue());
         assertNotNull(result.getBody());
         assertEquals(validReason, result.getBody().getReason());
@@ -67,6 +68,7 @@ class ReportCommentServiceImplTest {
         String validReason = "Inappropriate content";
         long validReviewId = 30L;
         long invalidReviewId = 999L;
+
 
         Comment mockComment = new Comment();
         mockComment.setId(validCommentId);

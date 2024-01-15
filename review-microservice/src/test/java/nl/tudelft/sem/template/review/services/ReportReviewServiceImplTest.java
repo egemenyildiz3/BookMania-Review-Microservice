@@ -3,11 +3,13 @@ package nl.tudelft.sem.template.review.services;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
 import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import nl.tudelft.sem.template.review.repositories.ReportReviewRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.model.ReportReview;
-import nl.tudelft.sem.template.review.services.ReportReviewServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -17,9 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 class ReportReviewServiceImplTest {
@@ -54,6 +53,7 @@ class ReportReviewServiceImplTest {
         when(communicationService.existsUser(mockReview.getUserId())).thenReturn(true);
 
         ResponseEntity<ReportReview> result = service.report(validReviewId, validReason);
+
 
         assertEquals(200, result.getStatusCodeValue());
         assertNotNull(result.getBody());
@@ -181,6 +181,9 @@ class ReportReviewServiceImplTest {
         assertEquals(200, result.getStatusCodeValue());
         assertNotNull(result.getBody());
         assertTrue(result.getBody());
+
+        verify(repository).existsByReviewId(1L);
+        
     }
 
     @Test
@@ -190,6 +193,7 @@ class ReportReviewServiceImplTest {
         when(reviewRepository.existsById(invalidReviewId)).thenReturn(false);
 
         assertThrows(CustomBadRequestException.class, () -> service.isReported(invalidReviewId));
+
     }
 
     @Test
@@ -232,6 +236,7 @@ class ReportReviewServiceImplTest {
         when(repository.existsById(invalidReportId)).thenReturn(false);
 
         assertThrows(CustomBadRequestException.class, () -> service.delete(invalidReportId, adminUserId));
+
     }
 
 
