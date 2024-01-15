@@ -1,20 +1,16 @@
 package nl.tudelft.sem.template.review.services;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import nl.tudelft.sem.template.model.BookData;
-import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.repositories.BookDataRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.ResponseEntity;
-
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class StatsServiceImplTest {
 

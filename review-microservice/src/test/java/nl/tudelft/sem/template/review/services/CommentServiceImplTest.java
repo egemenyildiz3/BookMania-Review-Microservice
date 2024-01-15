@@ -1,24 +1,21 @@
 package nl.tudelft.sem.template.review.services;
 
-import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
-import nl.tudelft.sem.template.review.repositories.CommentRepository;
-import nl.tudelft.sem.template.review.repositories.ReviewRepository;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+import java.util.List;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.Review;
-import nl.tudelft.sem.template.review.services.CommentServiceImpl;
+import nl.tudelft.sem.template.review.repositories.CommentRepository;
+import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import java.util.List;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 class CommentServiceImplTest {
@@ -51,7 +48,7 @@ class CommentServiceImplTest {
         when(reviewRepository.save(review)).thenReturn(review);
         when(reviewRepository.existsById(2L)).thenReturn(true);
         when(reviewRepository.findById(2L)).thenReturn(Optional.of(review));
-        var result = service.add(comment);
+        final var result = service.add(comment);
         verify(reviewRepository).save(review);
         verify(reviewRepository).existsById(2L);
         verify(reviewRepository).findById(2L);
@@ -102,7 +99,7 @@ class CommentServiceImplTest {
         var result = service.update(2L, comment);
         verify(commentRepository).save(comment);
         verify(commentRepository).existsById(1L);
-//        verify(commentRepository).findById(1L);
+        //  verify(commentRepository).findById(1L);
         assertEquals(result.getBody(), comment);
         comment.text("great");
         result = service.update(2L, comment);
@@ -122,7 +119,7 @@ class CommentServiceImplTest {
         var result = service.update(2L, comment);
         verify(commentRepository).save(comment);
         verify(commentRepository).existsById(1L);
-//        verify(commentRepository).findById(1L);
+        //  verify(commentRepository).findById(1L);
         assertEquals(result.getBody(), comment);
         comment.text("fuck");
         result = service.update(2L, comment);
@@ -150,7 +147,7 @@ class CommentServiceImplTest {
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         when(reviewRepository.save(review)).thenReturn(review);
         when(reviewRepository.getOne(3L)).thenReturn(review);
-        var result = service.delete(1L, 2L);
+        final var result = service.delete(1L, 2L);
         verify(commentRepository).existsById(1L);
         verify(commentRepository).findById(1L);
         verify(reviewRepository).save(review);
@@ -167,7 +164,7 @@ class CommentServiceImplTest {
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         when(reviewRepository.save(review)).thenReturn(review);
-        var result = service.delete(1L, 3L);
+        final var result = service.delete(1L, 3L);
         verify(commentRepository).existsById(1L);
         verify(commentRepository).findById(1L);
         verify(reviewRepository, never()).save(review);
@@ -188,9 +185,9 @@ class CommentServiceImplTest {
 
         when(reviewRepository.existsById(17L)).thenReturn(true);
         when(reviewRepository.existsById(2L)).thenReturn(false);
-        when(commentRepository.findAll()).thenReturn(List.of(c1,c2,c3,c4,c5,c6));
+        when(commentRepository.findAll()).thenReturn(List.of(c1, c2, c3, c4, c5, c6));
 
-        List<Comment> correctList = List.of(c1,c2,c4,c5,c6);
+        List<Comment> correctList = List.of(c1, c2, c4, c5, c6);
         ResponseEntity<List<Comment>> result = service.getAll(17L);
         ResponseEntity<List<Comment>> failResult = service.getAll(2L);
 
@@ -199,17 +196,18 @@ class CommentServiceImplTest {
         assertEquals(failResult.getStatusCode(), HttpStatus.BAD_REQUEST);
 
     }
+
     @Test
     void findMostUpvotedComment() {
-        Review reviewOne = new Review(5L, 15L, 15L, "rev1", "rev1t", 5L);
-        Review reviewTwo = new Review(10L, 10L, 15L, "rev1", "rev1t", 5L);
+        final Review reviewOne = new Review(5L, 15L, 15L, "rev1", "rev1t", 5L);
+        final Review reviewTwo = new Review(10L, 10L, 15L, "rev1", "rev1t", 5L);
         Comment commentOne = new Comment(1L, 5L, 15L, "a");
         Comment commentTwo = new Comment(2L, 10L, 20L, "b");
         Comment commentThree = new Comment(3L, 10L, 25L, "c");
         commentOne.setUpvote(25L);
         commentTwo.setUpvote(15L);
         commentThree.setUpvote(20L);
-        List<Comment> comments = List.of(new Comment[] {commentOne,commentTwo, commentThree});
+        List<Comment> comments = List.of(new Comment[] {commentOne, commentTwo, commentThree});
         when(commentRepository.findAll()).thenReturn(comments);
         when(reviewRepository.getOne(5L)).thenReturn(reviewOne);
         when(reviewRepository.getOne(10L)).thenReturn(reviewTwo);
@@ -220,16 +218,16 @@ class CommentServiceImplTest {
     }
 
     @Test
-    void findMostUpvotedCommentNoResults(){
-        Review reviewOne = new Review(5L, 15L, 15L, "rev1", "rev1t", 5L);
-        Review reviewTwo = new Review(10L, 10L, 15L, "rev1", "rev1t", 5L);
+    void findMostUpvotedCommentNoResults() {
+        final Review reviewOne = new Review(5L, 15L, 15L, "rev1", "rev1t", 5L);
+        final Review reviewTwo = new Review(10L, 10L, 15L, "rev1", "rev1t", 5L);
         Comment commentOne = new Comment(1L, 5L, 15L, "a");
         Comment commentTwo = new Comment(2L, 10L, 20L, "b");
         Comment commentThree = new Comment(3L, 10L, 25L, "c");
         commentOne.setUpvote(25L);
         commentTwo.setUpvote(15L);
         commentThree.setUpvote(20L);
-        List<Comment> comments = List.of(new Comment[] {commentOne,commentTwo, commentThree});
+        List<Comment> comments = List.of(new Comment[] {commentOne, commentTwo, commentThree});
         when(commentRepository.findAll()).thenReturn(comments);
         when(reviewRepository.getOne(5L)).thenReturn(reviewOne);
         when(reviewRepository.getOne(10L)).thenReturn(reviewTwo);
@@ -285,7 +283,7 @@ class CommentServiceImplTest {
         service.addVote(1L, 1);
         service.addVote(1L, 1);
 
-        ResponseEntity<String> res1 = service.addVote(1L, 1);
+        final ResponseEntity<String> res1 = service.addVote(1L, 1);
 
         service.addVote(1L, 0);
         service.addVote(1L, 0);

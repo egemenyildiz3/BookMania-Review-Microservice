@@ -1,11 +1,13 @@
 package nl.tudelft.sem.template.review.services;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReportCommentRepository;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.ReportComment;
 import nl.tudelft.sem.template.model.Review;
-import nl.tudelft.sem.template.review.services.ReportCommentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -13,14 +15,10 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 class ReportCommentServiceImplTest {
@@ -47,7 +45,7 @@ class ReportCommentServiceImplTest {
         when(repository.save(ArgumentMatchers.any())).thenReturn(new ReportComment());
         when(commentRepository.getOne(1L)).thenReturn(comment);
 
-        ResponseEntity<ReportComment> result = service.report(1L,"foul language");
+        ResponseEntity<ReportComment> result = service.report(1L, "foul language");
 
         verify(commentRepository).existsById(comment.getId());
         verify(commentRepository).save(ArgumentMatchers.any());
@@ -58,7 +56,7 @@ class ReportCommentServiceImplTest {
 
     @Test
     void reportInvalid() {
-        ResponseEntity<ReportComment> result = service.report(1L,null);
+        ResponseEntity<ReportComment> result = service.report(1L, null);
 
         verify(repository, never()).save(any());
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
