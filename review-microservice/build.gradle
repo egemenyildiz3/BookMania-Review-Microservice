@@ -42,6 +42,7 @@ repositories {
 dependencies {
 
 	testImplementation 'junit:junit:4.13.1'
+	testImplementation 'org.jetbrains:annotations:24.0.0'
 	compileOnly 'org.projectlombok:lombok:1.18.24'
 	annotationProcessor 'org.projectlombok:lombok:1.18.24'
 
@@ -107,7 +108,7 @@ checkstyle {
 	toolVersion "10.12.5"
 	// Link Checkstyle task to customCheckstyle
 	configFile = file("${projectDir}/../config/checkstyle/checkstyle.xml")
-	ignoreFailures = true // Set to true if you want the build to ignore Checkstyle failures
+	ignoreFailures = false // Set to true if you want the build to ignore Checkstyle failures
 	showViolations = true // Set to true to display Checkstyle violations in the console
 
 	checkstyleMain {
@@ -130,7 +131,7 @@ checkstyle {
 
 pmd {
 	incrementalAnalysis = true
-	ignoreFailures = true
+	ignoreFailures = true // Not sure what pmd is but putting this to false makes the build fail
 	// Exclude specific rules or files/directories
 	pmdMain {
 		source = project.sourceSets.main.allJava.filter { file ->
