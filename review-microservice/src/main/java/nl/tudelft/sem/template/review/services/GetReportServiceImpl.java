@@ -19,6 +19,14 @@ public class GetReportServiceImpl implements GetReportService {
     private final CommunicationServiceImpl communicationService;
     private final CommentService commentService;
 
+    /**
+     * Constructor for the GetReportServiceImpl.
+     *
+     * @param bdr - the bookDataRepository
+     * @param rr - the reviewRepository
+     * @param cs - the communicationService
+     * @param co - the commentService
+     */
     public GetReportServiceImpl(BookDataRepository bdr,
                                 ReviewRepository rr,
                                 CommunicationServiceImpl cs,
@@ -101,7 +109,7 @@ public class GetReportServiceImpl implements GetReportService {
         switch (notion) {
             case NEUTRAL -> bd.setNeutralRev(bd.getNeutralRev() + 1);
             case NEGATIVE -> bd.setNegativeRev(bd.getNegativeRev() + 1);
-            case POSITIVE -> bd.setPositiveRev(bd.getPositiveRev() + 1);
+            default -> bd.setPositiveRev(bd.getPositiveRev() + 1);
         }
 
         BookData saved = bookDataRepository.save(bd);
@@ -133,7 +141,7 @@ public class GetReportServiceImpl implements GetReportService {
         switch (notion) {
             case NEUTRAL -> bd.setNeutralRev(bd.getNeutralRev() - 1);
             case NEGATIVE -> bd.setNegativeRev(bd.getNegativeRev() - 1);
-            case POSITIVE -> bd.setPositiveRev(bd.getPositiveRev() - 1);
+            default -> bd.setPositiveRev(bd.getPositiveRev() - 1);
         }
 
         BookData saved = bookDataRepository.save(bd);
@@ -151,6 +159,12 @@ public class GetReportServiceImpl implements GetReportService {
         return addRatingAndNotion(bookId, newRating, newNotion);
     }
 
+    /**
+     * Creates an empty BookData object in the repository.
+     *
+     * @param bookId - the id of the book to create for
+     * @return The object as saved in the database
+     */
     public ResponseEntity<BookData> createBookDataInRepository(Long bookId) {
         if (bookId == null) {
             throw new CustomBadRequestException("BookId cannot be null");
