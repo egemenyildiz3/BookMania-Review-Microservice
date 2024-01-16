@@ -374,11 +374,6 @@ class ReviewServiceImplTest {
     }
 
     @Test
-    void getFilterNull() {
-        assertNull(service.getSort("hello"));
-    }
-
-    @Test
     void seeAllMostRecent() {
         Review r = new Review(1L, 2L, 10L,  "Review",  "review",  5L);
         Review r2 = new Review(2L, 2L, 9L,  "Review",  "review",  5L);
