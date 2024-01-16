@@ -9,6 +9,7 @@ import nl.tudelft.sem.template.review.repositories.ReportCommentRepository;
 import org.springframework.http.ResponseEntity;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
+import org.springframework.stereotype.Service;
 
 
 @Service
