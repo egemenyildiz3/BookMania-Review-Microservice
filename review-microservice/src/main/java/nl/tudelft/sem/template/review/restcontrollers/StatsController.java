@@ -12,8 +12,8 @@ public class StatsController implements StatsApi {
 
     private final StatsServiceImpl service;
 
-    public StatsController(BookDataRepository repo, ReviewRepository reviewRepository) {
-        this.service = new StatsServiceImpl(repo, reviewRepository);
+    public StatsController(BookDataRepository repo, ReviewRepository reviewRepository, StatsServiceImpl service) {
+        this.service = (service == null) ? new StatsServiceImpl(repo, reviewRepository) : service;
     }
 
     @Override
