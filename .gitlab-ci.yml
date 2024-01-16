@@ -1,5 +1,4 @@
 include:
-  - authentication-microservice/.gitlab-ci.yml
   - review-microservice/.gitlab-ci.yml
 
 gradle_build:

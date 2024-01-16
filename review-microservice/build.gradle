@@ -42,6 +42,7 @@ repositories {
 dependencies {
 
 	testImplementation 'junit:junit:4.13.1'
+	testImplementation 'org.jetbrains:annotations:24.0.0'
 	compileOnly 'org.projectlombok:lombok:1.18.24'
 	annotationProcessor 'org.projectlombok:lombok:1.18.24'
 
@@ -51,6 +52,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	//implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
 
 
 	// Local test database (in-memory)
@@ -63,10 +65,14 @@ dependencies {
 	testImplementation('org.junit.jupiter:junit-jupiter:5.8.2')
 	testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.12.4'
 	testImplementation('org.assertj:assertj-core:3.23.1')
+	//testImplementation "org.wiremock:wiremock:3.3.1"
 	implementation 'io.swagger.core.v3:swagger-core:2.2.15'
 	implementation 'io.springfox:springfox-swagger2:2.8.0'
 	implementation 'io.springfox:springfox-swagger-ui:2.8.0'
 	implementation 'org.openapitools:jackson-databind-nullable:0.1.0'
+	testImplementation 'com.github.tomakehurst:wiremock:2.8.0'
+
+
 }
 
 test {
@@ -78,9 +84,6 @@ test {
 	}
 }
 
-repositories {
-	mavenCentral()
-}
 
 jacoco {
 	toolVersion = "0.8.7" // Use the desired version of JaCoCo
@@ -103,35 +106,51 @@ jacocoTestCoverageVerification() {
 	}
 }
 
-// Define a task to run Checkstyle
-task customCheckstyle(type: Checkstyle) {
-	// Set the Checkstyle configuration file
-	configFile = file("${rootDir}/config/checkstyle/checkstyle.xml") // Modify the path as needed
-
-	// Apply Checkstyle to the main source set while excluding generated code
-	source = sourceSets.main.allJava.filter { file ->
-		// Exclude directories or files associated with generated code
-		!file.path.contains('generated') // Example condition, modify as per your generated code path
-	}
-}
-
 checkstyle {
-	toolVersion "8.37"
+	toolVersion "10.12.5"
 	// Link Checkstyle task to customCheckstyle
-	configFile = customCheckstyle.configFile
+	configFile = file("${projectDir}/../config/checkstyle/checkstyle.xml")
 	ignoreFailures = false // Set to true if you want the build to ignore Checkstyle failures
 	showViolations = true // Set to true to display Checkstyle violations in the console
 
+	checkstyleMain {
+		source = project.sourceSets.main.allJava.filter { file ->
+			// Exclude directories or files associated with generated code
+			!file.path.contains('build') // Example condition, modify as per your generated code path
+		}
+		excludes = ['**/generated/.*', '**/build/.*']
+	}
+
+	checkstyleTest {
+		source = project.sourceSets.test.allJava.filter { file ->
+			// Exclude directories or files associated with generated code
+			!file.path.contains('build') // Example condition, modify as per your generated code path
+		}
+		excludes = ['**/generated/.*', '**/build/.*']
+	}
 }
+
 
 pmd {
 	incrementalAnalysis = true
-	ignoreFailures = true
-	sourceSets = [sourceSets.main]
+	ignoreFailures = true // Not sure what pmd is but putting this to false makes the build fail
 	// Exclude specific rules or files/directories
 	pmdMain {
-		excludes = ['**/generated/.*']
+		source = project.sourceSets.main.allJava.filter { file ->
+			// Exclude directories or files associated with generated code
+			!file.path.contains('build') // Example condition, modify as per your generated code path
+		}
+		excludes = ['**/generated/.*', '**/build/.*']
 	}
+
+	pmdTest {
+		source = project.sourceSets.test.allJava.filter { file ->
+			// Exclude directories or files associated with generated code
+			!file.path.contains('generated') // Example condition, modify as per your generated code path
+		}
+		excludes = ['**/generated/.*', '**/build/.*']
+	}
+
 }
 
 apply plugin: 'info.solidsoft.pitest'
@@ -139,7 +158,7 @@ pitest {
 	//adds dependency to org.pitest:pitest-junit5-plugin and sets "testPlugin" to "junit5"
 	junit5PluginVersion = '0.12'
 
-	targetClasses = ['nl.tudelft.sem.template.*']  //by default "${project.group}.*"
+	targetClasses = ['nl.tudelft.sem.template.review.*']  //by default "${project.group}.*"
 	pitestVersion = '1.5.1' //not needed when a default PIT version should be used
 	threads = 4
 	outputFormats = ['XML', 'HTML']

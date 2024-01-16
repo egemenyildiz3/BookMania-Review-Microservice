@@ -18,7 +18,7 @@ variables:
       - .gradle/
     policy: pull
 
-build-example-microservice:
+build-review-microservice:
   extends:
     - .build_cached
   needs:
@@ -29,7 +29,7 @@ build-example-microservice:
   script:
     gradle review-microservice:assemble review-microservice:testClasses
 
-checkStyle-example-microservice:
+checkStyle-review-microservice:
   extends:
     - .build_cached
   needs:
@@ -42,7 +42,7 @@ checkStyle-example-microservice:
   allow_failure: true
 
 
-PMD-example-microservice:
+PMD-review-microservice:
   extends:
     - .build_cached
   needs:
@@ -54,7 +54,7 @@ PMD-example-microservice:
     gradle review-microservice:pmdMain
   allow_failure: true
 
-test-example-microservice:
+test-review-microservice:
   extends:
     - .build_cached
   needs:

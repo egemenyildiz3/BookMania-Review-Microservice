@@ -34,3 +34,6 @@ gradle-app.setting
 
 ### MacOS ###
 *.DS_Store
+
+### CodeMR Metrics ###
+codemr/
