@@ -9,13 +9,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.model.Review;
+import nl.tudelft.sem.template.review.domain.reviewsort.*;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
 import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
-import nl.tudelft.sem.template.review.domain.review.filter.HighestRatedFilter;
-import nl.tudelft.sem.template.review.domain.review.filter.MostRecentFilter;
-import nl.tudelft.sem.template.review.domain.review.filter.MostRelevantFilter;
-import nl.tudelft.sem.template.review.domain.review.filter.ReviewFilter;
 import nl.tudelft.sem.template.review.exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
@@ -47,24 +44,6 @@ public class ReviewServiceImpl implements ReviewService {
     private static final List<String> profanities =
             Arrays.asList("fuck", "shit", "motherfucker", "bastard", "cunt", "bitch");
 
-    /**
-     * Gets the correct filter that is needed.
-     *
-     * @param type The needed filter
-     * @return The needed implementation of
-     */
-    public ReviewFilter getFilter(String type) {
-        if (type.equals("mostRecent")) {
-            return new MostRecentFilter();
-        }
-        if (type.equals("highestRated")) {
-            return new HighestRatedFilter();
-        }
-        if (type.equals("mostRelevant")) {
-            return new MostRelevantFilter();
-        }
-        return null;
-    }
 
     @Override
     public ResponseEntity<Review> add(Review review) {
@@ -137,11 +116,15 @@ public class ReviewServiceImpl implements ReviewService {
         if (listOfReviews.isEmpty()) {
             throw new CustomBadRequestException("No reviews for this book.");
         }
-        if (!Arrays.asList("mostRelevant", "mostRecent", "highestRated").contains(filter)) {
-            throw new CustomBadRequestException("Invalid filter.");
-        }
 
-        ReviewFilter reviewFilter = getFilter(filter);
+        SortContext sortContext = new SortContext();
+
+        switch (filter) {
+            case "mostRelevant" -> sortContext.setSort(new MostRelevantSort());
+            case "mostRecent" -> sortContext.setSort(new MostRecentSort());
+            case "highestRated" -> sortContext.setSort(new HighestRatedSort());
+            default -> throw new CustomBadRequestException("Invalid filter.");
+        }
 
         List<Review> pinnedReviews = listOfReviews.stream()
                 .filter(r -> Boolean.TRUE.equals(r.getPinned())) // Null safe
@@ -151,8 +134,8 @@ public class ReviewServiceImpl implements ReviewService {
                 .filter(r -> r.getPinned() == null || !r.getPinned())
                 .collect(Collectors.toList());
 
-        List<Review> sortedPinnedReviews = reviewFilter.filter(pinnedReviews);
-        List<Review> sortedUnpinnedReviews = reviewFilter.filter(unpinnedReviews);
+        List<Review> sortedPinnedReviews = sortContext.sort(pinnedReviews);
+        List<Review> sortedUnpinnedReviews = sortContext.sort(unpinnedReviews);
 
         List<Review> sortedReviews = new ArrayList<>();
         sortedReviews.addAll(sortedPinnedReviews);
