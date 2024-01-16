@@ -20,9 +20,10 @@ public class ReportedController implements ReportedApi {
     private final ReportCommentServiceImpl reportCommentService;
 
     public ReportedController(ReportReviewRepository reportReviewRepository, ReviewRepository reviewRepository,
-                              CommunicationServiceImpl communicationService, ReportCommentRepository reportCommentRepository, CommentRepository commentRepository) {
-        this.reportReviewService = new ReportReviewServiceImpl(reportReviewRepository, communicationService, reviewRepository);
-        this.reportCommentService = new ReportCommentServiceImpl(reportCommentRepository, communicationService, commentRepository);
+                            CommunicationServiceImpl communicationService, ReportCommentRepository reportCommentRepository, CommentRepository commentRepository,
+                            ReportCommentServiceImpl reportCommentService, ReportReviewServiceImpl reportReviewService) {
+        this.reportReviewService = reportReviewService != null ? reportReviewService : new ReportReviewServiceImpl(reportReviewRepository, communicationService, reviewRepository);
+        this.reportCommentService = reportCommentService != null ? reportCommentService : new ReportCommentServiceImpl(reportCommentRepository, communicationService, commentRepository);
     }
 
     @Override

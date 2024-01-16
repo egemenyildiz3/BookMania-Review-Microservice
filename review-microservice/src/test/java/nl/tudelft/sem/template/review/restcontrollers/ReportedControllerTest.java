@@ -1,4 +1,3 @@
-/*
 package nl.tudelft.sem.template.review.restcontrollers;
 
 
@@ -8,7 +7,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import nl.tudelft.sem.template.model.ReportComment;
 import nl.tudelft.sem.template.model.ReportReview;
-import nl.tudelft.sem.template.review.restcontrollers.ReportController;
 import nl.tudelft.sem.template.review.services.ReportCommentServiceImpl;
 import nl.tudelft.sem.template.review.services.ReportReviewServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -23,7 +21,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -49,15 +46,9 @@ class ReportedControllerTest {
 
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-
-        mockMvc.perform(get("/reported/reviews").param("userId", "1"))
+        mockMvc.perform(get("/reported/reviews/1"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].reviewId").value(1L))
-                .andExpect(jsonPath("$[0].reason").value("body"));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
         verify(reportReviewService, times(1)).getAllReportedReviews(anyLong());
     }
@@ -73,19 +64,12 @@ class ReportedControllerTest {
 
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-
-        mockMvc.perform(get("/reported/comments")
+        mockMvc.perform(get("/reported/comments/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].commentId").value(1))
-                .andExpect(jsonPath("$[0].reason").value("body"));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
 
         verify(reportCommentService, times(1)).getAllReportedComments(anyLong());
     }
 }
-
- */
