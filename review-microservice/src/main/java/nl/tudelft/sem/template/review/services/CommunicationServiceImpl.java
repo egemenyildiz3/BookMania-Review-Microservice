@@ -16,8 +16,12 @@ public class CommunicationServiceImpl {
 
     public CommunicationServiceImpl() {
     }
-    public boolean getResponse(String server, Long id, boolean admin){
+    public boolean getResponse(String server, Long id, boolean admin, boolean working){
+        if(!working)
+            return true;
         String url;
+        StringBuilder response = new StringBuilder();
+        int responseCode;
         if(Objects.equals(server, bookMicroUrl)){
             url = server + "/book/getById/" + id;
         }else{
@@ -30,45 +34,46 @@ public class CommunicationServiceImpl {
             // Set the request method
             connection.setRequestMethod("GET");
 
-            int responseCode = connection.getResponseCode();
+            responseCode = connection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String inputLine;
-                StringBuilder response = new StringBuilder();
-
                 while ((inputLine = in.readLine()) != null) {
                     response.append(inputLine);
                 }
                 in.close();
 
-                // Print the response
-                System.out.println(response.toString());
             } else {
                 System.out.println("Failed with status code " + responseCode);
+                return false;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+        }
+        if(admin) {
+            return response.toString().toLowerCase().contains("admin");
         }
         return true;
+
     }
 
     public boolean isAdmin(Long userId) {
         //TODO make http request to endpoint for admin
-        //return getResponse(userMicroUrl,userId,true);
-        return true;
+        return getResponse(userMicroUrl,userId,true, false);//set the second boolean to true to make actual http request
+        //return true;
     }
 
 
     public boolean existsBook(Long bookId) {
         //TODO make http request to endpoint for book
-        //return getResponse(bookMicroUrl,userId,false);
-        return true;
+        return getResponse(bookMicroUrl,bookId,false, false);
+        //return true;
     }
 
     public boolean existsUser(Long userId) {
         //TODO make http request to endpoint for user
-        //return getResponse(userMicroUrl,userId,false);
-        return true;
+        return getResponse(userMicroUrl,userId,false, false);
+        //return true;
     }
 
 

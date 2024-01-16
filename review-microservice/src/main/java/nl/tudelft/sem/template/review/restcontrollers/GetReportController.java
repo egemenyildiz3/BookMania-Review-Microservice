@@ -2,6 +2,8 @@ package nl.tudelft.sem.template.review.restcontrollers;
 
 import nl.tudelft.sem.template.api.GetReportApi;
 import nl.tudelft.sem.template.model.BookData;
+import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
+import nl.tudelft.sem.template.review.exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.BookDataRepository;
 import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class GetReportController implements GetReportApi {
 
     private final GetReportServiceImpl service;
+
+
 
     public GetReportController(BookDataRepository repo,
                                ReviewRepository rr,

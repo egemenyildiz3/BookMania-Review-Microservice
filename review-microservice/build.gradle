@@ -52,6 +52,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	//implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
 
 
 	// Local test database (in-memory)
@@ -64,10 +65,14 @@ dependencies {
 	testImplementation('org.junit.jupiter:junit-jupiter:5.8.2')
 	testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.12.4'
 	testImplementation('org.assertj:assertj-core:3.23.1')
+	//testImplementation "org.wiremock:wiremock:3.3.1"
 	implementation 'io.swagger.core.v3:swagger-core:2.2.15'
 	implementation 'io.springfox:springfox-swagger2:2.8.0'
 	implementation 'io.springfox:springfox-swagger-ui:2.8.0'
 	implementation 'org.openapitools:jackson-databind-nullable:0.1.0'
+	testImplementation 'com.github.tomakehurst:wiremock:2.8.0'
+
+
 }
 
 test {
@@ -79,9 +84,6 @@ test {
 	}
 }
 
-repositories {
-	mavenCentral()
-}
 
 jacoco {
 	toolVersion = "0.8.7" // Use the desired version of JaCoCo
