@@ -1,9 +1,7 @@
 package nl.tudelft.sem.template.review.services;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-
 import nl.tudelft.sem.template.model.ReportReview;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.repositories.ReportReviewRepository;
@@ -11,7 +9,6 @@ import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
-import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,10 +19,11 @@ public class ReportReviewServiceImpl implements ReportReviewService {
     private final ReviewRepository reviewRepo;
 
     /**
-     * Constructor for ReportReviewServiceImpl.
-     * @param repo the report review repository
-     * @param communicationService the communication service
-     * @param reviewRepo the review repository
+     * Constructor for the ReportReviewServiceImpl.
+     *
+     * @param repo - the reportReviewRepository
+     * @param communicationService - the communicationService
+     * @param reviewRepo - the reviewRepository
      */
     public ReportReviewServiceImpl(ReportReviewRepository repo, CommunicationServiceImpl communicationService,
                                    ReviewRepository reviewRepo) {
@@ -90,8 +88,8 @@ public class ReportReviewServiceImpl implements ReportReviewService {
             throw new CustomPermissionsException("User is not owner or admin.");
         }
 
-            List<ReportReview> allReportedReviews = repo.findAll();
-            return ResponseEntity.ok(allReportedReviews);
+        List<ReportReview> allReportedReviews = repo.findAll();
+        return ResponseEntity.ok(allReportedReviews);
     }
 
     @Override
@@ -139,13 +137,13 @@ public class ReportReviewServiceImpl implements ReportReviewService {
             throw new CustomPermissionsException("User is not owner or admin.");
         }
 
-            List<ReportReview> allReportedReviews = repo.findAllByReviewId(reviewId);
-            for (ReportReview reportReview : allReportedReviews) {
-                Review review = reviewRepo.getOne(reportReview.getReviewId());
-                review.getReportList().remove(reportReview);
-                reviewRepo.save(review);
-            }
-            return ResponseEntity.ok("Deleted all reports");
+        List<ReportReview> allReportedReviews = repo.findAllByReviewId(reviewId);
+        for (ReportReview reportReview : allReportedReviews) {
+            Review review = reviewRepo.getOne(reportReview.getReviewId());
+            review.getReportList().remove(reportReview);
+            reviewRepo.save(review);
+        }
+        return ResponseEntity.ok("Deleted all reports");
 
     }
 }

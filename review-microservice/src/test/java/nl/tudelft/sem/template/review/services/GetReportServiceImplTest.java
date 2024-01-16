@@ -38,6 +38,8 @@ class GetReportServiceImplTest {
 
         when(communicationService.existsUser(any(Long.class))).thenReturn(true);
         when(communicationService.existsBook(any(Long.class))).thenReturn(true);
+        when(communicationService.isAuthor(any(Long.class), any(Long.class))).thenReturn(true);
+        when(communicationService.isAdmin(any(Long.class))).thenReturn(true);
     }
 
     @Test
@@ -54,6 +56,16 @@ class GetReportServiceImplTest {
         BookData result = service.getReport(id, 5L, "report").getBody();
 
         assertEquals(expected, result);
+    }
+
+    @Test
+    void getReportNotAuthorOrAdmin() {
+        when(communicationService.isAuthor(any(Long.class), any(Long.class))).thenReturn(false);
+        when(communicationService.isAdmin(any(Long.class))).thenReturn(false);
+        when(communicationService.isAuthor(1L, 5L)).thenReturn(false);
+        when(communicationService.isAdmin(5L)).thenReturn(false);
+
+        assertThrows(CustomBadRequestException.class, () -> service.getReport(1L, 5L, "report"));
     }
 
     @Test
@@ -88,7 +100,7 @@ class GetReportServiceImplTest {
     }
 
     @Test
-    void testGetReportReport() {
+    void testGetReportReportNoComments() {
         long id = 20L;
         BookData data = new BookData(id);
         data.setAvrRating(4.0);
@@ -108,6 +120,32 @@ class GetReportServiceImplTest {
         BookData result = service.getReport(id, 5L, "report").getBody();
 
         data.setMostUpvotedReview(mostUpvoted.getId());
+
+        assertEquals(data, result);
+    }
+
+    @Test
+    void testGetReportReportWithComments() {
+        long id = 20L;
+        BookData data = new BookData(id);
+        data.setAvrRating(4.0);
+        data.setPositiveRev(3);
+        data.setNeutralRev(1);
+        data.setNegativeRev(1);
+
+        when(bookDataRepository.existsById(id)).thenReturn(true);
+        when(bookDataRepository.getOne(id)).thenReturn(data);
+
+        List<Long> reviews = new ArrayList<>();
+        Review mostUpvoted = new Review(5L, id, 20L, "Review", "text", 5L);
+        reviews.add(mostUpvoted.getId());
+        when(reviewRepository.findMostUpvotedReviewId(eq(id), any(Pageable.class))).thenReturn(reviews);
+        when(commentService.findMostUpvotedComment(id)).thenReturn(ResponseEntity.ok(67L));
+
+        BookData result = service.getReport(id, 5L, "report").getBody();
+
+        data.setMostUpvotedReview(mostUpvoted.getId());
+        data.setMostUpvotedComment(67L);
 
         assertEquals(data, result);
     }
@@ -280,6 +318,30 @@ class GetReportServiceImplTest {
 
         assertThrows(CustomBadRequestException.class,
                 () -> service.addRatingAndNotion(null, 3L, Review.BookNotionEnum.POSITIVE));
+    }
+
+    @Test
+    void addRatingAndNotionBookDoesntExist() {
+        long id = 20L;
+
+        when(bookDataRepository.existsById(any(Long.class))).thenReturn(false);
+        when(bookDataRepository.existsById(id)).thenReturn(false);
+        when(communicationService.existsBook(any(Long.class))).thenReturn(false);
+        when(communicationService.existsBook(id)).thenReturn(false);
+        assertThrows(CustomBadRequestException.class,
+                () -> service.addRatingAndNotion(id, 3L, Review.BookNotionEnum.POSITIVE));
+    }
+
+    @Test
+    void removeRatingAndNotionBookDoesntExist() {
+        long id = 20L;
+
+        when(bookDataRepository.existsById(any(Long.class))).thenReturn(false);
+        when(bookDataRepository.existsById(id)).thenReturn(false);
+        when(communicationService.existsBook(any(Long.class))).thenReturn(false);
+        when(communicationService.existsBook(id)).thenReturn(false);
+        assertThrows(CustomBadRequestException.class,
+                () -> service.removeRatingAndNotion(id, 3L, Review.BookNotionEnum.POSITIVE));
     }
 
     @Test
