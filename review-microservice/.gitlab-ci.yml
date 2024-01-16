@@ -38,8 +38,7 @@ checkStyle-review-microservice:
     - gradle_build
   stage: staticAnalysis
   script:
-    gradle review-microservice:checkStyleTest
-  #review-microservice:checkstyleMain - Add back when main checkstyle is fixed
+    gradle review-microservice:checkstyleMain review-microservice:checkStyleTest
   allow_failure: true
 
 

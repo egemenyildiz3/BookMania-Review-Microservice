@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
@@ -261,6 +260,13 @@ public class ReviewServiceImpl implements ReviewService {
         return ResponseEntity.ok("Vote added, new vote values are:\nupvotes: "
                 + review.getUpvote() + "\ndownvotes: " + review.getDownvote());
     }
+
+    /**
+     * Checks whether is upvoting or downvoting a review
+     *
+     * @param review The review that is being voted
+     * @param body The vote, 0 for downvote and 1 for upvote
+     */
 
     private void checkBody(Review review, Integer body) {
         if (body == 1) {

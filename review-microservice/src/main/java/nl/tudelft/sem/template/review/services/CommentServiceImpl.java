@@ -26,6 +26,14 @@ public class CommentServiceImpl implements CommentService {
     private final ReviewRepository reviewRepository;
     private final CommunicationServiceImpl communicationService;
 
+    /**
+     * Initializes a new instance of the class with the provided dependencies
+     *
+     * @param repository The comment repository instance for data storage and retrieval
+     * @param reviewRepository The review repository instance for data storage and retrieval
+     * @param communicationService The communication service instance for using the other teams' APIs
+     */
+
     public CommentServiceImpl(CommentRepository repository, ReviewRepository reviewRepository,
                               CommunicationServiceImpl communicationService) {
         this.reviewRepository = reviewRepository;
@@ -189,6 +197,13 @@ public class CommentServiceImpl implements CommentService {
         return ResponseEntity.ok("Vote added, new vote values are:\nupvotes: "
                 + comment.getUpvote() + "\ndownvotes: " + comment.getDownvote());
     }
+
+    /**
+     * Checks whether is upvoting or downvoting a comment
+     *
+     * @param comment The comment that is being voted
+     * @param body The vote, 0 for downvote and 1 for upvote
+     */
 
     private void checkBody(Comment comment, Integer body) {
         if (body == 1) {

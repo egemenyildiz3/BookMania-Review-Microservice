@@ -55,6 +55,9 @@ public class GetReportServiceImpl implements GetReportService {
         if (!communicationService.existsBook(bookId)) {
             throw new CustomBadRequestException("Book doesn't exist");
         }
+        if (!(communicationService.isAuthor(bookId, userId) || communicationService.isAdmin(userId))) {
+            throw new CustomBadRequestException("User is not authorised to view this BookData");
+        }
 
         // If the bookData doesn't exist yet, then create an empty one for the repository, and work with it later
         if (!bookDataRepository.existsById(bookId)) {
@@ -103,10 +106,7 @@ public class GetReportServiceImpl implements GetReportService {
     @Override
     public ResponseEntity<BookData> addRatingAndNotion(Long bookId, Long rating, Review.BookNotionEnum notion) {
         if (!bookDataRepository.existsById(bookId)) {
-            var response = createBookDataInRepository(bookId);
-            if (response.getStatusCode().is4xxClientError()) {
-                return response;
-            }
+            createBookDataInRepository(bookId);
         }
 
         BookData bd = initializeLazyObjectFromDatabase(bookDataRepository.getOne(bookId));
@@ -152,10 +152,7 @@ public class GetReportServiceImpl implements GetReportService {
     @Override
     public ResponseEntity<BookData> updateRatingAndNotion(Long bookId, Long oldRating, Review.BookNotionEnum oldNotion,
                                                           Long newRating, Review.BookNotionEnum newNotion) {
-        var response =  removeRatingAndNotion(bookId, oldRating, oldNotion);
-        if (response.getStatusCode().is4xxClientError()) {
-            return response;
-        }
+        removeRatingAndNotion(bookId, oldRating, oldNotion);
         return addRatingAndNotion(bookId, newRating, newNotion);
     }
 
@@ -172,7 +169,9 @@ public class GetReportServiceImpl implements GetReportService {
         if (bookDataRepository.existsById(bookId)) {
             throw new CustomBadRequestException("BookData already exists");
         }
-
+        if (!communicationService.existsBook(bookId)) {
+            throw new CustomBadRequestException("Book doesn't exist");
+        }
 
         BookData bd = new BookData(bookId);
         bd.setAvrRating(0.0);

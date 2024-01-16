@@ -1,16 +1,16 @@
 package nl.tudelft.sem.template.review.services;
 
+import java.util.List;
+import java.util.Optional;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.ReportComment;
-import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
-import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
 import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReportCommentRepository;
 import org.springframework.http.ResponseEntity;
+import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
+import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ReportCommentServiceImpl implements ReportCommentService {
@@ -19,11 +19,13 @@ public class ReportCommentServiceImpl implements ReportCommentService {
     private final CommentRepository commentRepo;
 
     /**
-     * Constructor for ReportCommentServiceImpl.
-     * @param repo the report comment repository
-     * @param communicationService the communication service
-     * @param commentRepo the comment repository
-        */
+     * Constructor for the ReportCommentServiceImpl.
+     *
+     * @param repo - the reportCommentRepository
+     * @param communicationService - the communicationService
+     * @param commentRepo - the commentRepository
+     */
+
     public ReportCommentServiceImpl(ReportCommentRepository repo, CommunicationServiceImpl communicationService,
                                     CommentRepository commentRepo) {
         this.repo = repo;
@@ -74,7 +76,7 @@ public class ReportCommentServiceImpl implements ReportCommentService {
 
     @Override
     public ResponseEntity<List<ReportComment>> getReportsForComment(Long commentId) {
-        if(!commentRepo.existsById(commentId)) {
+        if (!commentRepo.existsById(commentId)) {
             throw new CustomBadRequestException("Comment id does not exist.");
         }
         List<ReportComment> allReportsForComment = repo.findAllByCommentId(commentId);
@@ -88,13 +90,13 @@ public class ReportCommentServiceImpl implements ReportCommentService {
             throw new CustomPermissionsException("User is not admin.");
         }
 
-            List<ReportComment> allReportedComments = repo.findAll();
-            return ResponseEntity.ok(allReportedComments);
+        List<ReportComment> allReportedComments = repo.findAll();
+        return ResponseEntity.ok(allReportedComments);
     }
 
     @Override
     public ResponseEntity<Boolean> isReported(Long commentId) {
-        if(!commentRepo.existsById(commentId)) {
+        if (!commentRepo.existsById(commentId)) {
             throw new CustomBadRequestException("Comment id does not exist.");
         }
         boolean isReported = repo.existsByCommentId(commentId);
@@ -134,13 +136,13 @@ public class ReportCommentServiceImpl implements ReportCommentService {
             throw new CustomPermissionsException("User is not owner or admin.");
         }
 
-            List<ReportComment> allReportedComments = repo.findAllByCommentId(commentId);
-            for (ReportComment reportComment : allReportedComments) {
-                Comment comment = commentRepo.getOne(reportComment.getCommentId());
-                comment.getReportList().remove(reportComment);
-                commentRepo.save(comment);
-            }
-            return ResponseEntity.ok("Deleted all reports");
+        List<ReportComment> allReportedComments = repo.findAllByCommentId(commentId);
+        for (ReportComment reportComment : allReportedComments) {
+            Comment comment = commentRepo.getOne(reportComment.getCommentId());
+            comment.getReportList().remove(reportComment);
+            commentRepo.save(comment);
+        }
+        return ResponseEntity.ok("Deleted all reports");
 
     }
 }
