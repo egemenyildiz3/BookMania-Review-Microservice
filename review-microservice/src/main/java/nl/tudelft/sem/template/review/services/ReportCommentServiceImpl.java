@@ -9,7 +9,7 @@ import nl.tudelft.sem.template.review.repositories.ReportCommentRepository;
 import org.springframework.http.ResponseEntity;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
-import org.springframework.stereotype.Service;
+
 
 @Service
 public class ReportCommentServiceImpl implements ReportCommentService {
@@ -24,6 +24,7 @@ public class ReportCommentServiceImpl implements ReportCommentService {
      * @param communicationService - the communicationService
      * @param commentRepo - the commentRepository
      */
+
     public ReportCommentServiceImpl(ReportCommentRepository repo, CommunicationServiceImpl communicationService,
                                     CommentRepository commentRepo) {
         this.repo = repo;
