@@ -375,7 +375,7 @@ class ReviewServiceImplTest {
 
     @Test
     void getFilterNull() {
-        assertNull(service.getFilter("hello"));
+        assertNull(service.getSort("hello"));
     }
 
     @Test

@@ -12,10 +12,10 @@ import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
 import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
-import nl.tudelft.sem.template.review.domain.review.filter.HighestRatedFilter;
-import nl.tudelft.sem.template.review.domain.review.filter.MostRecentFilter;
-import nl.tudelft.sem.template.review.domain.review.filter.MostRelevantFilter;
-import nl.tudelft.sem.template.review.domain.review.filter.ReviewFilter;
+import nl.tudelft.sem.template.review.domain.reviewsort.HighestRatedSort;
+import nl.tudelft.sem.template.review.domain.reviewsort.MostRecentSort;
+import nl.tudelft.sem.template.review.domain.reviewsort.MostRelevantSort;
+import nl.tudelft.sem.template.review.domain.reviewsort.ReviewSort;
 import nl.tudelft.sem.template.review.exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
@@ -53,15 +53,15 @@ public class ReviewServiceImpl implements ReviewService {
      * @param type The needed filter
      * @return The needed implementation of
      */
-    public ReviewFilter getFilter(String type) {
+    public ReviewSort getSort(String type) {
         if (type.equals("mostRecent")) {
-            return new MostRecentFilter();
+            return new MostRecentSort();
         }
         if (type.equals("highestRated")) {
-            return new HighestRatedFilter();
+            return new HighestRatedSort();
         }
         if (type.equals("mostRelevant")) {
-            return new MostRelevantFilter();
+            return new MostRelevantSort();
         }
         return null;
     }
@@ -141,7 +141,7 @@ public class ReviewServiceImpl implements ReviewService {
             throw new CustomBadRequestException("Invalid filter.");
         }
 
-        ReviewFilter reviewFilter = getFilter(filter);
+        ReviewSort reviewFilter = getSort(filter);
 
         List<Review> pinnedReviews = listOfReviews.stream()
                 .filter(r -> Boolean.TRUE.equals(r.getPinned())) // Null safe
@@ -151,8 +151,8 @@ public class ReviewServiceImpl implements ReviewService {
                 .filter(r -> r.getPinned() == null || !r.getPinned())
                 .collect(Collectors.toList());
 
-        List<Review> sortedPinnedReviews = reviewFilter.filter(pinnedReviews);
-        List<Review> sortedUnpinnedReviews = reviewFilter.filter(unpinnedReviews);
+        List<Review> sortedPinnedReviews = reviewFilter.sort(pinnedReviews);
+        List<Review> sortedUnpinnedReviews = reviewFilter.sort(unpinnedReviews);
 
         List<Review> sortedReviews = new ArrayList<>();
         sortedReviews.addAll(sortedPinnedReviews);
