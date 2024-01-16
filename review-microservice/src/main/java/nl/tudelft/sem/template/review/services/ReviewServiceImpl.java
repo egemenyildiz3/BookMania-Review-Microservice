@@ -2,7 +2,6 @@ package nl.tudelft.sem.template.review.services;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -15,7 +14,6 @@ import nl.tudelft.sem.template.review.domain.textcheck.TextHandler;
 import nl.tudelft.sem.template.review.domain.textcheck.UrlHandler;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
-import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
 import nl.tudelft.sem.template.review.exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
@@ -228,7 +226,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     /**
-     * Checks whether is upvoting or downvoting a review
+     * Checks whether is upvoting or downvoting a review.
      *
      * @param review The review that is being voted
      * @param body The vote, 0 for downvote and 1 for upvote

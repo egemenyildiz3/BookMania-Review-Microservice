@@ -38,16 +38,6 @@ class CommentServiceImplTest {
     }
 
     @Test
-    void testCheckProfanitiesTrue() {
-        assertTrue(CommentServiceImpl.checkProfanities("This review is fucking trash"));
-    }
-
-    @Test
-    void testCheckProfanitiesFalse() {
-        assertFalse(CommentServiceImpl.checkProfanities("This review is great"));
-    }
-
-    @Test
     void testAdd() {
         Review review = new Review(2L, 5L, 10L, "Review", "review", 5L);
         Comment comment = new Comment(3L, 2L, 10L, "comment");
