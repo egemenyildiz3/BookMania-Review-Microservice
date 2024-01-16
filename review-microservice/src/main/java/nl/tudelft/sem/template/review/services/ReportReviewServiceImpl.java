@@ -1,28 +1,51 @@
 package nl.tudelft.sem.template.review.services;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
 import nl.tudelft.sem.template.model.ReportReview;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.repositories.ReportReviewRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
+import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
+import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
+import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ReportReviewServiceImpl implements ReportReviewService {
 
     private final ReportReviewRepository repo;
+    private final CommunicationServiceImpl communicationService;
     private final ReviewRepository reviewRepo;
 
-    public ReportReviewServiceImpl(ReportReviewRepository repo, ReviewRepository reviewRepo) {
+    public ReportReviewServiceImpl(ReportReviewRepository repo, CommunicationServiceImpl communicationService,
+                                   ReviewRepository reviewRepo) {
         this.repo = repo;
+        this.communicationService =  communicationService;
         this.reviewRepo = reviewRepo;
     }
 
     @Override
     public ResponseEntity<ReportReview> report(Long reviewId, String reason) {
-        if (reason == null || !reviewRepo.existsById(reviewId)) {
-            return ResponseEntity.badRequest().build();
+        if (reviewId == null) {
+            throw new CustomBadRequestException("Review ID cannot be null.");
+        }
+        if (reason == null) {
+            throw new CustomBadRequestException("Reason cannot be null.");
+        }
+        boolean existsReviewId = reviewRepo.existsById(reviewId);
+        if (!existsReviewId) {
+            throw new CustomBadRequestException("Invalid review id.");
+        }
+
+        Review review = reviewRepo.getOne(reviewId);
+
+        boolean existsUser = communicationService.existsUser(review.getUserId());
+        if (!existsUser) {
+            throw new CustomBadRequestException("Invalid user id.");
         }
 
         ReportReview reportReview = new ReportReview();
@@ -39,29 +62,38 @@ public class ReportReviewServiceImpl implements ReportReviewService {
     @Override
     public ResponseEntity<ReportReview> get(Long id) {
         if (!repo.existsById(id)) {
-            return ResponseEntity.badRequest().build();
+            throw new CustomBadRequestException("Invalid report id.");
         }
         return ResponseEntity.ok(repo.findById(id).get());
     }
 
     @Override
     public ResponseEntity<List<ReportReview>> getReportsForReview(Long reviewId) {
+        if (!reviewRepo.existsById(reviewId)) {
+            throw new CustomBadRequestException("Invalid review id.");
+        }
         List<ReportReview> reports = repo.findAllByReviewId(reviewId);
         return ResponseEntity.ok(reports);
     }
 
     @Override
     public ResponseEntity<List<ReportReview>> getAllReportedReviews(Long userId) {
-        boolean isAdmin = isAdmin(userId);
-        if (isAdmin) {
+
+        boolean isAdmin = communicationService.isAdmin(userId);
+        if (!isAdmin) {
+            throw new CustomPermissionsException("User is not owner or admin.");
+        }
+
             List<ReportReview> allReportedReviews = repo.findAll();
             return ResponseEntity.ok(allReportedReviews);
-        }
-        return ResponseEntity.badRequest().build();
     }
 
     @Override
     public ResponseEntity<Boolean> isReported(Long reviewId) {
+        boolean existsReviewId = reviewRepo.existsById(reviewId);
+        if (!existsReviewId) {
+            throw new CustomBadRequestException("Invalid review id.");
+        }
         boolean isReported = repo.existsByReviewId(reviewId);
         return ResponseEntity.ok(isReported);
     }
@@ -69,35 +101,45 @@ public class ReportReviewServiceImpl implements ReportReviewService {
     @Override
     public ResponseEntity<String> delete(Long id, Long userId) {
         if (!repo.existsById(id)) {
-            return ResponseEntity.badRequest().header("no exist").build();
+            throw new CustomBadRequestException("Invalid report id.");
         }
-        ReportReview reportReview = repo.findById(id).get();
-        boolean isAdmin = isAdmin(userId);
+
+        Optional<ReportReview> optionalReportReview = repo.findById(id);
+        ReportReview reportReview;
+        if (optionalReportReview.isPresent()) {
+            reportReview = optionalReportReview.get();
+        } else {
+            throw new CustomBadRequestException("Cannot find report.");
+        }
+
+        boolean isAdmin = communicationService.isAdmin(userId);
         if (isAdmin) {
             Review review = reviewRepo.getOne(reportReview.getReviewId());
             review.getReportList().remove(reportReview);
             reviewRepo.save(review);
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.badRequest().header("not admin").build();
+        throw new CustomPermissionsException("User is not admin");
+
     }
 
-    /*@Override
+    @Override
     public ResponseEntity<String> deleteReportsForReview(Long reviewId, Long userId) {
-        if(!repo.existsByReviewId(reviewId)) {
-            return ResponseEntity.badRequest().build();
+        if (!reviewRepo.existsById(reviewId)) {
+            throw new CustomBadRequestException("Invalid review id.");
         }
-        boolean isAdmin = isAdmin(userId);
-        if(isAdmin){
-            repo.deleteAll(repo.findAllByReviewId(reviewId));
-            return ResponseEntity.ok().build();
+        boolean isAdmin = communicationService.isAdmin(userId);
+        if (!isAdmin) {
+            throw new CustomPermissionsException("User is not owner or admin.");
         }
-        return ResponseEntity.badRequest().build();
-    }*/
 
-    public static boolean isAdmin(Long userId) {
-        //TODO: call the method from user microservice that returns the role of user
-        // return true if admin
-        return true;
+            List<ReportReview> allReportedReviews = repo.findAllByReviewId(reviewId);
+            for (ReportReview reportReview : allReportedReviews) {
+                Review review = reviewRepo.getOne(reportReview.getReviewId());
+                review.getReportList().remove(reportReview);
+                reviewRepo.save(review);
+            }
+            return ResponseEntity.ok("Deleted all reports");
+
     }
 }

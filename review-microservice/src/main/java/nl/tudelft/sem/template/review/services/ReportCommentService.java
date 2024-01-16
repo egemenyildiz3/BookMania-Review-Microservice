@@ -18,6 +18,6 @@ public interface ReportCommentService {
 
     ResponseEntity<String> delete(Long id, Long userId);
 
-    //ResponseEntity<String> deleteReportsForComment(Long commentId, Long userId);
+    ResponseEntity<String> deleteReportsForComment(Long commentId, Long userId);
 }
 

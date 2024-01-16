@@ -40,6 +40,7 @@ class CustomExceptionHandlerTest {
         assertEquals("No permission", responseEntity.getBody());
     }
 
+
     @Test
     public void testCustomUserExistsException() {
         CustomExceptionHandler exceptionHandler = new CustomExceptionHandler();
