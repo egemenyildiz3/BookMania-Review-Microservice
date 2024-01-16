@@ -18,6 +18,7 @@ import nl.tudelft.sem.template.review.domain.review.filter.HighestRatedFilter;
 import nl.tudelft.sem.template.review.domain.review.filter.MostRecentFilter;
 import nl.tudelft.sem.template.review.domain.review.filter.MostRelevantFilter;
 import nl.tudelft.sem.template.review.domain.review.filter.ReviewFilter;
+import nl.tudelft.sem.template.review.exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -80,7 +81,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         boolean existsUser = communicationService.existsUser(review.getUserId());
         if (!existsUser) {
-            throw new CustomBadRequestException("Invalid user id.");
+            throw new CustomUserExistsException("Invalid user id.");
         }
 
 
@@ -172,7 +173,7 @@ public class ReviewServiceImpl implements ReviewService {
         //check for user in database
         boolean existsUser = communicationService.existsUser(userId);
         if (!existsUser) {
-            throw new CustomBadRequestException("Invalid user id.");
+            throw new CustomUserExistsException("Invalid user id.");
         }
 
 
@@ -244,12 +245,15 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public ResponseEntity<String> addVote(Long reviewId, Integer body) {
-        if (!repo.existsById(reviewId) || get(reviewId).getBody() == null) {
-            return ResponseEntity.badRequest().body("Review id does not exist.");
+        if (!repo.existsById(reviewId)) {
+            throw new CustomBadRequestException("Invalid review id.");
+        }
+        if (get(reviewId).getBody() == null) {
+            throw new CustomBadRequestException("Review cannot be null.");
         }
 
         if (!(List.of(0, 1).contains(body))) {
-            return ResponseEntity.badRequest().body("The only accepted bodies are 0 for downvote and 1 for upvote.");
+            throw new CustomBadRequestException("The only accepted bodies are 0 for downvote and 1 for upvote");
         }
         Review review = get(reviewId).getBody();
         assert review != null;

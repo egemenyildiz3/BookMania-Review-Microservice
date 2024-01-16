@@ -8,6 +8,7 @@ import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
 import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
 import nl.tudelft.sem.template.model.Review;
+import nl.tudelft.sem.template.review.exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -93,8 +94,8 @@ class ReviewServiceImplTest {
         when(repository.save(review)).thenReturn(review);
         when(communicationService.existsUser(10L)).thenReturn(false);
         when(communicationService.existsBook(2L)).thenReturn(true);
-        assertThrows(CustomBadRequestException.class,  () -> service.add(review));
-        verify(repository, never()).save(review);
+        assertThrows(CustomUserExistsException.class, () -> service.add(review));
+        verify(repository,never()).save(review);
 
     }
 
@@ -209,8 +210,8 @@ class ReviewServiceImplTest {
         when(repository.existsById(1L)).thenReturn(true);
         when(communicationService.existsUser(10L)).thenReturn(false);
         when(communicationService.isAdmin(10L)).thenReturn(true);
-        assertThrows(CustomBadRequestException.class,  () -> service.update(10L, review));
-        verify(repository, never()).save(review);
+        assertThrows(CustomUserExistsException.class, () -> service.update(10L,review));
+        verify(repository,never()).save(review);
     }
 
     @Test
@@ -327,11 +328,10 @@ class ReviewServiceImplTest {
 
         when(repository.existsById(reviewId)).thenReturn(false);
 
-        ResponseEntity<String> response = service.addVote(reviewId,  upvote);
+        assertThrows(CustomBadRequestException.class, () -> service.addVote(reviewId,upvote));
 
-        assertTrue(response.getStatusCode().is4xxClientError());
-        assertEquals(response.getBody(),  "Review id does not exist.");
-        verify(repository,  times(0)).save(review);
+
+        verify(repository, times(0)).save(review);
 
     }
 
@@ -345,11 +345,10 @@ class ReviewServiceImplTest {
 
         when(repository.existsById(reviewId)).thenReturn(true);
 
-        ResponseEntity<String> response = service.addVote(reviewId,  upvote);
+        assertThrows(CustomBadRequestException.class, () -> service.addVote(reviewId,upvote));
 
-        assertTrue(response.getStatusCode().is4xxClientError());
-        assertEquals(response.getBody(),  "The only accepted bodies are 0 for downvote and 1 for upvote.");
-        verify(repository,  times(0)).save(review);
+
+        verify(repository, times(0)).save(review);
 
     }
 
