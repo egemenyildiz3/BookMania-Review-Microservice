@@ -19,10 +19,24 @@ public class ReportedController implements ReportedApi {
     private final ReportReviewServiceImpl reportReviewService;
     private final ReportCommentServiceImpl reportCommentService;
 
-    public ReportedController(ReportReviewRepository reportReviewRepository, ReviewRepository reviewRepository,
-                              CommunicationServiceImpl communicationService, ReportCommentRepository reportCommentRepository, CommentRepository commentRepository) {
-        this.reportReviewService = new ReportReviewServiceImpl(reportReviewRepository, communicationService, reviewRepository);
-        this.reportCommentService = new ReportCommentServiceImpl(reportCommentRepository, communicationService, commentRepository);
+    /**
+     * Constructor for ReportedController - which handles retrieving reported reviews and comments.
+     *
+     * @param reportReviewRepository - the repository for report reviews
+     * @param reviewRepository - the repository for reviews
+     * @param communicationService - the service for communication
+     * @param reportCommentRepository - the repository for report comments
+     * @param commentRepository - the repository for comments
+     */
+    public ReportedController(ReportReviewRepository reportReviewRepository,
+                              ReviewRepository reviewRepository,
+                              CommunicationServiceImpl communicationService,
+                              ReportCommentRepository reportCommentRepository,
+                              CommentRepository commentRepository) {
+        this.reportReviewService = new ReportReviewServiceImpl(reportReviewRepository,
+                communicationService, reviewRepository);
+        this.reportCommentService = new ReportCommentServiceImpl(reportCommentRepository,
+                communicationService, commentRepository);
     }
 
     @Override

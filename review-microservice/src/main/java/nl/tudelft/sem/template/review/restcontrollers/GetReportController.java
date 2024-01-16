@@ -26,8 +26,7 @@ public class GetReportController implements GetReportApi {
                                CommunicationServiceImpl cs,
                                CommentRepository cr,
                                GetReportServiceImpl service
-    )
-    {
+    ) {
         CommentService co = new CommentServiceImpl(cr, rr);
         this.service = service != null ? service : new GetReportServiceImpl(repo, rr, cs, co);
     }
