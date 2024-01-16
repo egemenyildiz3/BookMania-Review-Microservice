@@ -1,19 +1,16 @@
 package nl.tudelft.sem.template.review.services;
 
-import java.util.List;
-import java.util.Optional;
-
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.ReportComment;
-import nl.tudelft.sem.template.model.ReportReview;
-import nl.tudelft.sem.template.model.Review;
+import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
+import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
 import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReportCommentRepository;
 import org.springframework.http.ResponseEntity;
-import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
-import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
-import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ReportCommentServiceImpl implements ReportCommentService {
@@ -21,6 +18,12 @@ public class ReportCommentServiceImpl implements ReportCommentService {
     private final CommunicationServiceImpl communicationService;
     private final CommentRepository commentRepo;
 
+    /**
+     * Constructor for ReportCommentServiceImpl.
+     * @param repo the report comment repository
+     * @param communicationService the communication service
+     * @param commentRepo the comment repository
+        */
     public ReportCommentServiceImpl(ReportCommentRepository repo, CommunicationServiceImpl communicationService,
                                     CommentRepository commentRepo) {
         this.repo = repo;

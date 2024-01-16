@@ -1,26 +1,26 @@
 package nl.tudelft.sem.template.review.services;
 
 
-import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
-import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import nl.tudelft.sem.template.review.repositories.CommentRepository;
-import nl.tudelft.sem.template.review.repositories.ReportCommentRepository;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.ReportComment;
-import nl.tudelft.sem.template.model.Review;
+import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
+import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
+import nl.tudelft.sem.template.review.repositories.CommentRepository;
+import nl.tudelft.sem.template.review.repositories.ReportCommentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 class ReportCommentServiceImplTest {
@@ -30,6 +30,9 @@ class ReportCommentServiceImplTest {
     private CommentRepository commentRepository;
     private CommunicationServiceImpl communicationService;
 
+    /**
+     * Sets up the necessary mocks before each individual test.
+     */
     @BeforeEach
     public void setup() {
         repository = mock(ReportCommentRepository.class);
@@ -42,7 +45,7 @@ class ReportCommentServiceImplTest {
     void reportValid() {
         long validCommentId = 1L;
         String validReason = "Inappropriate content";
-        Comment mockComment = new Comment();
+        Comment mockComment = new Comment(null, null, null,null);
         mockComment.setId(validCommentId);
         mockComment.setReviewId(30L);
         mockComment.setText("This is a valid review text.");
@@ -67,10 +70,8 @@ class ReportCommentServiceImplTest {
         long validCommentId = 1L;
         String validReason = "Inappropriate content";
         long validReviewId = 30L;
-        long invalidReviewId = 999L;
 
-
-        Comment mockComment = new Comment();
+        Comment mockComment = new Comment(null, null, null,null);
         mockComment.setId(validCommentId);
         mockComment.setUserId(123L);
         mockComment.setReviewId(validReviewId);
@@ -89,7 +90,7 @@ class ReportCommentServiceImplTest {
     @Test
     void getValid() {
         long validReportId = 1L;
-        ReportComment mockReportComment = new ReportComment();
+        ReportComment mockReportComment = new ReportComment(null,null,null);
         mockReportComment.setId(validReportId);
 
         when(repository.existsById(validReportId)).thenReturn(true);
@@ -106,7 +107,7 @@ class ReportCommentServiceImplTest {
     void getInvalidThrowsBadRequestException() {
         long invalidReportId = 999L;
         long validCommentId = 1L;
-        ReportComment mockReportComment = new ReportComment();
+        ReportComment mockReportComment = new ReportComment(null,null,null);
         mockReportComment.setCommentId(validCommentId);
 
         when(repository.existsById(invalidReportId)).thenReturn(false);
@@ -124,7 +125,7 @@ class ReportCommentServiceImplTest {
     @Test
     void getReportsForCommentValid() {
         long validCommentId = 1L;
-        ReportComment mockReportComment = new ReportComment();
+        ReportComment mockReportComment = new ReportComment(null,null,null);
         mockReportComment.setCommentId(validCommentId);
 
         when(commentRepository.existsById(validCommentId)).thenReturn(true);
@@ -149,7 +150,7 @@ class ReportCommentServiceImplTest {
     @Test
     void getAllReportedCommentsValid() {
         long validUserId = 1L;
-        ReportComment mockReportComment = new ReportComment();
+        ReportComment mockReportComment = new ReportComment(null,null,null);
         mockReportComment.setCommentId(validUserId);
 
         when(communicationService.isAdmin(validUserId)).thenReturn(true);
@@ -175,9 +176,6 @@ class ReportCommentServiceImplTest {
     @Test
     void isReportedValid() {
         long validCommentId = 1L;
-        ReportComment mockReportComment = new ReportComment();
-        mockReportComment.setCommentId(validCommentId);
-
         when(commentRepository.existsById(validCommentId)).thenReturn(true);
         when(repository.existsByCommentId(validCommentId)).thenReturn(true);
 
@@ -199,10 +197,10 @@ class ReportCommentServiceImplTest {
     void deleteValid() {
         long validCommentId = 1L;
         long adminUserId = 123L;
-        ReportComment mockReportComment = new ReportComment();
+        ReportComment mockReportComment = new ReportComment(null,null,null);
         mockReportComment.setId(validCommentId);
         mockReportComment.setCommentId(456L);
-        Comment com = new Comment();
+        Comment com = new Comment(null, null, null,null);
         com.setReportList(new ArrayList<>());
         when(repository.existsById(validCommentId)).thenReturn(true);
         when(repository.findById(validCommentId)).thenReturn(Optional.of(mockReportComment));
@@ -228,7 +226,7 @@ class ReportCommentServiceImplTest {
         long nonAdminUserId = 456L;
 
         when(repository.existsById(validReportId)).thenReturn(true);
-        when(repository.findById(validReportId)).thenReturn(Optional.of(new ReportComment()));
+        when(repository.findById(validReportId)).thenReturn(Optional.of(new ReportComment(null,null,null)));
         when(communicationService.existsUser(nonAdminUserId)).thenReturn(true);
 
         when(communicationService.isAdmin(nonAdminUserId)).thenReturn(false);
@@ -239,10 +237,8 @@ class ReportCommentServiceImplTest {
     void deleteReportsForCommentValid() {
         long validCommentId = 1L;
         long adminUserId = 123L;
-        ReportComment mockReportComment = new ReportComment();
-        mockReportComment.setId(validCommentId);
-        mockReportComment.setCommentId(456L);
-        Comment com = new Comment();
+
+        Comment com = new Comment(null, null, null,null);
         com.setReportList(new ArrayList<>());
         when(commentRepository.existsById(validCommentId)).thenReturn(true);
         when(commentRepository.getOne(validCommentId)).thenReturn(com);
