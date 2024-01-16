@@ -21,6 +21,12 @@ public class ReportReviewServiceImpl implements ReportReviewService {
     private final CommunicationServiceImpl communicationService;
     private final ReviewRepository reviewRepo;
 
+    /**
+     * Constructor for ReportReviewServiceImpl.
+     * @param repo the report review repository
+     * @param communicationService the communication service
+     * @param reviewRepo the review repository
+     */
     public ReportReviewServiceImpl(ReportReviewRepository repo, CommunicationServiceImpl communicationService,
                                    ReviewRepository reviewRepo) {
         this.repo = repo;

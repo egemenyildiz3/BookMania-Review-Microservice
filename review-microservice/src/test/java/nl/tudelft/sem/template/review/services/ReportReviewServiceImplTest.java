@@ -1,24 +1,24 @@
 package nl.tudelft.sem.template.review.services;
 
+import nl.tudelft.sem.template.model.ReportReview;
+import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
-import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import nl.tudelft.sem.template.review.repositories.ReportReviewRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
-import nl.tudelft.sem.template.model.Review;
-import nl.tudelft.sem.template.model.ReportReview;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 class ReportReviewServiceImplTest {
@@ -43,7 +43,7 @@ class ReportReviewServiceImplTest {
     void reportValid() {
         long validReviewId = 1L;
         String validReason = "Inappropriate content";
-        Review mockReview = new Review();
+        Review mockReview = new Review(null, null, null,null,null,null);
         mockReview.setId(validReviewId);
         mockReview.setText("This is a valid review text.");
         mockReview.setUserId(123L);
@@ -66,7 +66,7 @@ class ReportReviewServiceImplTest {
         long invalidReviewId = 999L;
         long validReviewId = 1L;
         String validReason = "Inappropriate content";
-        Review mockReview = new Review();
+        Review mockReview = new Review(null, null, null,null,null,null);
         mockReview.setId(validReviewId);
         mockReview.setUserId(123L);
 
@@ -87,7 +87,7 @@ class ReportReviewServiceImplTest {
     @Test
     void getValid() {
         long validReportId = 1L;
-        ReportReview mockReportReview = new ReportReview();
+        ReportReview mockReportReview = new ReportReview(null,null,null);
         mockReportReview.setId(validReportId);
 
         when(repository.existsById(validReportId)).thenReturn(true);
@@ -104,7 +104,7 @@ class ReportReviewServiceImplTest {
     void getInvalidThrowsBadRequestException() {
         long invalidReportId = 999L;
         long validReviewId = 1L;
-        ReportReview mockReportReview = new ReportReview();
+        ReportReview mockReportReview = new ReportReview(null,null,null);
         mockReportReview.setReviewId(validReviewId);
 
         when(repository.existsById(invalidReportId)).thenReturn(false);
@@ -123,7 +123,7 @@ class ReportReviewServiceImplTest {
     @Test
     void getReportsForReviewValid() {
         long validReviewId = 1L;
-        ReportReview mockReportReview = new ReportReview();
+        ReportReview mockReportReview = new ReportReview(null,null,null);
         mockReportReview.setReviewId(validReviewId);
 
         when(reviewRepository.existsById(validReviewId)).thenReturn(true);
@@ -151,7 +151,7 @@ class ReportReviewServiceImplTest {
         long adminUserId = 123L;
 
         when(communicationService.isAdmin(adminUserId)).thenReturn(true);
-        when(repository.findAll()).thenReturn(Collections.singletonList(new ReportReview()));
+        when(repository.findAll()).thenReturn(Collections.singletonList(new ReportReview(null,null,null)));
 
         ResponseEntity<List<ReportReview>> result = service.getAllReportedReviews(adminUserId);
 
@@ -200,10 +200,10 @@ class ReportReviewServiceImplTest {
     void deleteValid() {
         long validReportId = 1L;
         long adminUserId = 123L;
-        ReportReview mockReportReview = new ReportReview();
+        ReportReview mockReportReview = new ReportReview(null,null,null);
         mockReportReview.setId(validReportId);
         mockReportReview.setReviewId(456L);
-        Review rev = new Review();
+        Review rev = new Review(null, null, null,null,null,null);
         rev.setReportList(new ArrayList<>());
         when(repository.existsById(validReportId)).thenReturn(true);
         when(repository.findById(validReportId)).thenReturn(Optional.of(mockReportReview));
@@ -221,7 +221,7 @@ class ReportReviewServiceImplTest {
         long nonAdminUserId = 456L;
 
         when(repository.existsById(validReportId)).thenReturn(true);
-        when(repository.findById(validReportId)).thenReturn(Optional.of(new ReportReview()));
+        when(repository.findById(validReportId)).thenReturn(Optional.of(new ReportReview(null,null,null)));
 
         when(communicationService.isAdmin(nonAdminUserId)).thenReturn(false);
 
@@ -244,7 +244,7 @@ class ReportReviewServiceImplTest {
     void deleteReportsForReviewValid() {
         long validReviewId = 1L;
         long adminUserId = 123L;
-        Review rev = new Review();
+        Review rev = new Review(null, null, null,null,null,null);
         rev.setReportList(new ArrayList<>());
         when(reviewRepository.existsById(validReviewId)).thenReturn(true);
         when(communicationService.isAdmin(adminUserId)).thenReturn(true);
