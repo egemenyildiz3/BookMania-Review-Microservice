@@ -261,6 +261,13 @@ public class ReviewServiceImpl implements ReviewService {
                 + review.getUpvote() + "\ndownvotes: " + review.getDownvote());
     }
 
+    /**
+     * Checks whether is upvoting or downvoting a review
+     *
+     * @param review The review that is being voted
+     * @param body The vote, 0 for downvote and 1 for upvote
+     */
+
     private void checkBody(Review review, Integer body) {
         if (body == 1) {
             review.upvote(review.getUpvote() + 1);
