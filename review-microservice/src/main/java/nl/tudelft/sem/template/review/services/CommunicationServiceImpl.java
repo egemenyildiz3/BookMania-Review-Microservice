@@ -113,6 +113,31 @@ public class CommunicationServiceImpl {
     public boolean isAuthor(Long bookId, Long userId) {
         //TODO make http request to endpoint for author
         //return getResponse(bookMicroUrl, bookId, false, false);
-        return true;
+        String book;
+        try {
+            URL obj = new URL(bookMicroUrl + "/book/getById/" + bookId);
+            HttpURLConnection connection = (HttpURLConnection) obj.openConnection();
+            connection.setRequestMethod("GET");
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+                while ((inputLine = reader.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                book = response.toString();
+                System.out.println(book);
+                reader.close();
+                return book.contains("\"authorId\": " + userId);
+            }
+            else {
+                System.out.println("Failed with status code" + responseCode);
+                return false;
+            }
+        }
+        catch (Exception e) {
+            return false;
+        }
     }
 }
