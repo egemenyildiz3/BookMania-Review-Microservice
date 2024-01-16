@@ -6,6 +6,7 @@ import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.review.services.CommentServiceImpl;
+import nl.tudelft.sem.template.review.services.CommunicationServiceImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,8 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class CommentController implements CommentApi {
     private final CommentServiceImpl service;
 
-    public CommentController(CommentRepository repository, ReviewRepository reviews) {
-        this.service = new CommentServiceImpl(repository, reviews);
+    public CommentController(CommentRepository commentRepository, ReviewRepository reviewRepository) {
+        CommunicationServiceImpl communicationService = new CommunicationServiceImpl();
+        this.service = new CommentServiceImpl(commentRepository, reviewRepository, communicationService);
     }
 
     @Override

@@ -11,6 +11,9 @@ import java.util.stream.Collectors;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
+import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
+import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
+import nl.tudelft.sem.template.review.exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +24,13 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository repository;
     private final ReviewRepository reviewRepository;
+    private final CommunicationServiceImpl communicationService;
 
-    public CommentServiceImpl(CommentRepository repository, ReviewRepository reviewRepository) {
+    public CommentServiceImpl(CommentRepository repository, ReviewRepository reviewRepository,
+                              CommunicationServiceImpl communicationService) {
         this.reviewRepository = reviewRepository;
         this.repository = repository;
+        this.communicationService = communicationService;
     }
 
     private static final List<String> profanities =
@@ -50,11 +56,17 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public ResponseEntity<Comment> add(Comment comment) {
 
-        if (comment == null || !reviewRepository.existsById(comment.getReviewId())) {
-            return ResponseEntity.badRequest().build();
+        if (comment == null) {
+            throw new CustomBadRequestException("Comment cannot be null.");
+        }
+        if (!reviewRepository.existsById(comment.getReviewId())) {
+            throw new CustomBadRequestException("Invalid review id.");
+        }
+        if (!communicationService.existsUser(comment.getUserId())) {
+            throw new CustomUserExistsException("Invalid user id.");
         }
         if (checkProfanities(comment.getText())) {
-            return ResponseEntity.badRequest().build();
+            throw new CustomProfanitiesException("Profanities detected in text. Please remove them.");
         }
 
         comment.setId(0L);
@@ -74,7 +86,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public ResponseEntity<Comment> get(Long commentId) {
         if (!repository.existsById(commentId)) {
-            return ResponseEntity.badRequest().build();
+            throw new CustomBadRequestException("Invalid comment id.");
         }
         return ResponseEntity.ok(repository.findById(commentId).get());
     }
@@ -82,7 +94,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public ResponseEntity<List<Comment>> getAll(Long reviewId) {
         if (!reviewRepository.existsById(reviewId)) {
-            return  ResponseEntity.badRequest().build();
+            throw new CustomBadRequestException("Invalid review id.");
         }
 
         List<Comment> comments = repository.findAll().stream()
@@ -95,12 +107,18 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public ResponseEntity<Comment> update(Long userId, Comment comment) {
-        if (comment == null || !Objects.equals(comment.getUserId(), userId) || !repository.existsById(comment.getId())) {
-            return ResponseEntity.badRequest().header("blah").build();
+        if (comment == null) {
+            throw new CustomBadRequestException("Comment cannot be null");
+        }
+        if (!Objects.equals(comment.getUserId(), userId)) {
+            throw new CustomBadRequestException("User id does not match");
+        }
+        if (!repository.existsById(comment.getId())) {
+            throw new CustomBadRequestException("Invalid comment id");
         }
 
         if (checkProfanities(comment.getText())) {
-            return ResponseEntity.badRequest().build();
+            throw new CustomProfanitiesException("Profanities detected in text. Please remove them.");
         }
         Comment dataCom = repository.getOne(comment.getId());
         dataCom.setText(comment.getText());
@@ -111,7 +129,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public ResponseEntity<String> delete(Long commentId, Long userId) {
         if (!repository.existsById(commentId)) {
-            return ResponseEntity.badRequest().build();
+            throw new CustomBadRequestException("Invalid comment id");
         }
 
         Optional<Comment> optionalComment = repository.findById(commentId);
@@ -129,7 +147,7 @@ public class CommentServiceImpl implements CommentService {
             reviewRepository.save(rev);
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.badRequest().build();
+        throw new CustomPermissionsException("User is not owner or admin.");
     }
 
     /**
@@ -154,12 +172,15 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public ResponseEntity<String> addVote(Long commentId, Integer body) {
-        if (!repository.existsById(commentId) || get(commentId).getBody() == null) {
-            return ResponseEntity.badRequest().body("Comment id does not exist.");
+        if (!repository.existsById(commentId)) {
+            throw new CustomBadRequestException("Invalid comment id.");
+        }
+        if (get(commentId).getBody() == null) {
+            throw new CustomBadRequestException("Comment cannot be null.");
         }
 
         if (!(List.of(0, 1).contains(body))) {
-            return ResponseEntity.badRequest().body("The only accepted bodies are 0 for downvote and 1 for upvote.");
+            throw new CustomBadRequestException("The only accepted bodies are 0 for downvote and 1 for upvote");
         }
         Comment comment = get(commentId).getBody();
         assert comment != null;

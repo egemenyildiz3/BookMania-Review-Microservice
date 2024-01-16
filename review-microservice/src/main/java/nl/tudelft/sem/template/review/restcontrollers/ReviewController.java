@@ -28,7 +28,7 @@ public class ReviewController implements ReviewApi {
     public ReviewController(BookDataRepository bookDataRepository, ReviewRepository repo, CommentRepository cr,
                             ReviewServiceImpl service) {
         CommunicationServiceImpl communicationService = new CommunicationServiceImpl();
-        CommentServiceImpl commentService = new CommentServiceImpl(cr, repo);
+        CommentServiceImpl commentService = new CommentServiceImpl(cr, repo, communicationService);
         GetReportServiceImpl getReportService = new GetReportServiceImpl(bookDataRepository, repo,
                 communicationService, commentService);
 
