@@ -149,5 +149,6 @@ class CommunicationServiceImplTest {
         assertTrue(service.isAdmin(1L));
         assertTrue(service.existsBook(1L));
         assertTrue(service.existsUser(1L));
+        assertTrue(service.isAuthor(1L,1L));
     }
 }
