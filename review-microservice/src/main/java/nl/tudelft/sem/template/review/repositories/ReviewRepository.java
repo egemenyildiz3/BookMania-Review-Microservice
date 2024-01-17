@@ -17,6 +17,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Long> findMostUpvotedReviewId(@Param("bookId") Long bookId, Pageable pageable);
 
     List<Review> findTop3ByUserIdOrderByUpvoteDesc(Long userId);
+
     // Uses the naming convention of Spring Data JPA to automatically generate the appropriate query
     Long countByBookId(Long bookId);
 }

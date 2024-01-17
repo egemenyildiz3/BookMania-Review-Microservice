@@ -145,7 +145,6 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
 
-        Review dataReview = repo.getOne(review.getId());
         updateExistingBookData(dataReview,review);
         handleText(review.getText());
 
