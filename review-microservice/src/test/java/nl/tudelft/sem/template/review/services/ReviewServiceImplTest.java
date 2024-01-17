@@ -477,12 +477,12 @@ class ReviewServiceImplTest {
         Review r5 = new Review(5L,  5L,  78L,  "Review",  "review",  5L);
         Review r6 = new Review(6L,  2L,  userId,  "Review",  "review",  5L);
 
-        r1.setUpvote(0L);
-        r2.setUpvote(0L);
-        r3.setUpvote(0L);
-        r4.setUpvote(0L);
-        r5.setUpvote(0L);
-        r6.setUpvote(0L);
+        r1.setUpvote(5L);
+        r2.setUpvote(1L);
+        r3.setUpvote(3L);
+        r4.setUpvote(8L);
+        r5.setUpvote(9L);
+        r6.setUpvote(4L);
         r1.setDownvote(0L);
         r2.setDownvote(0L);
         r3.setDownvote(0L);
@@ -490,66 +490,21 @@ class ReviewServiceImplTest {
         r5.setDownvote(0L);
         r6.setDownvote(0L);
 
-        when(repository.findAll()).thenReturn(List.of(r1,  r2,  r3,  r4,  r5,  r6));
 
-        when(repository.existsById(1L)).thenReturn(true);
-        when(repository.findById(1L)).thenReturn(Optional.of(r1));
-        when(repository.getOne(1L)).thenReturn(r1);
-        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        when(repository.existsById(2L)).thenReturn(true);
-        when(repository.findById(2L)).thenReturn(Optional.of(r2));
-        when(repository.getOne(2L)).thenReturn(r2);
-        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        when(repository.existsById(3L)).thenReturn(true);
-        when(repository.findById(3L)).thenReturn(Optional.of(r3));
-        when(repository.getOne(3L)).thenReturn(r3);
-        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-
-        when(repository.existsById(4L)).thenReturn(true);
-        when(repository.findById(4L)).thenReturn(Optional.of(r4));
-        when(repository.getOne(4L)).thenReturn(r4);
-        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        when(repository.existsById(5L)).thenReturn(true);
-        when(repository.findById(5L)).thenReturn(Optional.of(r5));
-        when(repository.getOne(5L)).thenReturn(r5);
-        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        when(repository.existsById(6L)).thenReturn(true);
-        when(repository.findById(6L)).thenReturn(Optional.of(r6));
-        when(repository.getOne(6L)).thenReturn(r6);
-        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        service.addVote(1L,  1);
-        service.addVote(1L,  1);
-        service.addVote(1L,  1);
-        service.addVote(1L,  1);
-        service.addVote(1L,  1);
-        service.addVote(3L,  1);
-        service.addVote(3L,  1);
-        service.addVote(3L,  1);
-        service.addVote(6L,  1);
-        service.addVote(6L,  1);
-        service.addVote(6L,  1);
-        service.addVote(6L,  1);
-        service.addVote(4L,  1);
-        service.addVote(4L,  1);
-        service.addVote(4L,  1);
-        service.addVote(4L,  1);
-        service.addVote(4L,  1);
-        service.addVote(4L,  1);
-        service.addVote(4L,  1);
-        service.addVote(4L,  1);
-        service.addVote(4L,  1);
 
         List<Review> corrList = new ArrayList<>();
         corrList.add(r1);
         corrList.add(r6);
         corrList.add(r3);
+        when(repository.findTop3ByUserIdOrderByUpvoteDesc(userId)).thenReturn(corrList);
+        when(communicationService.existsUser(userId)).thenReturn(true);
         assertEquals(service.mostUpvotedReviews(userId).getBody(),  corrList);
+
+        when(communicationService.existsUser(userId)).thenReturn(false);
+        assertThrows(CustomUserExistsException.class, () -> service.mostUpvotedReviews(2L));
+        verify(repository,never()).findTop3ByUserIdOrderByUpvoteDesc(2L);
+
+        ;
     }
 
     @Test

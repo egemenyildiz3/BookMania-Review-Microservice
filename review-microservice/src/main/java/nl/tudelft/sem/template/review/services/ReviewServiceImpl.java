@@ -16,6 +16,7 @@ import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
 import nl.tudelft.sem.template.review.exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -210,9 +211,6 @@ public class ReviewServiceImpl implements ReviewService {
         if (!repo.existsById(reviewId)) {
             throw new CustomBadRequestException("Invalid review id.");
         }
-        if (get(reviewId).getBody() == null) {
-            throw new CustomBadRequestException("Review cannot be null.");
-        }
 
         if (!(List.of(0, 1).contains(body))) {
             throw new CustomBadRequestException("The only accepted bodies are 0 for downvote and 1 for upvote");
@@ -242,24 +240,10 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public ResponseEntity<List<Review>> mostUpvotedReviews(Long userId) {
-        List<Review> listOfReviews = new ArrayList<>(repo.findAll());
-        List<Review> result = new ArrayList<>();
-        for (Review rev : listOfReviews) {
-            if (rev.getUserId().equals(userId)) {
-                result.add(rev);
-            }
+        if(!communicationService.existsUser(userId)) {
+            throw new CustomUserExistsException("Invalid user id");
         }
-        result.sort(Comparator.comparingLong((Review r) -> r.getUpvote() == null ? 0 : r.getUpvote()).reversed());
-        List<Review> finalRes = new ArrayList<>();
-        if (result.get(0) != null) {
-            finalRes.add(result.get(0));
-        }
-        if (result.get(1) != null) {
-            finalRes.add(result.get(1));
-        }
-        if (result.get(2) != null) {
-            finalRes.add(result.get(2));
-        }
+        List<Review> finalRes = repo.findTop3ByUserIdOrderByUpvoteDesc(userId);
         return ResponseEntity.ok(finalRes);
     }
 

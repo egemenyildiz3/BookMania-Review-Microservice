@@ -107,6 +107,9 @@ public class CommentServiceImpl implements CommentService {
         if (!repository.existsById(comment.getId())) {
             throw new CustomBadRequestException("Invalid comment id");
         }
+        if(!communicationService.existsUser(userId)) {
+            throw new CustomUserExistsException("Invalid user id");
+        }
 
         TextHandler textHandler = new ProfanityHandler();
         textHandler.setNext(new UrlHandler());
