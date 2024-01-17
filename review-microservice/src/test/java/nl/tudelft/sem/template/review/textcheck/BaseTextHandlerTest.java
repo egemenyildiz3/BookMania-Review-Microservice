@@ -4,6 +4,7 @@ import nl.tudelft.sem.template.model.BookData;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.domain.textcheck.BaseTextHandler;
 import nl.tudelft.sem.template.review.domain.textcheck.ProfanityHandler;
+import nl.tudelft.sem.template.review.domain.textcheck.TextHandler;
 import nl.tudelft.sem.template.review.domain.textcheck.UrlHandler;
 import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
@@ -59,4 +60,12 @@ public class BaseTextHandlerTest {
         assertThrows(CustomProfanitiesException.class,  () -> service.handleText(review.getText()));
         assertFalse(baseTextHandler.handle(review.getText()));
     }
+
+    @Test
+    void baseTextHandlerNullNext() {
+        TextHandler baseTextHandler1 = new ProfanityHandler();
+        baseTextHandler1.setNext(null);
+        assertTrue(baseTextHandler1.handle(""));
+    }
+
 }

@@ -3,6 +3,7 @@ package nl.tudelft.sem.template.review.textcheck;
 import nl.tudelft.sem.template.model.BookData;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.domain.textcheck.ProfanityHandler;
+import nl.tudelft.sem.template.review.domain.textcheck.UrlHandler;
 import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.review.services.CommunicationServiceImpl;
@@ -55,5 +56,11 @@ public class ProfanityHandlerTest {
 
         assertThrows(CustomProfanitiesException.class,  () -> service.handleText(review.getText()));
         assertFalse(profanityHandler.handle(review.getText()));
+    }
+    @Test
+    void setProfanityHandler(){
+        ProfanityHandler profanityHandler1 = new ProfanityHandler();
+        profanityHandler1.setNext(new UrlHandler());
+        assertTrue(profanityHandler1.handle("hahah htt:"));
     }
 }
