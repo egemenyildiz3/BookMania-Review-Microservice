@@ -471,23 +471,16 @@ class ReviewServiceImplTest {
     void retrieveMostUpvotedTest() {
         Long userId = 17L;
         Review r1 = new Review(1L,  2L,  userId,  "Review",  "review",  5L);
-        Review r2 = new Review(2L,  2L,  userId,  "Review",  "review",  5L);
         Review r3 = new Review(3L,  3L,  userId,  "Review",  "review",  5L);
-        Review r4 = new Review(4L,  5L,  89L,  "Review",  "review",  5L);
-        Review r5 = new Review(5L,  5L,  78L,  "Review",  "review",  5L);
         Review r6 = new Review(6L,  2L,  userId,  "Review",  "review",  5L);
 
         r1.setUpvote(5L);
-        r2.setUpvote(1L);
         r3.setUpvote(3L);
-        r4.setUpvote(8L);
-        r5.setUpvote(9L);
+
         r6.setUpvote(4L);
         r1.setDownvote(0L);
-        r2.setDownvote(0L);
+
         r3.setDownvote(0L);
-        r4.setDownvote(0L);
-        r5.setDownvote(0L);
         r6.setDownvote(0L);
 
 
@@ -504,7 +497,7 @@ class ReviewServiceImplTest {
         assertThrows(CustomUserExistsException.class, () -> service.mostUpvotedReviews(2L));
         verify(repository,never()).findTop3ByUserIdOrderByUpvoteDesc(2L);
 
-        ;
+
     }
 
     @Test
@@ -524,8 +517,6 @@ class ReviewServiceImplTest {
 
     @Test
     void pinInvalid() {
-        Long userId = 17L;
-        Review r1 = new Review(1L,  2L,  userId,  "Review",  "review",  5L);
         when(repository.existsById(1L)).thenReturn(false);
         assertThrows(CustomBadRequestException.class,  () -> service.pinReview(1L, true));
     }
