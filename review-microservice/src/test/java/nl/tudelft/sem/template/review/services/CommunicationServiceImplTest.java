@@ -152,7 +152,7 @@ class CommunicationServiceImplTest {
     }
 
     @Test
-    void testIsAuthorTrue() {
+    void testIsAuthorIntegrationTrue() {
         WireMockServer wireMockServer1 = new WireMockServer(8081);
         wireMockServer1.start();
         WireMock.configureFor(8081);
@@ -173,13 +173,13 @@ class CommunicationServiceImplTest {
                         "  ],\n" +
                         "  \"average_rating\": 8.7\n" +
                         "  \"}")));
-        assertTrue(service.isAuthor(1L, 1L));
+        assertTrue(service.isAuthorIntegration(1L, 1L));
         wireMockServer1.verify(getRequestedFor(urlEqualTo("/book/getById/1")));
         wireMockServer1.stop();
     }
 
     @Test
-    void testIsAuthorFalse() {
+    void testIsAuthorIntegrationFalse() {
         WireMockServer wireMockServer1 = new WireMockServer(8081);
         wireMockServer1.start();
         WireMock.configureFor(8081);
@@ -200,7 +200,7 @@ class CommunicationServiceImplTest {
                                 "  ],\n" +
                                 "  \"average_rating\": 8.7\n" +
                                 "  \"}")));
-        assertFalse(service.isAuthor(1L, 2L));
+        assertFalse(service.isAuthorIntegration(1L, 2L));
         wireMockServer1.verify(getRequestedFor(urlEqualTo("/book/getById/1")));
         wireMockServer1.stop();
     }

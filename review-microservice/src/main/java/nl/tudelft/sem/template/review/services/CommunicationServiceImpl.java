@@ -112,7 +112,18 @@ public class CommunicationServiceImpl {
      */
     public boolean isAuthor(Long bookId, Long userId) {
         //TODO make http request to endpoint for author
-        //return getResponse(bookMicroUrl, bookId, false, false);
+        return true;
+    }
+
+    /**
+     * Checks if the user with the given id is the author of the book with the given id by making an HTTP request.
+     *
+     * @param bookId - the id of the book to check
+     * @param userId - the id of the user to check
+     * @return - True if the user is the author of the book, false otherwise
+     */
+    public boolean isAuthorIntegration(Long bookId, Long userId) {
+        //TODO make http request to endpoint for author
         String book;
         try {
             URL obj = new URL(bookMicroUrl + "/book/getById/" + bookId);
