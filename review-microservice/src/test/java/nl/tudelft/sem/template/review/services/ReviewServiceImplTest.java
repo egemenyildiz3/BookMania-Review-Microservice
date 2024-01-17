@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.context.TestComponent;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import java.time.LocalDate;
@@ -521,5 +522,22 @@ class ReviewServiceImplTest {
     void pinInvalid() {
         when(repository.existsById(1L)).thenReturn(false);
         assertThrows(CustomBadRequestException.class,  () -> service.pinReview(1L, true));
+    }
+
+    @Test
+    void handleTextValid() {
+        Review review = new Review(1L, 2L, 10L,  "Review",  "review",  5L);
+
+        service.handleText(review.getText());
+        assertEquals(review.getText(), "review");
+    }
+
+    @Test
+    void handleTextInvalid() {
+        Review review1 = new Review(1L, 2L, 10L,  "Review",  "Bastard",  5L);
+        Review review2 = new Review(1L, 2L, 10L,  "Review",  "https://www.tudelft.nl",  5L);
+
+        assertThrows(CustomProfanitiesException.class,  () -> service.handleText(review1.getText()));;
+        assertThrows(CustomBadRequestException.class, () -> service.handleText(review2.getText()));
     }
 }
