@@ -5,7 +5,6 @@ import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.domain.textcheck.BaseTextHandler;
 import nl.tudelft.sem.template.review.domain.textcheck.ProfanityHandler;
 import nl.tudelft.sem.template.review.domain.textcheck.TextHandler;
-import nl.tudelft.sem.template.review.domain.textcheck.UrlHandler;
 import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import nl.tudelft.sem.template.review.services.CommunicationServiceImpl;

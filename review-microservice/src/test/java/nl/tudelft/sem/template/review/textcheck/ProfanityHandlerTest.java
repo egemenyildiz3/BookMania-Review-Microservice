@@ -58,7 +58,7 @@ public class ProfanityHandlerTest {
         assertFalse(profanityHandler.handle(review.getText()));
     }
     @Test
-    void setProfanityHandler(){
+    void setProfanityHandler() {
         ProfanityHandler profanityHandler1 = new ProfanityHandler();
         profanityHandler1.setNext(new UrlHandler());
         assertTrue(profanityHandler1.handle("hahah htt:"));
