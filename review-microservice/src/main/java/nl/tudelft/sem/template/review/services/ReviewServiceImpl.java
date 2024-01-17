@@ -45,6 +45,7 @@ public class ReviewServiceImpl implements ReviewService {
         if (review == null) {
             throw new CustomBadRequestException("Review cannot be null.");
         }
+
         boolean existsBook = communicationService.existsBook(review.getBookId());
         if (!existsBook) {
             throw new CustomBadRequestException("Invalid book id.");
@@ -56,7 +57,11 @@ public class ReviewServiceImpl implements ReviewService {
             throw new CustomUserExistsException("Invalid user id.");
         }
 
+        if(repo.existsByBookIdAndUserId(review.getBookId(), review.getUserId()))
+            throw new CustomBadRequestException("User has already created review for book");
+
         handleText(review.getText());
+        handleText(review.getTitle());
         updateBookData(review);
 
         review.setId(0L);
