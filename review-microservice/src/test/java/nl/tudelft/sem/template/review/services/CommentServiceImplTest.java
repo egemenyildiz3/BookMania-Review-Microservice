@@ -99,7 +99,7 @@ class CommentServiceImplTest {
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         var result = service.get(1L);
-        verify(commentRepository).findById(1L);
+        verify(commentRepository,times(2)).findById(1L);
         verify(commentRepository).existsById(1L);
         assertEquals(result.getBody(), comment);
         assertEquals(result.getStatusCode(), HttpStatus.OK);
@@ -122,6 +122,8 @@ class CommentServiceImplTest {
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         when(commentRepository.getOne(1L)).thenReturn(comment);
+        when(communicationService.existsUser(2L)).thenReturn(true);
+
         var result = service.update(2L, comment);
         verify(commentRepository).save(comment);
         verify(commentRepository).existsById(1L);
@@ -159,6 +161,8 @@ class CommentServiceImplTest {
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         when(commentRepository.getOne(1L)).thenReturn(comment);
+        when(communicationService.existsUser(2L)).thenReturn(true);
+
         var result = service.update(2L, comment);
         verify(commentRepository).save(comment);
         verify(commentRepository).existsById(1L);
@@ -166,6 +170,23 @@ class CommentServiceImplTest {
         assertEquals(result.getBody(), comment);
         comment.text("fuck");
         assertThrows(CustomProfanitiesException.class, () -> service.update(2L, comment));
+    }
+
+    @Test
+    void testUpdateInvalidUser() {
+        Comment comment = new Comment(1L, 2L, 10L, "comment");
+        comment.id(1L);
+        comment.userId(2L);
+        when(commentRepository.save(comment)).thenReturn(comment);
+        when(commentRepository.existsById(1L)).thenReturn(true);
+        when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+        when(commentRepository.getOne(1L)).thenReturn(comment);
+        when(communicationService.existsUser(2L)).thenReturn(false);
+
+        assertThrows(CustomUserExistsException.class, () -> service.update(2L, comment));
+        verify(commentRepository, never()).save(comment);
+        verify(commentRepository).existsById(1L);
+
     }
 
     @Test
@@ -190,7 +211,7 @@ class CommentServiceImplTest {
         when(reviewRepository.getOne(3L)).thenReturn(review);
         final var result = service.delete(1L, 2L);
         verify(commentRepository).existsById(1L);
-        verify(commentRepository).findById(1L);
+        verify(commentRepository, times(2)).findById(1L);
         verify(reviewRepository).save(review);
         assertTrue(review.getCommentList().isEmpty());
         assertEquals(result.getStatusCode(), HttpStatus.OK);
@@ -208,7 +229,7 @@ class CommentServiceImplTest {
         assertThrows(CustomPermissionsException.class, () -> service.delete(1L, 5L));
 
         verify(commentRepository).existsById(1L);
-        verify(commentRepository).findById(1L);
+        verify(commentRepository,times(2)).findById(1L);
         verify(reviewRepository, never()).save(review);
         assertTrue(review.getCommentList().contains(comment));
     }

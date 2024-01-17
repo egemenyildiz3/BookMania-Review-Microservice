@@ -81,7 +81,11 @@ public class CommentServiceImpl implements CommentService {
         if (!repository.existsById(commentId)) {
             throw new CustomBadRequestException("Invalid comment id.");
         }
-        return ResponseEntity.ok(repository.findById(commentId).get());
+        Comment comment = new Comment(1L,2L,3L,"check");
+        if (repository.findById(commentId).isPresent()) {
+            comment = repository.findById(commentId).get();
+        }
+        return ResponseEntity.ok(comment);
     }
 
     @Override
@@ -103,11 +107,12 @@ public class CommentServiceImpl implements CommentService {
         if (comment == null) {
             throw new CustomBadRequestException("Comment cannot be null");
         }
-        if (!Objects.equals(comment.getUserId(), userId)) {
+        Comment dataCom = get(comment.getId()).getBody();
+        if (!Objects.equals(dataCom.getUserId(), userId)) {
             throw new CustomBadRequestException("User id does not match");
         }
-        if (!repository.existsById(comment.getId())) {
-            throw new CustomBadRequestException("Invalid comment id");
+        if(!communicationService.existsUser(userId)) {
+            throw new CustomUserExistsException("Invalid user id");
         }
 
         TextHandler textHandler = new ProfanityHandler();
@@ -115,7 +120,6 @@ public class CommentServiceImpl implements CommentService {
 
         textHandler.handle(comment.getText());
 
-        Comment dataCom = repository.getOne(comment.getId());
         dataCom.setText(comment.getText());
         Comment updated = repository.save(dataCom);
         return ResponseEntity.ok(updated);
@@ -123,17 +127,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public ResponseEntity<String> delete(Long commentId, Long userId) {
-        if (!repository.existsById(commentId)) {
-            throw new CustomBadRequestException("Invalid comment id");
-        }
-
-        Optional<Comment> optionalComment = repository.findById(commentId);
-        Comment comment;
-        if (optionalComment.isPresent()) {
-            comment = optionalComment.get();
-        } else {
-            throw new CustomBadRequestException("Cannot find comment.");
-        }
+        Comment comment = get(commentId).getBody();
 
         Review rev = reviewRepository.getOne(comment.getReviewId());
         if (Objects.equals(userId, comment.getUserId())) {
@@ -167,13 +161,6 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public ResponseEntity<String> addVote(Long commentId, Integer body) {
-        if (!repository.existsById(commentId)) {
-            throw new CustomBadRequestException("Invalid comment id.");
-        }
-        if (get(commentId).getBody() == null) {
-            throw new CustomBadRequestException("Comment cannot be null.");
-        }
-
         if (!(List.of(0, 1).contains(body))) {
             throw new CustomBadRequestException("The only accepted bodies are 0 for downvote and 1 for upvote");
         }

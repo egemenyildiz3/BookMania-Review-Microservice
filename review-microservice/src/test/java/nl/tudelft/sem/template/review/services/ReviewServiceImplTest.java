@@ -71,6 +71,11 @@ class ReviewServiceImplTest {
         assertThrows(CustomProfanitiesException.class,  () -> service.add(r1));
         verify(repository, never()).save(r1);
 
+        Review r2 = new Review(1L, 2L, 10L,  "Review",  "review",  5L);
+        r2.text("https://");
+        when(repository.save(r2)).thenReturn(r2);
+        assertThrows(CustomBadRequestException.class,  () -> service.add(r2));
+        verify(repository, never()).save(r2);
 
         assertThrows(CustomBadRequestException.class,  () -> service.add(null));
         verify(repository, never()).save(r1);
@@ -131,7 +136,7 @@ class ReviewServiceImplTest {
         review1.setSpoiler(true);
         when(repository.save(review1)).thenReturn(review1);
         when(repository.existsById(1L)).thenReturn(true);
-        when(repository.getOne(1L)).thenReturn(review1);
+        when(repository.findById(1L)).thenReturn(Optional.of(review1));
         when(communicationService.existsUser(10L)).thenReturn(true);
         when(communicationService.isAdmin(2L)).thenReturn(false);
 
@@ -172,9 +177,10 @@ class ReviewServiceImplTest {
         when(communicationService.existsBook(2L)).thenReturn(true);
         when(repository.save(review)).thenReturn(review);
         when(repository.existsById(1L)).thenReturn(true);
-        when(repository.getOne(1L)).thenReturn(review);
+        when(repository.findById(1L)).thenReturn(Optional.of(review));
         when(communicationService.isAdmin(9L)).thenReturn(true);
         var result = service.update(9L, review);
+        review.setLastEditTime(LocalDate.now());
         verify(repository).save(review);
         assertEquals(result.getBody(), review);
     }
@@ -225,7 +231,7 @@ class ReviewServiceImplTest {
         doNothing().when(repository).deleteById(1L);
         when(communicationService.isAdmin(10L)).thenReturn(true);
         var result = service.delete(1L, 10L);
-        verify(repository).findById(1L);
+        verify(repository,times(2)).findById(1L);
         verify(repository).deleteById(1L);
         assertEquals(result.getStatusCode(), HttpStatus.OK);
     }
@@ -258,7 +264,7 @@ class ReviewServiceImplTest {
         when(repository.findById(1L)).thenReturn(Optional.of(review));
         when(communicationService.isAdmin(10L)).thenReturn(true);
         var result = service.delete(1L, 10L);
-        verify(repository).findById(1L);
+        verify(repository,times(2)).findById(1L);
         verify(repository).deleteById(1L);
         assertEquals(result.getStatusCode(), HttpStatus.OK);
     }
@@ -270,7 +276,7 @@ class ReviewServiceImplTest {
         when(repository.findById(1L)).thenReturn(Optional.of(review));
         when(communicationService.isAdmin(10L)).thenReturn(false);
         var result = service.delete(1L, 10L);
-        verify(repository).findById(1L);
+        verify(repository,times(2)).findById(1L);
         verify(repository).deleteById(1L);
         assertEquals(result.getStatusCode(), HttpStatus.OK);
     }
@@ -467,85 +473,33 @@ class ReviewServiceImplTest {
     void retrieveMostUpvotedTest() {
         Long userId = 17L;
         Review r1 = new Review(1L,  2L,  userId,  "Review",  "review",  5L);
-        Review r2 = new Review(2L,  2L,  userId,  "Review",  "review",  5L);
         Review r3 = new Review(3L,  3L,  userId,  "Review",  "review",  5L);
-        Review r4 = new Review(4L,  5L,  89L,  "Review",  "review",  5L);
-        Review r5 = new Review(5L,  5L,  78L,  "Review",  "review",  5L);
         Review r6 = new Review(6L,  2L,  userId,  "Review",  "review",  5L);
 
-        r1.setUpvote(0L);
-        r2.setUpvote(0L);
-        r3.setUpvote(0L);
-        r4.setUpvote(0L);
-        r5.setUpvote(0L);
-        r6.setUpvote(0L);
+        r1.setUpvote(5L);
+        r3.setUpvote(3L);
+
+        r6.setUpvote(4L);
         r1.setDownvote(0L);
-        r2.setDownvote(0L);
+
         r3.setDownvote(0L);
-        r4.setDownvote(0L);
-        r5.setDownvote(0L);
         r6.setDownvote(0L);
 
-        when(repository.findAll()).thenReturn(List.of(r1,  r2,  r3,  r4,  r5,  r6));
 
-        when(repository.existsById(1L)).thenReturn(true);
-        when(repository.findById(1L)).thenReturn(Optional.of(r1));
-        when(repository.getOne(1L)).thenReturn(r1);
-        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        when(repository.existsById(2L)).thenReturn(true);
-        when(repository.findById(2L)).thenReturn(Optional.of(r2));
-        when(repository.getOne(2L)).thenReturn(r2);
-        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        when(repository.existsById(3L)).thenReturn(true);
-        when(repository.findById(3L)).thenReturn(Optional.of(r3));
-        when(repository.getOne(3L)).thenReturn(r3);
-        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-
-        when(repository.existsById(4L)).thenReturn(true);
-        when(repository.findById(4L)).thenReturn(Optional.of(r4));
-        when(repository.getOne(4L)).thenReturn(r4);
-        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        when(repository.existsById(5L)).thenReturn(true);
-        when(repository.findById(5L)).thenReturn(Optional.of(r5));
-        when(repository.getOne(5L)).thenReturn(r5);
-        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        when(repository.existsById(6L)).thenReturn(true);
-        when(repository.findById(6L)).thenReturn(Optional.of(r6));
-        when(repository.getOne(6L)).thenReturn(r6);
-        when(repository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        service.addVote(1L,  1);
-        service.addVote(1L,  1);
-        service.addVote(1L,  1);
-        service.addVote(1L,  1);
-        service.addVote(1L,  1);
-        service.addVote(3L,  1);
-        service.addVote(3L,  1);
-        service.addVote(3L,  1);
-        service.addVote(6L,  1);
-        service.addVote(6L,  1);
-        service.addVote(6L,  1);
-        service.addVote(6L,  1);
-        service.addVote(4L,  1);
-        service.addVote(4L,  1);
-        service.addVote(4L,  1);
-        service.addVote(4L,  1);
-        service.addVote(4L,  1);
-        service.addVote(4L,  1);
-        service.addVote(4L,  1);
-        service.addVote(4L,  1);
-        service.addVote(4L,  1);
 
         List<Review> corrList = new ArrayList<>();
         corrList.add(r1);
         corrList.add(r6);
         corrList.add(r3);
+        when(repository.findTop3ByUserIdOrderByUpvoteDesc(userId)).thenReturn(corrList);
+        when(communicationService.existsUser(userId)).thenReturn(true);
         assertEquals(service.mostUpvotedReviews(userId).getBody(),  corrList);
+
+        when(communicationService.existsUser(userId)).thenReturn(false);
+        assertThrows(CustomUserExistsException.class, () -> service.mostUpvotedReviews(2L));
+        verify(repository,never()).findTop3ByUserIdOrderByUpvoteDesc(2L);
+
+
     }
 
     @Test
@@ -565,8 +519,6 @@ class ReviewServiceImplTest {
 
     @Test
     void pinInvalid() {
-        Long userId = 17L;
-        Review r1 = new Review(1L,  2L,  userId,  "Review",  "review",  5L);
         when(repository.existsById(1L)).thenReturn(false);
         assertThrows(CustomBadRequestException.class,  () -> service.pinReview(1L, true));
     }
