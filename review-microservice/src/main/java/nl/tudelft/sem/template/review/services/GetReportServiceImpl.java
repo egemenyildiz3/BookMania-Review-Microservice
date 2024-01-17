@@ -123,8 +123,11 @@ public class GetReportServiceImpl implements GetReportService {
         double totalRating = bd.getAvrRating() * totalReviews;
         totalRating += rating * sign;
         totalReviews += sign;
-        bd.setAvrRating(totalRating / totalReviews);
-
+        if (totalReviews == 0) {
+            bd.setAvrRating(0.0);
+        } else {
+            bd.setAvrRating(totalRating / totalReviews);
+        }
 
         switch (notion) {
             case NEUTRAL -> bd.setNeutralRev(bd.getNeutralRev() + sign);
