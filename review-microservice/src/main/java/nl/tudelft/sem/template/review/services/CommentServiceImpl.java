@@ -2,7 +2,6 @@ package nl.tudelft.sem.template.review.services;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -10,9 +9,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.Review;
+import nl.tudelft.sem.template.review.domain.textcheck.ProfanityHandler;
+import nl.tudelft.sem.template.review.domain.textcheck.TextHandler;
+import nl.tudelft.sem.template.review.domain.textcheck.UrlHandler;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
-import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
 import nl.tudelft.sem.template.review.exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
@@ -27,7 +28,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommunicationServiceImpl communicationService;
 
     /**
-     * Initializes a new instance of the class with the provided dependencies
+     * Initializes a new instance of the class with the provided dependencies.
      *
      * @param repository The comment repository instance for data storage and retrieval
      * @param reviewRepository The review repository instance for data storage and retrieval
@@ -39,26 +40,6 @@ public class CommentServiceImpl implements CommentService {
         this.reviewRepository = reviewRepository;
         this.repository = repository;
         this.communicationService = communicationService;
-    }
-
-    private static final List<String> profanities =
-            Arrays.asList("fuck", "shit", "motherfucker", "bastard", "cunt", "bitch");
-
-    /**
-     * Checks if a string contains any profanities from the defined profanities list.
-     *
-     * @param text - The text to check
-     * @return - True if profanities were found, false otherwise
-     */
-    public static boolean checkProfanities(String text) {
-        if (text != null) {
-            for (String character : profanities) {
-                if (text.toLowerCase().contains(character)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     @Override
@@ -73,9 +54,11 @@ public class CommentServiceImpl implements CommentService {
         if (!communicationService.existsUser(comment.getUserId())) {
             throw new CustomUserExistsException("Invalid user id.");
         }
-        if (checkProfanities(comment.getText())) {
-            throw new CustomProfanitiesException("Profanities detected in text. Please remove them.");
-        }
+
+        TextHandler textHandler = new ProfanityHandler();
+        textHandler.setNext(new UrlHandler());
+
+        textHandler.handle(comment.getText());
 
         comment.setId(0L);
         comment.setDownvote(0L);
@@ -125,9 +108,11 @@ public class CommentServiceImpl implements CommentService {
             throw new CustomBadRequestException("Invalid comment id");
         }
 
-        if (checkProfanities(comment.getText())) {
-            throw new CustomProfanitiesException("Profanities detected in text. Please remove them.");
-        }
+        TextHandler textHandler = new ProfanityHandler();
+        textHandler.setNext(new UrlHandler());
+
+        textHandler.handle(comment.getText());
+
         Comment dataCom = repository.getOne(comment.getId());
         dataCom.setText(comment.getText());
         Comment updated = repository.save(dataCom);
@@ -199,7 +184,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     /**
-     * Checks whether is upvoting or downvoting a comment
+     * Checks whether is upvoting or downvoting a comment.
      *
      * @param comment The comment that is being voted
      * @param body The vote, 0 for downvote and 1 for upvote

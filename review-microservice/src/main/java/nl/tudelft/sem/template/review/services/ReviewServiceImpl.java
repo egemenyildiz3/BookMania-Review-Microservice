@@ -2,7 +2,6 @@ package nl.tudelft.sem.template.review.services;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -10,9 +9,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.domain.reviewsort.*;
+import nl.tudelft.sem.template.review.domain.textcheck.ProfanityHandler;
+import nl.tudelft.sem.template.review.domain.textcheck.TextHandler;
+import nl.tudelft.sem.template.review.domain.textcheck.UrlHandler;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
-import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
 import nl.tudelft.sem.template.review.exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
@@ -41,10 +42,6 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
 
-    private static final List<String> profanities =
-            Arrays.asList("fuck", "shit", "motherfucker", "bastard", "cunt", "bitch");
-
-
     @Override
     public ResponseEntity<Review> add(Review review) {
         if (review == null) {
@@ -61,10 +58,11 @@ public class ReviewServiceImpl implements ReviewService {
             throw new CustomUserExistsException("Invalid user id.");
         }
 
+        TextHandler textHandler = new ProfanityHandler();
+        textHandler.setNext(new UrlHandler());
 
-        if (checkProfanities(review.getText())) {
-            throw new CustomProfanitiesException("Profanities detected in text. Please remove them.");
-        }
+        textHandler.handle(review.getText());
+
         getReportService.addRatingAndNotion(review.getBookId(), review.getRating(), review.getBookNotion());
 
         review.setId(0L);
@@ -76,23 +74,6 @@ public class ReviewServiceImpl implements ReviewService {
         review.timeCreated(LocalDate.now());
         Review saved = repo.save(review);
         return ResponseEntity.ok(saved);
-    }
-
-    /**
-     * Checks if the given string has profanities in it.
-     *
-     * @param s The string that is checked.
-     * @return Whether there are profanities in the string
-     */
-    public static boolean checkProfanities(String s) {
-        if (s != null) {
-            for (String p : profanities) {
-                if (s.toLowerCase().contains(p)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     @Override
@@ -164,10 +145,10 @@ public class ReviewServiceImpl implements ReviewService {
             throw new CustomPermissionsException("User is not owner or admin.");
         }
 
+        TextHandler textHandler = new ProfanityHandler();
+        textHandler.setNext(new UrlHandler());
 
-        if (checkProfanities(review.getText())) {
-            throw new CustomProfanitiesException("Profanities detected in text. Please remove them.");
-        }
+        textHandler.handle(review.getText());
 
         Review dataReview = repo.getOne(review.getId());
         getReportService.updateRatingAndNotion(dataReview.getBookId(),
@@ -245,7 +226,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     /**
-     * Checks whether is upvoting or downvoting a review
+     * Checks whether is upvoting or downvoting a review.
      *
      * @param review The review that is being voted
      * @param body The vote, 0 for downvote and 1 for upvote

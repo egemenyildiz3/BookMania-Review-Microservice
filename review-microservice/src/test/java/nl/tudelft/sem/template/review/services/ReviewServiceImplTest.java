@@ -100,13 +100,6 @@ class ReviewServiceImplTest {
     }
 
     @Test
-    void checkProfanities() {
-        assertTrue(ReviewServiceImpl.checkProfanities("This book is fucking bad"));
-        assertFalse(ReviewServiceImpl.checkProfanities("This book is so fun"));
-        assertFalse(ReviewServiceImpl.checkProfanities(null));
-    }
-
-    @Test
     void getValid() {
         Review review = new Review(1L, 2L, 10L,  "Review",  "review",  5L);
         when(repository.existsById(1L)).thenReturn(true);
