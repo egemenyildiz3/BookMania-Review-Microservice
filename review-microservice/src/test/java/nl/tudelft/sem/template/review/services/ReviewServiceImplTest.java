@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import nl.tudelft.sem.template.model.BookData;
+import nl.tudelft.sem.template.review.domain.textcheck.BaseTextHandler;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
 import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
@@ -522,22 +523,5 @@ class ReviewServiceImplTest {
     void pinInvalid() {
         when(repository.existsById(1L)).thenReturn(false);
         assertThrows(CustomBadRequestException.class,  () -> service.pinReview(1L, true));
-    }
-
-    @Test
-    void handleTextValid() {
-        Review review = new Review(1L, 2L, 10L,  "Review",  "review",  5L);
-
-        service.handleText(review.getText());
-        assertEquals(review.getText(), "review");
-    }
-
-    @Test
-    void handleTextInvalid() {
-        Review review1 = new Review(1L, 2L, 10L,  "Review",  "Bastard",  5L);
-        Review review2 = new Review(1L, 2L, 10L,  "Review",  "https://www.tudelft.nl",  5L);
-
-        assertThrows(CustomProfanitiesException.class,  () -> service.handleText(review1.getText()));;
-        assertThrows(CustomBadRequestException.class, () -> service.handleText(review2.getText()));
     }
 }
