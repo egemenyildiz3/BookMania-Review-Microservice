@@ -147,15 +147,18 @@ public class ReviewServiceImpl implements ReviewService {
 
         updateExistingBookData(dataReview,review);
         handleText(review.getText());
+        Review saved = updateReview(dataReview,review);
+        return ResponseEntity.ok(saved);
+    }
 
+    public Review updateReview(Review dataReview, Review review) {
         dataReview.setLastEditTime(LocalDate.now());
         dataReview.setText(review.getText());
         dataReview.setTitle(review.getTitle());
         dataReview.setRating(review.getRating());
         dataReview.setSpoiler(review.getSpoiler());
         dataReview.setBookNotion(review.getBookNotion());
-        Review saved = repo.save(dataReview);
-        return ResponseEntity.ok(saved);
+        return repo.save(dataReview);
     }
 
     public void handleText(String text){
