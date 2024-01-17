@@ -136,7 +136,7 @@ class ReviewServiceImplTest {
         review1.setSpoiler(true);
         when(repository.save(review1)).thenReturn(review1);
         when(repository.existsById(1L)).thenReturn(true);
-        when(repository.getOne(1L)).thenReturn(review1);
+        when(repository.findById(1L)).thenReturn(Optional.of(review1));
         when(communicationService.existsUser(10L)).thenReturn(true);
         when(communicationService.isAdmin(2L)).thenReturn(false);
 
@@ -177,9 +177,10 @@ class ReviewServiceImplTest {
         when(communicationService.existsBook(2L)).thenReturn(true);
         when(repository.save(review)).thenReturn(review);
         when(repository.existsById(1L)).thenReturn(true);
-        when(repository.getOne(1L)).thenReturn(review);
+        when(repository.findById(1L)).thenReturn(Optional.of(review));
         when(communicationService.isAdmin(9L)).thenReturn(true);
         var result = service.update(9L, review);
+        review.setLastEditTime(LocalDate.now());
         verify(repository).save(review);
         assertEquals(result.getBody(), review);
     }
@@ -229,7 +230,7 @@ class ReviewServiceImplTest {
         doNothing().when(repository).deleteById(1L);
         when(communicationService.isAdmin(10L)).thenReturn(true);
         var result = service.delete(1L, 10L);
-        verify(repository).findById(1L);
+        verify(repository,times(2)).findById(1L);
         verify(repository).deleteById(1L);
         assertEquals(result.getStatusCode(), HttpStatus.OK);
     }
@@ -262,7 +263,7 @@ class ReviewServiceImplTest {
         when(repository.findById(1L)).thenReturn(Optional.of(review));
         when(communicationService.isAdmin(10L)).thenReturn(true);
         var result = service.delete(1L, 10L);
-        verify(repository).findById(1L);
+        verify(repository,times(2)).findById(1L);
         verify(repository).deleteById(1L);
         assertEquals(result.getStatusCode(), HttpStatus.OK);
     }
@@ -274,7 +275,7 @@ class ReviewServiceImplTest {
         when(repository.findById(1L)).thenReturn(Optional.of(review));
         when(communicationService.isAdmin(10L)).thenReturn(false);
         var result = service.delete(1L, 10L);
-        verify(repository).findById(1L);
+        verify(repository,times(2)).findById(1L);
         verify(repository).deleteById(1L);
         assertEquals(result.getStatusCode(), HttpStatus.OK);
     }

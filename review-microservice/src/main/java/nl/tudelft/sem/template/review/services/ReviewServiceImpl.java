@@ -127,16 +127,17 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public ResponseEntity<Review> update(Long userId, Review review) {
 
-        if (review == null || !repo.existsById(review.getId())) {
+        if (review == null) {
             throw new CustomBadRequestException("Invalid review id.");
         }
+        Review dataReview = get(review.getId()).getBody();
+
 
         //check for user in database
         boolean existsUser = communicationService.existsUser(userId);
         if (!existsUser) {
             throw new CustomUserExistsException("Invalid user id.");
         }
-
 
         //check for owner or admin
         boolean isAdmin = communicationService.isAdmin(userId);
@@ -149,7 +150,6 @@ public class ReviewServiceImpl implements ReviewService {
 
         textHandler.handle(review.getText());
 
-        Review dataReview = repo.getOne(review.getId());
         getReportService.updateRatingAndNotion(dataReview.getBookId(),
                 dataReview.getRating(),
                 dataReview.getBookNotion(),
@@ -169,17 +169,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public ResponseEntity<String> delete(Long reviewId, Long userId) {
-        if (!repo.existsById(reviewId)) {
-            throw new CustomBadRequestException("Invalid review id.");
-        }
-
-        Optional<Review> optionalReview = repo.findById(reviewId);
-        Review review;
-        if (optionalReview.isPresent()) {
-            review = optionalReview.get();
-        } else {
-            throw new CustomBadRequestException("Cannot find review.");
-        }
+        Review review = get(reviewId).getBody();
 
         boolean isAdmin = communicationService.isAdmin(userId); // call method for admin check from users
 
@@ -206,10 +196,6 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public ResponseEntity<String> addVote(Long reviewId, Integer body) {
-        if (!repo.existsById(reviewId)) {
-            throw new CustomBadRequestException("Invalid review id.");
-        }
-
         if (!(List.of(0, 1).contains(body))) {
             throw new CustomBadRequestException("The only accepted bodies are 0 for downvote and 1 for upvote");
         }
@@ -247,9 +233,6 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public ResponseEntity<String> pinReview(Long reviewId, Boolean body) {
-        if (!repo.existsById(reviewId) || get(reviewId).getBody() == null) {
-            throw new CustomBadRequestException("Review Id not found or invalid");
-        }
         Review review = get(reviewId).getBody();
         assert review != null;
         review.setPinned(body);

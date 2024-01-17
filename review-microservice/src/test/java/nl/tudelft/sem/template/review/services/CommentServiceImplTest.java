@@ -99,7 +99,7 @@ class CommentServiceImplTest {
         when(commentRepository.existsById(1L)).thenReturn(true);
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         var result = service.get(1L);
-        verify(commentRepository).findById(1L);
+        verify(commentRepository,times(2)).findById(1L);
         verify(commentRepository).existsById(1L);
         assertEquals(result.getBody(), comment);
         assertEquals(result.getStatusCode(), HttpStatus.OK);
@@ -211,7 +211,7 @@ class CommentServiceImplTest {
         when(reviewRepository.getOne(3L)).thenReturn(review);
         final var result = service.delete(1L, 2L);
         verify(commentRepository).existsById(1L);
-        verify(commentRepository).findById(1L);
+        verify(commentRepository, times(2)).findById(1L);
         verify(reviewRepository).save(review);
         assertTrue(review.getCommentList().isEmpty());
         assertEquals(result.getStatusCode(), HttpStatus.OK);
@@ -229,7 +229,7 @@ class CommentServiceImplTest {
         assertThrows(CustomPermissionsException.class, () -> service.delete(1L, 5L));
 
         verify(commentRepository).existsById(1L);
-        verify(commentRepository).findById(1L);
+        verify(commentRepository,times(2)).findById(1L);
         verify(reviewRepository, never()).save(review);
         assertTrue(review.getCommentList().contains(comment));
     }
