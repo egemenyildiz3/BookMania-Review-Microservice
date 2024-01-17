@@ -29,13 +29,14 @@ class ReviewServiceImplTest {
     private ReviewRepository repository;
 
     private CommunicationServiceImpl communicationService;
+    private GetReportServiceImpl getReportService;
 
 
     @BeforeEach
     public void setup() {
         repository = mock(ReviewRepository.class);
         communicationService = mock(CommunicationServiceImpl.class);
-        GetReportServiceImpl getReportService = mock(GetReportServiceImpl.class);
+         getReportService = mock(GetReportServiceImpl.class);
         when(getReportService.addRatingAndNotion(any(),  any(),  any()))
                 .thenReturn(ResponseEntity.of(Optional.of(new BookData(1L))));
 
@@ -58,6 +59,8 @@ class ReviewServiceImplTest {
         when(communicationService.existsBook(2L)).thenReturn(true);
         var result = service.add(review);
         verify(repository).save(review);
+        verify(getReportService).addRatingAndNotion(any(),any(),any());
+
         assertEquals(result.getBody(), review);
         assertEquals(Objects.requireNonNull(result.getBody()).getUpvote(), 0L);
         assertEquals(result.getBody().getDownvote(), 0L);
@@ -142,6 +145,7 @@ class ReviewServiceImplTest {
 
         var result = service.update(10L, review);
         verify(repository).save(review1);
+        verify(getReportService).updateRatingAndNotion(any(),any(),any(),any(),any());
         review.text("hahaha");
         result = service.update(10L, review);
         assertEquals(result.getBody(), review1);
@@ -233,7 +237,19 @@ class ReviewServiceImplTest {
         var result = service.delete(1L, 10L);
         verify(repository,times(2)).findById(1L);
         verify(repository).deleteById(1L);
+        verify(getReportService).removeRatingAndNotion(any(),any(),any());
         assertEquals(result.getStatusCode(), HttpStatus.OK);
+    }
+
+    @Test
+    void addSecondReviewToBook() {
+        Review review = new Review(1L, 2L, 10L,  "Review",  "review",  5L);
+        when(repository.save(review)).thenReturn(review);
+        when(communicationService.existsUser(10L)).thenReturn(true);
+        when(communicationService.existsBook(2L)).thenReturn(true);
+        when(repository.existsByBookIdAndUserId(2L,10L)).thenReturn(true);
+        assertThrows(CustomBadRequestException.class,  () -> service.add(review));
+
     }
 
     @Test
