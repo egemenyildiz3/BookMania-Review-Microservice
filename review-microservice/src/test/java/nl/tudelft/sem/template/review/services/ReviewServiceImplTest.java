@@ -71,6 +71,11 @@ class ReviewServiceImplTest {
         assertThrows(CustomProfanitiesException.class,  () -> service.add(r1));
         verify(repository, never()).save(r1);
 
+        Review r2 = new Review(1L, 2L, 10L,  "Review",  "review",  5L);
+        r2.text("https://");
+        when(repository.save(r2)).thenReturn(r2);
+        assertThrows(CustomBadRequestException.class,  () -> service.add(r2));
+        verify(repository, never()).save(r2);
 
         assertThrows(CustomBadRequestException.class,  () -> service.add(null));
         verify(repository, never()).save(r1);
