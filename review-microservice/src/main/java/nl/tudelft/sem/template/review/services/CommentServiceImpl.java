@@ -74,6 +74,8 @@ public class CommentServiceImpl implements CommentService {
         return ResponseEntity.ok(review.getCommentList().get(review.getCommentList().size() - 1));
     }
 
+
+
     @Override
     public ResponseEntity<Comment> get(Long commentId) {
         if (!repository.existsById(commentId)) {

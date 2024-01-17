@@ -368,6 +368,29 @@ class GetReportServiceImplTest {
     }
 
     @Test
+    void removeRatingAndNotionOnlyOne() {
+        long id = 20L;
+        BookData data = new BookData(id);
+        data.setAvrRating(4.0);
+        data.setPositiveRev(1);
+        data.setNeutralRev(0);
+        data.setNegativeRev(0);
+
+        when(bookDataRepository.existsById(id)).thenReturn(true);
+        when(bookDataRepository.getOne(id)).thenReturn(data);
+
+        when(bookDataRepository.save(any(BookData.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        BookData result = service.removeRatingAndNotion(id, 2L, Review.BookNotionEnum.POSITIVE).getBody();
+
+        data.setPositiveRev(0);
+        data.setAvrRating(0.0);
+
+        assertNotNull(result);
+        assertEquals(data, result);
+    }
+
+    @Test
     void removeRatingAndNotionPositive() {
         long id = 20L;
         BookData data = new BookData(id);

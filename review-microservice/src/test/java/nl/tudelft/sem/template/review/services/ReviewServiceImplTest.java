@@ -193,6 +193,7 @@ class ReviewServiceImplTest {
         review.setText("fuck");
         when(repository.save(review)).thenReturn(review);
         when(repository.existsById(1L)).thenReturn(true);
+        when(repository.getOne(1L)).thenReturn(review);
         when(communicationService.existsUser(10L)).thenReturn(true);
         when(communicationService.isAdmin(10L)).thenReturn(true);
         assertThrows(CustomProfanitiesException.class,  () -> service.update(10L, review));

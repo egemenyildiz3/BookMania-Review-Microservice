@@ -56,12 +56,8 @@ public class ReviewServiceImpl implements ReviewService {
             throw new CustomUserExistsException("Invalid user id.");
         }
 
-        TextHandler textHandler = new ProfanityHandler();
-        textHandler.setNext(new UrlHandler());
-
-        textHandler.handle(review.getText());
-
-        getReportService.addRatingAndNotion(review.getBookId(), review.getRating(), review.getBookNotion());
+        handleText(review.getText());
+        updateBookData(review);
 
         review.setId(0L);
         review.setDownvote(0L);
@@ -72,6 +68,10 @@ public class ReviewServiceImpl implements ReviewService {
         review.timeCreated(LocalDate.now());
         Review saved = repo.save(review);
         return ResponseEntity.ok(saved);
+    }
+
+    public void updateBookData(Review review){
+        getReportService.addRatingAndNotion(review.getBookId(), review.getRating(), review.getBookNotion());
     }
 
     @Override
@@ -144,17 +144,10 @@ public class ReviewServiceImpl implements ReviewService {
             throw new CustomPermissionsException("User is not owner or admin.");
         }
 
-        TextHandler textHandler = new ProfanityHandler();
-        textHandler.setNext(new UrlHandler());
 
-        textHandler.handle(review.getText());
-
-        getReportService.updateRatingAndNotion(dataReview.getBookId(),
-                dataReview.getRating(),
-                dataReview.getBookNotion(),
-                review.getRating(),
-                review.getBookNotion());
-
+        Review dataReview = repo.getOne(review.getId());
+        updateExistingBookData(dataReview,review);
+        handleText(review.getText());
 
         dataReview.setLastEditTime(LocalDate.now());
         dataReview.setText(review.getText());
@@ -166,6 +159,21 @@ public class ReviewServiceImpl implements ReviewService {
         return ResponseEntity.ok(saved);
     }
 
+    public void handleText(String text){
+        TextHandler textHandler = new ProfanityHandler();
+        textHandler.setNext(new UrlHandler());
+
+        textHandler.handle(text);
+    }
+
+    public void updateExistingBookData(Review dataReview, Review review){
+        getReportService.updateRatingAndNotion(dataReview.getBookId(),
+                dataReview.getRating(),
+                dataReview.getBookNotion(),
+                review.getRating(),
+                review.getBookNotion());
+    }
+
     @Override
     public ResponseEntity<String> delete(Long reviewId, Long userId) {
         Review review = get(reviewId).getBody();
@@ -174,7 +182,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         //check for owner or admin
         if (Objects.equals(userId, review.getUserId()) || isAdmin) {
-            getReportService.removeRatingAndNotion(review.getBookId(), review.getRating(), review.getBookNotion());
+            deleteBookDataUpdate(review);
             repo.deleteById(reviewId);
             return ResponseEntity.ok().build();
         }
@@ -182,6 +190,9 @@ public class ReviewServiceImpl implements ReviewService {
         throw new CustomPermissionsException("User is not owner or admin.");
 
 
+    }
+    public void deleteBookDataUpdate(Review review){
+        getReportService.removeRatingAndNotion(review.getBookId(), review.getRating(), review.getBookNotion());
     }
 
     @Override
