@@ -143,9 +143,8 @@ public class ReviewServiceImpl implements ReviewService {
             throw new CustomUserExistsException("Invalid user id.");
         }
 
-        //check for owner or admin
-        boolean isAdmin = communicationService.isAdmin(userId);
-        if (!isAdmin && !Objects.equals(review.getUserId(), userId)) {
+        //check for owner
+        if (!Objects.equals(review.getUserId(), userId)) {
             throw new CustomPermissionsException("User is not owner or admin.");
         }
 
