@@ -16,7 +16,7 @@ public interface CommentService {
     ResponseEntity<String> delete(Long commentId, Long userId);
 
 
-    ResponseEntity<Long> findMostUpvotedComment(Long bookId);
+    List<Long> findMostUpvotedCommentAndReview(Long bookId);
 
     ResponseEntity<String> addVote(Long commentId, Integer body);
 }

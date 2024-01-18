@@ -2,17 +2,16 @@ package nl.tudelft.sem.template.review.services;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.domain.reviewsort.*;
+import nl.tudelft.sem.template.review.domain.textcheck.ProfanityHandler;
+import nl.tudelft.sem.template.review.domain.textcheck.TextHandler;
+import nl.tudelft.sem.template.review.domain.textcheck.UrlHandler;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
-import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
 import nl.tudelft.sem.template.review.exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import org.springframework.http.ResponseEntity;
@@ -41,15 +40,12 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
 
-    private static final List<String> profanities =
-            Arrays.asList("fuck", "shit", "motherfucker", "bastard", "cunt", "bitch");
-
-
     @Override
     public ResponseEntity<Review> add(Review review) {
         if (review == null) {
             throw new CustomBadRequestException("Review cannot be null.");
         }
+
         boolean existsBook = communicationService.existsBook(review.getBookId());
         if (!existsBook) {
             throw new CustomBadRequestException("Invalid book id.");
@@ -61,11 +57,14 @@ public class ReviewServiceImpl implements ReviewService {
             throw new CustomUserExistsException("Invalid user id.");
         }
 
-
-        if (checkProfanities(review.getText())) {
-            throw new CustomProfanitiesException("Profanities detected in text. Please remove them.");
+        if (repo.existsByBookIdAndUserId(review.getBookId(), review.getUserId())) {
+            throw new CustomBadRequestException("User has already created review for book");
         }
-        getReportService.addRatingAndNotion(review.getBookId(), review.getRating(), review.getBookNotion());
+
+
+        handleText(review.getText());
+        handleText(review.getTitle());
+        updateBookData(review);
 
         review.setId(0L);
         review.setDownvote(0L);
@@ -78,21 +77,8 @@ public class ReviewServiceImpl implements ReviewService {
         return ResponseEntity.ok(saved);
     }
 
-    /**
-     * Checks if the given string has profanities in it.
-     *
-     * @param s The string that is checked.
-     * @return Whether there are profanities in the string
-     */
-    public static boolean checkProfanities(String s) {
-        if (s != null) {
-            for (String p : profanities) {
-                if (s.toLowerCase().contains(p)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    public void updateBookData(Review review) {
+        getReportService.addRatingAndNotion(review.getBookId(), review.getRating(), review.getBookNotion());
     }
 
     @Override
@@ -147,9 +133,9 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public ResponseEntity<Review> update(Long userId, Review review) {
 
-        if (review == null || !repo.existsById(review.getId())) {
-            throw new CustomBadRequestException("Invalid review id.");
-        }
+        Review dataReview = repo.findById(review.getId())
+                .orElseThrow(() -> new CustomBadRequestException("Review not found"));
+
 
         //check for user in database
         boolean existsUser = communicationService.existsUser(userId);
@@ -157,55 +143,72 @@ public class ReviewServiceImpl implements ReviewService {
             throw new CustomUserExistsException("Invalid user id.");
         }
 
-
-        //check for owner or admin
-        boolean isAdmin = communicationService.isAdmin(userId);
-        if (!isAdmin && !Objects.equals(review.getUserId(), userId)) {
+        //check for owner
+        if (!Objects.equals(review.getUserId(), userId)) {
             throw new CustomPermissionsException("User is not owner or admin.");
         }
 
 
-        if (checkProfanities(review.getText())) {
-            throw new CustomProfanitiesException("Profanities detected in text. Please remove them.");
-        }
+        updateExistingBookData(dataReview, review);
+        handleText(review.getText());
+        handleText(review.getTitle());
+        Review saved = updateReview(dataReview, review);
+        return ResponseEntity.ok(saved);
+    }
 
-        Review dataReview = repo.getOne(review.getId());
-        getReportService.updateRatingAndNotion(dataReview.getBookId(),
-                dataReview.getRating(),
-                dataReview.getBookNotion(),
-                review.getRating(),
-                review.getBookNotion());
-
-
+    /**
+     * Updates the review in the database with the one provided.
+     *
+     * @param dataReview The review from the repo.
+     * @param review The review object passed as parameter.
+     * @return The updated dataReview.
+     */
+    public Review updateReview(Review dataReview, Review review) {
         dataReview.setLastEditTime(LocalDate.now());
         dataReview.setText(review.getText());
         dataReview.setTitle(review.getTitle());
         dataReview.setRating(review.getRating());
         dataReview.setSpoiler(review.getSpoiler());
         dataReview.setBookNotion(review.getBookNotion());
-        Review saved = repo.save(dataReview);
-        return ResponseEntity.ok(saved);
+        return repo.save(dataReview);
+    }
+
+    /**
+     *  Handles the text validation.
+     *
+     * @param text The text to be checked.
+     */
+    public void handleText(String text) {
+        TextHandler textHandler = new ProfanityHandler();
+        textHandler.setNext(new UrlHandler());
+
+        textHandler.handle(text);
+    }
+
+    /**
+     * Updates the existing book data.
+     *
+     * @param dataReview The review from the database.
+     * @param review The review that is passed as a parameter.
+     */
+    public void updateExistingBookData(Review dataReview, Review review) {
+        getReportService.updateRatingAndNotion(dataReview.getBookId(),
+                dataReview.getRating(),
+                dataReview.getBookNotion(),
+                review.getRating(),
+                review.getBookNotion());
     }
 
     @Override
     public ResponseEntity<String> delete(Long reviewId, Long userId) {
-        if (!repo.existsById(reviewId)) {
-            throw new CustomBadRequestException("Invalid review id.");
-        }
-
-        Optional<Review> optionalReview = repo.findById(reviewId);
-        Review review;
-        if (optionalReview.isPresent()) {
-            review = optionalReview.get();
-        } else {
-            throw new CustomBadRequestException("Cannot find review.");
-        }
+        Review review = repo.findById(reviewId)
+                .orElseThrow(() -> new CustomBadRequestException("Review not found"));
 
         boolean isAdmin = communicationService.isAdmin(userId); // call method for admin check from users
 
         //check for owner or admin
         if (Objects.equals(userId, review.getUserId()) || isAdmin) {
-            getReportService.removeRatingAndNotion(review.getBookId(), review.getRating(), review.getBookNotion());
+            deleteBookDataUpdate(review);
             repo.deleteById(reviewId);
             return ResponseEntity.ok().build();
         }
@@ -213,6 +216,10 @@ public class ReviewServiceImpl implements ReviewService {
         throw new CustomPermissionsException("User is not owner or admin.");
 
 
+    }
+
+    public void deleteBookDataUpdate(Review review) {
+        getReportService.removeRatingAndNotion(review.getBookId(), review.getRating(), review.getBookNotion());
     }
 
     @Override
@@ -226,13 +233,6 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public ResponseEntity<String> addVote(Long reviewId, Integer body) {
-        if (!repo.existsById(reviewId)) {
-            throw new CustomBadRequestException("Invalid review id.");
-        }
-        if (get(reviewId).getBody() == null) {
-            throw new CustomBadRequestException("Review cannot be null.");
-        }
-
         if (!(List.of(0, 1).contains(body))) {
             throw new CustomBadRequestException("The only accepted bodies are 0 for downvote and 1 for upvote");
         }
@@ -245,7 +245,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     /**
-     * Checks whether is upvoting or downvoting a review
+     * Checks whether is upvoting or downvoting a review.
      *
      * @param review The review that is being voted
      * @param body The vote, 0 for downvote and 1 for upvote
@@ -261,32 +261,15 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public ResponseEntity<List<Review>> mostUpvotedReviews(Long userId) {
-        List<Review> listOfReviews = new ArrayList<>(repo.findAll());
-        List<Review> result = new ArrayList<>();
-        for (Review rev : listOfReviews) {
-            if (rev.getUserId().equals(userId)) {
-                result.add(rev);
-            }
+        if (!communicationService.existsUser(userId)) {
+            throw new CustomUserExistsException("Invalid user id");
         }
-        result.sort(Comparator.comparingLong((Review r) -> r.getUpvote() == null ? 0 : r.getUpvote()).reversed());
-        List<Review> finalRes = new ArrayList<>();
-        if (result.get(0) != null) {
-            finalRes.add(result.get(0));
-        }
-        if (result.get(1) != null) {
-            finalRes.add(result.get(1));
-        }
-        if (result.get(2) != null) {
-            finalRes.add(result.get(2));
-        }
+        List<Review> finalRes = repo.findTop3ByUserIdOrderByUpvoteDesc(userId);
         return ResponseEntity.ok(finalRes);
     }
 
     @Override
     public ResponseEntity<String> pinReview(Long reviewId, Boolean body) {
-        if (!repo.existsById(reviewId) || get(reviewId).getBody() == null) {
-            throw new CustomBadRequestException("Review Id not found or invalid");
-        }
         Review review = get(reviewId).getBody();
         assert review != null;
         review.setPinned(body);

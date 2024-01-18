@@ -149,5 +149,60 @@ class CommunicationServiceImplTest {
         assertTrue(service.isAdmin(1L));
         assertTrue(service.existsBook(1L));
         assertTrue(service.existsUser(1L));
+        assertTrue(service.isAuthor(1L,1L));
+    }
+
+    @Test
+    void testIsAuthorIntegrationTrue() {
+        WireMockServer wireMockServer1 = new WireMockServer(8081);
+        wireMockServer1.start();
+        WireMock.configureFor(8081);
+        wireMockServer1.stubFor(get(urlEqualTo("/book/getById/1"))
+                .willReturn(aResponse()
+                .withStatus(200)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{\n" +
+                        "  \"bookId\": 1,\n" +
+                        "  \"title\": \"Algorithm Design\",\n"+
+                        "  \"authorId\": 1,\n"+
+                        "  \"description\": \"A very useful book to learn basics of algorithm design.\",\n" +
+                        "  \"genre\": \"Education\",\n" +
+                        "  \"reviews\": [\n" +
+                        "    100000033,\n" +
+                        "    100000237,\n" +
+                        "    100000675\n" +
+                        "  ],\n" +
+                        "  \"average_rating\": 8.7\n" +
+                        "  \"}")));
+        assertTrue(service.isAuthorIntegration(1L, 1L));
+        wireMockServer1.verify(getRequestedFor(urlEqualTo("/book/getById/1")));
+        wireMockServer1.stop();
+    }
+
+    @Test
+    void testIsAuthorIntegrationFalse() {
+        WireMockServer wireMockServer1 = new WireMockServer(8081);
+        wireMockServer1.start();
+        WireMock.configureFor(8081);
+        wireMockServer1.stubFor(get(urlEqualTo("/book/getById/1"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\n" +
+                                "  \"bookId\": 1,\n" +
+                                "  \"title\": \"Algorithm Design\",\n"+
+                                "  \"authorId\": 1,\n"+
+                                "  \"description\": \"A very useful book to learn basics of algorithm design.\",\n" +
+                                "  \"genre\": \"Education\",\n" +
+                                "  \"reviews\": [\n" +
+                                "    100000033,\n" +
+                                "    100000237,\n" +
+                                "    100000675\n" +
+                                "  ],\n" +
+                                "  \"average_rating\": 8.7\n" +
+                                "  \"}")));
+        assertFalse(service.isAuthorIntegration(1L, 2L));
+        wireMockServer1.verify(getRequestedFor(urlEqualTo("/book/getById/1")));
+        wireMockServer1.stop();
     }
 }
