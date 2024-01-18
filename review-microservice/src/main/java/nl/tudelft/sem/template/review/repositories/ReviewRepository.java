@@ -20,5 +20,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     boolean existsByBookIdAndUserId(Long bookId, Long userId);
     // Uses the naming convention of Spring Data JPA to automatically generate the appropriate query
+
     Long countByBookId(Long bookId);
 }

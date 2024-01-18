@@ -19,11 +19,32 @@ public class ReportedController implements ReportedApi {
     private final ReportReviewServiceImpl reportReviewService;
     private final ReportCommentServiceImpl reportCommentService;
 
-    public ReportedController(ReportReviewRepository reportReviewRepository, ReviewRepository reviewRepository,
-                            CommunicationServiceImpl communicationService, ReportCommentRepository reportCommentRepository, CommentRepository commentRepository,
-                            ReportCommentServiceImpl reportCommentService, ReportReviewServiceImpl reportReviewService) {
-        this.reportReviewService = reportReviewService != null ? reportReviewService : new ReportReviewServiceImpl(reportReviewRepository, communicationService, reviewRepository);
-        this.reportCommentService = reportCommentService != null ? reportCommentService : new ReportCommentServiceImpl(reportCommentRepository, communicationService, commentRepository);
+    /**
+     * Initializes a new instance of the reportReviewService and reportCommentService with the provided dependencies.
+     *
+     * @param reportReviewRepository report review repo
+     * @param reviewRepository review repo
+     * @param communicationService communication service
+     * @param reportCommentRepository report comment repo
+     * @param commentRepository comment repo
+     * @param reportCommentService report comment service
+     * @param reportReviewService Report review service reportReviewService
+     */
+    public ReportedController(ReportReviewRepository reportReviewRepository,
+                              ReviewRepository reviewRepository,
+                              CommunicationServiceImpl communicationService,
+                              ReportCommentRepository reportCommentRepository,
+                              CommentRepository commentRepository,
+                              ReportCommentServiceImpl reportCommentService,
+                              ReportReviewServiceImpl reportReviewService) {
+        this.reportReviewService = reportReviewService != null ? reportReviewService : new ReportReviewServiceImpl(
+                reportReviewRepository,
+                communicationService,
+                reviewRepository);
+        this.reportCommentService = reportCommentService != null ? reportCommentService : new ReportCommentServiceImpl(
+                reportCommentRepository,
+                communicationService,
+                commentRepository);
     }
 
     @Override
