@@ -17,6 +17,7 @@ import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
 import nl.tudelft.sem.template.review.exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.CommentRepository;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -144,17 +145,26 @@ public class CommentServiceImpl implements CommentService {
      * @param bookId - The book whose comments to look for
      * @return - The id of the most upvoted comment of null if no comment was found
      */
-    public ResponseEntity<Long> findMostUpvotedComment(Long bookId) {
+    public List<Long> findMostUpvotedCommentAndReview(Long bookId) {
+        List<Long> result = new ArrayList<>();
+        List<Long> reviewIds = reviewRepository.findMostUpvotedReviewId(bookId, PageRequest.of(0, 1));
+
+        if (!reviewIds.isEmpty()) {
+            result.add(reviewIds.get(0));
+        }else{
+            result.add(null);
+        }
         List<Comment> allComments = repository.findAll();
 
-        Optional<Comment> result = allComments.stream().filter(x -> {
+        Optional<Comment> resultCom = allComments.stream().filter(x -> {
             Review associatedReview = reviewRepository.getOne(x.getReviewId());
             return Objects.equals(associatedReview.getBookId(), bookId);
         })
                 .max(Comparator.comparingLong(Comment::getUpvote));
 
-        return result.map(comment -> ResponseEntity.ok(comment.getId()))
-                .orElseGet(() -> ResponseEntity.badRequest().body(null));
+        result.add(resultCom.map(Comment::getId)
+                .orElse(null));
+        return result;
 
     }
 

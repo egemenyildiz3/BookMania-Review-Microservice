@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.review.services;
 
+import com.fasterxml.jackson.databind.introspect.TypeResolutionContext;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
 import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import java.util.Optional;
@@ -294,9 +296,10 @@ class CommentServiceImplTest {
     }
 
     @Test
-    void findMostUpvotedComment() {
+    void findMostUpvotedCommentAndReview() {
         final Review reviewOne = new Review(5L, 15L, 15L, "rev1", "rev1t", 5L);
         final Review reviewTwo = new Review(10L, 10L, 15L, "rev1", "rev1t", 5L);
+
         Comment commentOne = new Comment(1L, 5L, 15L, "a");
         Comment commentTwo = new Comment(2L, 10L, 20L, "b");
         Comment commentThree = new Comment(3L, 10L, 25L, "c");
@@ -307,10 +310,12 @@ class CommentServiceImplTest {
         when(commentRepository.findAll()).thenReturn(comments);
         when(reviewRepository.getOne(5L)).thenReturn(reviewOne);
         when(reviewRepository.getOne(10L)).thenReturn(reviewTwo);
-        
-        var result = service.findMostUpvotedComment(10L);
+        when(reviewRepository.findMostUpvotedReviewId(10L, PageRequest.of(0, 1))).thenReturn(List.of(reviewOne.getId()));
+        var result = service.findMostUpvotedCommentAndReview(10L);
+        assertEquals(result.get(0),reviewOne.getId());
+        assertEquals(result.get(1),commentThree.getId());
 
-        assertEquals(result.getBody(), 3L);
+
     }
 
     @Test
@@ -327,7 +332,11 @@ class CommentServiceImplTest {
         when(commentRepository.findAll()).thenReturn(comments);
         when(reviewRepository.getOne(5L)).thenReturn(reviewOne);
         when(reviewRepository.getOne(10L)).thenReturn(reviewTwo);
-        assertNull(service.findMostUpvotedComment(5L).getBody());
+        when(reviewRepository.findMostUpvotedReviewId(5L, PageRequest.of(0, 1))).thenReturn(List.of());
+
+        var result = service.findMostUpvotedCommentAndReview(5L);
+        assertNull(result.get(0));
+        assertNull(result.get(1));
     }
 
     @Test
