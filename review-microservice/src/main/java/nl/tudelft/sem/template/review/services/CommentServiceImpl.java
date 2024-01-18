@@ -70,7 +70,6 @@ public class CommentServiceImpl implements CommentService {
 
         review.addCommentListItem(comment);
         reviewRepository.save(review);
-        review.getCommentList().sort(Comparator.comparing(Comment::getTimeCreated));
         return ResponseEntity.ok(review.getCommentList().get(review.getCommentList().size() - 1));
     }
 

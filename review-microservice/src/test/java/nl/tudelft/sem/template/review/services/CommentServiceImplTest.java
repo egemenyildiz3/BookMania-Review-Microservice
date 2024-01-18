@@ -10,6 +10,7 @@ import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import nl.tudelft.sem.template.model.Comment;
 import nl.tudelft.sem.template.model.Review;
@@ -49,6 +50,11 @@ class CommentServiceImplTest {
         verify(reviewRepository).save(review);
         verify(reviewRepository).existsById(2L);
         verify(reviewRepository).findById(2L);
+        assertEquals(0L,comment.getDownvote());
+        assertEquals(0L,comment.getUpvote());
+        assertEquals(LocalDate.now(),comment.getTimeCreated());
+        assertNotNull(comment.getReportList());
+        assertEquals(0L,comment.getId());
         assertEquals(result.getBody(), comment);
         assertEquals(result.getStatusCode(), HttpStatus.OK);
     }
@@ -94,6 +100,17 @@ class CommentServiceImplTest {
     }
 
     @Test
+    void testAddLink() {
+        Review review = new Review(2L, 5L, 10L, "Review", "review", 5L);
+        Comment comment = new Comment(3L, 2L, 10L, "http://");
+        when(reviewRepository.save(review)).thenReturn(review);
+        when(reviewRepository.existsById(2L)).thenReturn(true);
+        when(communicationService.existsUser(10L)).thenReturn(true);
+        assertThrows(CustomBadRequestException.class, () -> service.add(comment));
+        verify(reviewRepository, never()).save(review);
+    }
+
+    @Test
     void testGetValid() {
         Comment comment = new Comment(1L, 2L, 10L, "comment");
         when(commentRepository.existsById(1L)).thenReturn(true);
@@ -116,22 +133,22 @@ class CommentServiceImplTest {
     @Test
     void testUpdateOwner() {
         Comment comment = new Comment(1L, 2L, 10L, "comment");
+        Comment comment1 = new Comment(1L, 2L, 10L, "hahaha");
         comment.id(1L);
         comment.userId(2L);
-        when(commentRepository.save(comment)).thenReturn(comment);
+        when(commentRepository.save(comment1)).thenReturn(comment1);
         when(commentRepository.existsById(1L)).thenReturn(true);
-        when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
-        when(commentRepository.getOne(1L)).thenReturn(comment);
-        when(communicationService.existsUser(2L)).thenReturn(true);
+        when(commentRepository.findById(1L)).thenReturn(Optional.of(comment1));
+        when(communicationService.existsUser(10L)).thenReturn(true);
 
-        var result = service.update(2L, comment);
-        verify(commentRepository).save(comment);
+        var result = service.update(10L, comment);
+        verify(commentRepository).save(comment1);
         verify(commentRepository).existsById(1L);
-        //  verify(commentRepository).findById(1L);
-        assertEquals(result.getBody(), comment);
+        assertEquals(comment1.getText(),comment.getText());
+        assertEquals(result.getBody(), comment1);
         comment.text("great");
-        result = service.update(2L, comment);
-        assertEquals(result.getBody(), comment);
+        result = service.update(10L, comment);
+        assertEquals(result.getBody(), comment1);
         assertEquals(result.getStatusCode(), HttpStatus.OK);
     }
 
@@ -170,6 +187,26 @@ class CommentServiceImplTest {
         assertEquals(result.getBody(), comment);
         comment.text("fuck");
         assertThrows(CustomProfanitiesException.class, () -> service.update(2L, comment));
+    }
+
+    @Test
+    void testUpdateOwnerLink() {
+        Comment comment = new Comment(1L, 2L, 10L, "comment");
+        comment.id(1L);
+        comment.userId(2L);
+        when(commentRepository.save(comment)).thenReturn(comment);
+        when(commentRepository.existsById(1L)).thenReturn(true);
+        when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
+        when(commentRepository.getOne(1L)).thenReturn(comment);
+        when(communicationService.existsUser(2L)).thenReturn(true);
+
+        var result = service.update(2L, comment);
+        verify(commentRepository).save(comment);
+        verify(commentRepository).existsById(1L);
+        //  verify(commentRepository).findById(1L);
+        assertEquals(result.getBody(), comment);
+        comment.text("http://");
+        assertThrows(CustomBadRequestException.class, () -> service.update(2L, comment));
     }
 
     @Test

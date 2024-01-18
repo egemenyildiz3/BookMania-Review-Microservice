@@ -88,6 +88,19 @@ class ReviewServiceImplTest {
     }
 
     @Test
+    void addProfanitiesTitle() {
+        Review review = new Review(1L, 2L, 10L,  "fuck",  "review",  5L);
+        when(repository.save(review)).thenReturn(review);
+        when(repository.existsById(1L)).thenReturn(true);
+        when(repository.getOne(1L)).thenReturn(review);
+        when(communicationService.existsUser(10L)).thenReturn(true);
+        when(communicationService.isAdmin(10L)).thenReturn(true);
+        when(communicationService.existsBook(2L)).thenReturn(true);
+        assertThrows(CustomProfanitiesException.class,  () -> service.add(review));
+        verify(repository, never()).save(review);
+    }
+
+    @Test
     void addInvalidBook() {
         Review review = new Review(1L, 2L, 10L,  "Review",  "review",  5L);
         when(repository.save(review)).thenReturn(review);
@@ -197,6 +210,17 @@ class ReviewServiceImplTest {
         review.id(1L);
         review.userId(10L);
         review.setText("fuck");
+        when(repository.save(review)).thenReturn(review);
+        when(repository.existsById(1L)).thenReturn(true);
+        when(repository.getOne(1L)).thenReturn(review);
+        when(communicationService.existsUser(10L)).thenReturn(true);
+        when(communicationService.isAdmin(10L)).thenReturn(true);
+        assertThrows(CustomProfanitiesException.class,  () -> service.update(10L, review));
+        verify(repository, never()).save(review);
+    }
+    @Test
+    void updateProfanitiesTitle() {
+        Review review = new Review(1L, 2L, 10L,  "fuck",  "review",  5L);
         when(repository.save(review)).thenReturn(review);
         when(repository.existsById(1L)).thenReturn(true);
         when(repository.getOne(1L)).thenReturn(review);
