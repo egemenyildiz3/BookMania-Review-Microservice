@@ -6,8 +6,6 @@ import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.BookDataRepository;
-import nl.tudelft.sem.template.review.repositories.ReviewRepository;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +49,7 @@ public class GetReportServiceImpl implements GetReportService {
         if (!communicationService.existsBook(bookId)) {
             throw new CustomBadRequestException("Book doesn't exist");
         }
-        if (!(communicationService.isAuthor(bookId, userId) || communicationService.isAdmin(userId))) {
+        if (!(communicationService.isAuthorIntegration(bookId, userId) || communicationService.isAdmin(userId))) {
             throw new CustomBadRequestException("User is not authorised to view this BookData");
         }
 

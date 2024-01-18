@@ -140,7 +140,7 @@ public class CommunicationServiceImpl {
                 book = response.toString();
                 System.out.println(book);
                 reader.close();
-                return book.contains("\"authorId\": " + userId);
+                return book.contains("\"authorId\":" + userId);
             } else {
                 System.out.println("Failed with status code" + responseCode);
                 return false;
