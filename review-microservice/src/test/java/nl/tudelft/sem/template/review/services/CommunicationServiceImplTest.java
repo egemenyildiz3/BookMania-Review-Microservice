@@ -164,7 +164,7 @@ class CommunicationServiceImplTest {
                 .withBody("{\n" +
                         "  \"bookId\": 1,\n" +
                         "  \"title\": \"Algorithm Design\",\n"+
-                        "  \"authorId\": 1,\n"+
+                        "  \"authorId\":1,\n"+
                         "  \"description\": \"A very useful book to learn basics of algorithm design.\",\n" +
                         "  \"genre\": \"Education\",\n" +
                         "  \"reviews\": [\n" +
@@ -191,7 +191,7 @@ class CommunicationServiceImplTest {
                         .withBody("{\n" +
                                 "  \"bookId\": 1,\n" +
                                 "  \"title\": \"Algorithm Design\",\n"+
-                                "  \"authorId\": 1,\n"+
+                                "  \"authorId\":1,\n"+
                                 "  \"description\": \"A very useful book to learn basics of algorithm design.\",\n" +
                                 "  \"genre\": \"Education\",\n" +
                                 "  \"reviews\": [\n" +
