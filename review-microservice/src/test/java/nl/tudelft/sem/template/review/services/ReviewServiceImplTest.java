@@ -4,18 +4,16 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import nl.tudelft.sem.template.model.BookData;
-import nl.tudelft.sem.template.review.domain.textcheck.BaseTextHandler;
+import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomPermissionsException;
 import nl.tudelft.sem.template.review.exceptions.CustomProfanitiesException;
-import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.test.context.TestComponent;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import java.time.LocalDate;
@@ -143,7 +141,7 @@ class ReviewServiceImplTest {
     }
 
     @Test
-    void updateOwnerNotAdmin() {
+    void updateOwner() {
         Review review = new Review(1L, 2L, 10L,  "Review",  "review",  5L);
         review.id(1L);
         review.userId(10L);
@@ -174,7 +172,7 @@ class ReviewServiceImplTest {
     }
 
     @Test
-    void updateNotOwnerOrAdmin() {
+    void updateNotOwner() {
         Review review = new Review(1L, 2L, 10L,  "Review",  "review",  5L);
         review.id(1L);
         review.userId(10L);
@@ -187,21 +185,6 @@ class ReviewServiceImplTest {
         assertThrows(CustomPermissionsException.class,  () -> service.update(9L, review));
         verify(repository, never()).save(review);
         //assertEquals(result.getStatusCode(), HttpStatus.FORBIDDEN);
-    }
-
-    @Test
-    void updateNotOwnerButAdmin() {
-        Review review = new Review(1L, 2L, 10L,  "Review",  "review",  5L);
-        when(communicationService.existsUser(9L)).thenReturn(true);
-        when(communicationService.existsBook(2L)).thenReturn(true);
-        when(repository.save(review)).thenReturn(review);
-        when(repository.existsById(1L)).thenReturn(true);
-        when(repository.findById(1L)).thenReturn(Optional.of(review));
-        when(communicationService.isAdmin(9L)).thenReturn(true);
-        var result = service.update(9L, review);
-        review.setLastEditTime(LocalDate.now());
-        verify(repository).save(review);
-        assertEquals(result.getBody(), review);
     }
 
     @Test
