@@ -112,35 +112,41 @@ public class CommunicationServiceImpl {
      */
     public boolean isAuthor(Long bookId, Long userId) {
         //TODO make http request to endpoint for author
-        //return getResponse(bookMicroUrl, bookId, false, false);
+        return true;
+    }
+
+    /**
+     * Checks if the user with the given id is the author of the book with the given id by making an HTTP request.
+     *
+     * @param bookId - the id of the book to check
+     * @param userId - the id of the user to check
+     * @return - True if the user is the author of the book, false otherwise
+     */
+    public boolean isAuthorIntegration(Long bookId, Long userId) {
+        //TODO make http request to endpoint for author
         String book;
-        try
-        {
-            URL obj = new URL(bookMicroUrl+"/book/getById/"+bookId);
+        try {
+            URL obj = new URL(bookMicroUrl + "/book/getById/" + bookId);
             HttpURLConnection connection = (HttpURLConnection) obj.openConnection();
-
-            // Set the request method
             connection.setRequestMethod("GET");
-
             int responseCode = connection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String inputLine;
                 StringBuilder response = new StringBuilder();
-                while ((inputLine = in.readLine()) != null) {
+                while ((inputLine = reader.readLine()) != null) {
                     response.append(inputLine);
                 }
                 book = response.toString();
                 System.out.println(book);
-                in.close();
-
+                reader.close();
+                return book.contains("\"authorId\":" + userId);
             } else {
-                System.out.println("Failed with status code " + responseCode);
+                System.out.println("Failed with status code" + responseCode);
                 return false;
             }
         } catch (Exception e) {
             return false;
         }
-        return book.contains("\"authorId\":"+userId);
     }
 }

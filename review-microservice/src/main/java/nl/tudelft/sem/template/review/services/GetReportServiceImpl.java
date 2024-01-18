@@ -6,8 +6,6 @@ import nl.tudelft.sem.template.model.Review;
 import nl.tudelft.sem.template.review.exceptions.CustomBadRequestException;
 import nl.tudelft.sem.template.review.exceptions.CustomUserExistsException;
 import nl.tudelft.sem.template.review.repositories.BookDataRepository;
-import nl.tudelft.sem.template.review.repositories.ReviewRepository;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +13,6 @@ import org.springframework.stereotype.Service;
 public class GetReportServiceImpl implements GetReportService {
 
     private final BookDataRepository bookDataRepository;
-    private final ReviewRepository reviewRepository;
     private final CommunicationServiceImpl communicationService;
     private final CommentService commentService;
 
@@ -23,16 +20,13 @@ public class GetReportServiceImpl implements GetReportService {
      * Constructor for the GetReportServiceImpl.
      *
      * @param bdr - the bookDataRepository
-     * @param rr - the reviewRepository
      * @param cs - the communicationService
      * @param co - the commentService
      */
     public GetReportServiceImpl(BookDataRepository bdr,
-                                ReviewRepository rr,
                                 CommunicationServiceImpl cs,
                                 CommentService co) {
         this.bookDataRepository = bdr;
-        this.reviewRepository = rr;
         this.communicationService = cs;
         this.commentService = co;
     }
@@ -55,7 +49,7 @@ public class GetReportServiceImpl implements GetReportService {
         if (!communicationService.existsBook(bookId)) {
             throw new CustomBadRequestException("Book doesn't exist");
         }
-        if (!(communicationService.isAuthor(bookId, userId) || communicationService.isAdmin(userId))) {
+        if (!(communicationService.isAuthorIntegration(bookId, userId) || communicationService.isAdmin(userId))) {
             throw new CustomBadRequestException("User is not authorised to view this BookData");
         }
 
@@ -91,15 +85,11 @@ public class GetReportServiceImpl implements GetReportService {
     }
 
     private ResponseEntity<BookData> getReportFromBook(Long bookId, BookData result) {
-        List<Long> reviewIds = reviewRepository.findMostUpvotedReviewId(bookId, PageRequest.of(0, 1));
 
-        if (!reviewIds.isEmpty()) {
-            result.setMostUpvotedReview(reviewIds.get(0));
-        }
-        var comments = commentService.findMostUpvotedComment(bookId);
-        if (comments.getStatusCode().is2xxSuccessful()) {
-            result.setMostUpvotedComment(comments.getBody());
-        }
+        List<Long> comments = commentService.findMostUpvotedCommentAndReview(bookId);
+        result.setMostUpvotedReview(comments.get(0));
+        result.setMostUpvotedComment(comments.get(1));
+
         return ResponseEntity.ok(result);
     }
 
@@ -123,8 +113,11 @@ public class GetReportServiceImpl implements GetReportService {
         double totalRating = bd.getAvrRating() * totalReviews;
         totalRating += rating * sign;
         totalReviews += sign;
-        bd.setAvrRating(totalRating / totalReviews);
-
+        if (totalReviews == 0) {
+            bd.setAvrRating(0.0);
+        } else {
+            bd.setAvrRating(totalRating / totalReviews);
+        }
 
         switch (notion) {
             case NEUTRAL -> bd.setNeutralRev(bd.getNeutralRev() + sign);

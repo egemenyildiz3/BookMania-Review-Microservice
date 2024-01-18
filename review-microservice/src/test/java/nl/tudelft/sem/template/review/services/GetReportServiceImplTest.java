@@ -33,7 +33,7 @@ class GetReportServiceImplTest {
         this.reviewRepository = mock(ReviewRepository.class);
         this.communicationService = mock(CommunicationServiceImpl.class);
         this.commentService = mock(CommentService.class);
-        this.service = new GetReportServiceImpl(this.bookDataRepository, this.reviewRepository,
+        this.service = new GetReportServiceImpl(this.bookDataRepository,
                 this.communicationService, commentService);
 
         when(communicationService.existsUser(any(Long.class))).thenReturn(true);
@@ -115,13 +115,17 @@ class GetReportServiceImplTest {
         Review mostUpvoted = new Review(5L, id, 20L, "Review", "text", 5L);
         reviews.add(mostUpvoted.getId());
         when(reviewRepository.findMostUpvotedReviewId(eq(id), any(Pageable.class))).thenReturn(reviews);
-        when(commentService.findMostUpvotedComment(id)).thenReturn(ResponseEntity.badRequest().build());
+        List<Long> ids = new ArrayList<>();
+        ids.add(mostUpvoted.getId());
+        ids.add(null);
+        when(commentService.findMostUpvotedCommentAndReview(id)).thenReturn(ids);
 
         BookData result = service.getReport(id, 5L, "report").getBody();
 
         data.setMostUpvotedReview(mostUpvoted.getId());
 
         assertEquals(data, result);
+        assertNull(result.getMostUpvotedComment());
     }
 
     @Test
@@ -140,13 +144,12 @@ class GetReportServiceImplTest {
         Review mostUpvoted = new Review(5L, id, 20L, "Review", "text", 5L);
         reviews.add(mostUpvoted.getId());
         when(reviewRepository.findMostUpvotedReviewId(eq(id), any(Pageable.class))).thenReturn(reviews);
-        when(commentService.findMostUpvotedComment(id)).thenReturn(ResponseEntity.ok(67L));
+        when(commentService.findMostUpvotedCommentAndReview(id)).thenReturn(List.of(mostUpvoted.getId(),67L));
 
         BookData result = service.getReport(id, 5L, "report").getBody();
 
         data.setMostUpvotedReview(mostUpvoted.getId());
         data.setMostUpvotedComment(67L);
-
         assertEquals(data, result);
     }
 
@@ -164,9 +167,13 @@ class GetReportServiceImplTest {
 
         List<Long> reviews = new ArrayList<>();
         when(reviewRepository.findMostUpvotedReviewId(eq(id), any(Pageable.class))).thenReturn(reviews);
-        when(commentService.findMostUpvotedComment(id)).thenReturn(ResponseEntity.badRequest().build());
+        List<Long> ids = new ArrayList<>();
+        ids.add(null);
+        ids.add(null);
+        when(commentService.findMostUpvotedCommentAndReview(id)).thenReturn(ids);
         BookData result = service.getReport(id, 5L, "report").getBody();
-
+        assertNull(result.getMostUpvotedReview());
+        assertNull(result.getMostUpvotedComment());
         assertEquals(data, result);
     }
 
@@ -362,6 +369,29 @@ class GetReportServiceImplTest {
 
         data.setNeutralRev(0);
         data.setAvrRating((4.0 * 5 - 2) / 4);
+
+        assertNotNull(result);
+        assertEquals(data, result);
+    }
+
+    @Test
+    void removeRatingAndNotionOnlyOne() {
+        long id = 20L;
+        BookData data = new BookData(id);
+        data.setAvrRating(4.0);
+        data.setPositiveRev(1);
+        data.setNeutralRev(0);
+        data.setNegativeRev(0);
+
+        when(bookDataRepository.existsById(id)).thenReturn(true);
+        when(bookDataRepository.getOne(id)).thenReturn(data);
+
+        when(bookDataRepository.save(any(BookData.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        BookData result = service.removeRatingAndNotion(id, 2L, Review.BookNotionEnum.POSITIVE).getBody();
+
+        data.setPositiveRev(0);
+        data.setAvrRating(0.0);
 
         assertNotNull(result);
         assertEquals(data, result);
