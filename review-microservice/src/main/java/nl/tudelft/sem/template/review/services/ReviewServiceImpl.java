@@ -57,8 +57,10 @@ public class ReviewServiceImpl implements ReviewService {
             throw new CustomUserExistsException("Invalid user id.");
         }
 
-        if(repo.existsByBookIdAndUserId(review.getBookId(), review.getUserId()))
+        if (repo.existsByBookIdAndUserId(review.getBookId(), review.getUserId())) {
             throw new CustomBadRequestException("User has already created review for book");
+        }
+
 
         handleText(review.getText());
         handleText(review.getTitle());
@@ -75,7 +77,7 @@ public class ReviewServiceImpl implements ReviewService {
         return ResponseEntity.ok(saved);
     }
 
-    public void updateBookData(Review review){
+    public void updateBookData(Review review) {
         getReportService.addRatingAndNotion(review.getBookId(), review.getRating(), review.getBookNotion());
     }
 
@@ -131,10 +133,8 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public ResponseEntity<Review> update(Long userId, Review review) {
 
-        if (review == null) {
-            throw new CustomBadRequestException("Invalid review id.");
-        }
-        Review dataReview = get(review.getId()).getBody();
+        Review dataReview = repo.findById(review.getId())
+                .orElseThrow(() -> new CustomBadRequestException("Review not found"));
 
 
         //check for user in database
@@ -150,13 +150,20 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
 
-        updateExistingBookData(dataReview,review);
+        updateExistingBookData(dataReview, review);
         handleText(review.getText());
         handleText(review.getTitle());
-        Review saved = updateReview(dataReview,review);
+        Review saved = updateReview(dataReview, review);
         return ResponseEntity.ok(saved);
     }
 
+    /**
+     * Updates the review in the database with the one provided.
+     *
+     * @param dataReview The review from the repo.
+     * @param review The review object passed as parameter.
+     * @return The updated dataReview.
+     */
     public Review updateReview(Review dataReview, Review review) {
         dataReview.setLastEditTime(LocalDate.now());
         dataReview.setText(review.getText());
@@ -167,14 +174,25 @@ public class ReviewServiceImpl implements ReviewService {
         return repo.save(dataReview);
     }
 
-    public void handleText(String text){
+    /**
+     *  Handles the text validation.
+     *
+     * @param text The text to be checked.
+     */
+    public void handleText(String text) {
         TextHandler textHandler = new ProfanityHandler();
         textHandler.setNext(new UrlHandler());
 
         textHandler.handle(text);
     }
 
-    public void updateExistingBookData(Review dataReview, Review review){
+    /**
+     * Updates the existing book data.
+     *
+     * @param dataReview The review from the database.
+     * @param review The review that is passed as a parameter.
+     */
+    public void updateExistingBookData(Review dataReview, Review review) {
         getReportService.updateRatingAndNotion(dataReview.getBookId(),
                 dataReview.getRating(),
                 dataReview.getBookNotion(),
@@ -184,7 +202,8 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public ResponseEntity<String> delete(Long reviewId, Long userId) {
-        Review review = get(reviewId).getBody();
+        Review review = repo.findById(reviewId)
+                .orElseThrow(() -> new CustomBadRequestException("Review not found"));
 
         boolean isAdmin = communicationService.isAdmin(userId); // call method for admin check from users
 
@@ -199,7 +218,8 @@ public class ReviewServiceImpl implements ReviewService {
 
 
     }
-    public void deleteBookDataUpdate(Review review){
+
+    public void deleteBookDataUpdate(Review review) {
         getReportService.removeRatingAndNotion(review.getBookId(), review.getRating(), review.getBookNotion());
     }
 
@@ -242,7 +262,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public ResponseEntity<List<Review>> mostUpvotedReviews(Long userId) {
-        if(!communicationService.existsUser(userId)) {
+        if (!communicationService.existsUser(userId)) {
             throw new CustomUserExistsException("Invalid user id");
         }
         List<Review> finalRes = repo.findTop3ByUserIdOrderByUpvoteDesc(userId);

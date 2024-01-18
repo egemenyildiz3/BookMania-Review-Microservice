@@ -145,7 +145,7 @@ class CommentServiceImplTest {
 
         var result = service.update(10L, comment);
         verify(commentRepository).save(comment1);
-        verify(commentRepository).existsById(1L);
+        verify(commentRepository).findById(1L);
         assertEquals(comment1.getText(),comment.getText());
         assertEquals(result.getBody(), comment1);
         comment.text("great");
@@ -184,7 +184,7 @@ class CommentServiceImplTest {
 
         var result = service.update(2L, comment);
         verify(commentRepository).save(comment);
-        verify(commentRepository).existsById(1L);
+        verify(commentRepository).findById(1L);
         //  verify(commentRepository).findById(1L);
         assertEquals(result.getBody(), comment);
         comment.text("fuck");
@@ -204,7 +204,7 @@ class CommentServiceImplTest {
 
         var result = service.update(2L, comment);
         verify(commentRepository).save(comment);
-        verify(commentRepository).existsById(1L);
+        verify(commentRepository).findById(1L);
         //  verify(commentRepository).findById(1L);
         assertEquals(result.getBody(), comment);
         comment.text("http://");
@@ -224,7 +224,7 @@ class CommentServiceImplTest {
 
         assertThrows(CustomUserExistsException.class, () -> service.update(2L, comment));
         verify(commentRepository, never()).save(comment);
-        verify(commentRepository).existsById(1L);
+        verify(commentRepository).findById(1L);
 
     }
 
@@ -249,8 +249,7 @@ class CommentServiceImplTest {
         when(reviewRepository.save(review)).thenReturn(review);
         when(reviewRepository.getOne(3L)).thenReturn(review);
         final var result = service.delete(1L, 2L);
-        verify(commentRepository).existsById(1L);
-        verify(commentRepository, times(2)).findById(1L);
+        verify(commentRepository).findById(1L);
         verify(reviewRepository).save(review);
         assertTrue(review.getCommentList().isEmpty());
         assertEquals(result.getStatusCode(), HttpStatus.OK);
@@ -267,8 +266,7 @@ class CommentServiceImplTest {
         when(reviewRepository.save(review)).thenReturn(review);
         assertThrows(CustomPermissionsException.class, () -> service.delete(1L, 5L));
 
-        verify(commentRepository).existsById(1L);
-        verify(commentRepository,times(2)).findById(1L);
+        verify(commentRepository).findById(1L);
         verify(reviewRepository, never()).save(review);
         assertTrue(review.getCommentList().contains(comment));
     }

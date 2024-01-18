@@ -67,7 +67,8 @@ public class CommentServiceImpl implements CommentService {
         comment.setTimeCreated(LocalDate.now());
         comment.setReportList(new ArrayList<>());
 
-        Review review = reviewRepository.findById(comment.getReviewId()).get();
+        Review review = reviewRepository.findById(comment.getReviewId())
+                        .orElseThrow(() -> new CustomBadRequestException("Review not found."));
 
         review.addCommentListItem(comment);
         reviewRepository.save(review);
@@ -81,7 +82,7 @@ public class CommentServiceImpl implements CommentService {
         if (!repository.existsById(commentId)) {
             throw new CustomBadRequestException("Invalid comment id.");
         }
-        Comment comment = new Comment(1L,2L,3L,"check");
+        Comment comment = new Comment(1L, 2L, 3L, "check");
         if (repository.findById(commentId).isPresent()) {
             comment = repository.findById(commentId).get();
         }
@@ -107,11 +108,12 @@ public class CommentServiceImpl implements CommentService {
         if (comment == null) {
             throw new CustomBadRequestException("Comment cannot be null");
         }
-        Comment dataCom = get(comment.getId()).getBody();
+        Comment dataCom = repository.findById(comment.getId())
+                .orElseThrow(() -> new CustomBadRequestException("Comment not found."));
         if (!Objects.equals(dataCom.getUserId(), userId)) {
             throw new CustomBadRequestException("User id does not match");
         }
-        if(!communicationService.existsUser(userId)) {
+        if (!communicationService.existsUser(userId)) {
             throw new CustomUserExistsException("Invalid user id");
         }
 
@@ -127,8 +129,8 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public ResponseEntity<String> delete(Long commentId, Long userId) {
-        Comment comment = get(commentId).getBody();
-
+        Comment comment = repository.findById(commentId)
+                .orElseThrow(() -> new CustomBadRequestException("Comment not found."));
         Review rev = reviewRepository.getOne(comment.getReviewId());
         if (Objects.equals(userId, comment.getUserId())) {
             //repository.deleteById(commentId);
@@ -151,7 +153,7 @@ public class CommentServiceImpl implements CommentService {
 
         if (!reviewIds.isEmpty()) {
             result.add(reviewIds.get(0));
-        }else{
+        } else {
             result.add(null);
         }
         List<Comment> allComments = repository.findAll();

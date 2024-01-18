@@ -141,13 +141,11 @@ public class CommunicationServiceImpl {
                 System.out.println(book);
                 reader.close();
                 return book.contains("\"authorId\": " + userId);
-            }
-            else {
+            } else {
                 System.out.println("Failed with status code" + responseCode);
                 return false;
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }
