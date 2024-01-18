@@ -34,7 +34,7 @@ class CommunicationServiceImplTest {
     }
 
     @Test
-    void getResponseTest() {
+    void userIsAdminTest() {
         // Configure a stub for a GET request
 
         wireMockServer.stubFor(get(urlEqualTo("/check/role/1"))
@@ -42,8 +42,8 @@ class CommunicationServiceImplTest {
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody("{\"role\":\"Admin\"}")));
-        boolean book = service.getResponse("http://localhost:8080", 1L,true, true);
-        assertTrue(book);
+        boolean isAdmin = service.getResponse("http://localhost:8080", 1L,true, true);
+        assertTrue(isAdmin);
         // Verify that the expected request was made
         wireMockServer.verify(getRequestedFor(urlEqualTo("/check/role/1")));
     }
@@ -144,13 +144,13 @@ class CommunicationServiceImplTest {
         wireMockServer1.stop();
     }
 
-    @Test
+    /*@Test
     void defaultCases(){
         assertTrue(service.isAdmin(1L));
         assertTrue(service.existsBook(1L));
         assertTrue(service.existsUser(1L));
         assertTrue(service.isAuthor(1L,1L));
-    }
+    }*/
 
     @Test
     void testIsAuthorIntegrationTrue() {

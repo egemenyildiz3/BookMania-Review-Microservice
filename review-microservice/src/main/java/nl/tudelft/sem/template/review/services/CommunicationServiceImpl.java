@@ -46,12 +46,15 @@ public class CommunicationServiceImpl {
 
             responseCode = connection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String inputLine;
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
+                if (admin) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+                    return response.toString().toLowerCase().contains("admin");
                 }
-                in.close();
 
             } else {
                 System.out.println("Failed with status code " + responseCode);
@@ -59,9 +62,6 @@ public class CommunicationServiceImpl {
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
-        }
-        if (admin) {
-            return response.toString().toLowerCase().contains("admin");
         }
         return true;
 
@@ -75,7 +75,7 @@ public class CommunicationServiceImpl {
      */
     public boolean isAdmin(Long userId) {
         //TODO make http request to endpoint for admin
-        return getResponse(userMicroUrl, userId, true, false); //set the second boolean to true to make actual http request
+        return getResponse(userMicroUrl, userId, true, true); //set the second boolean to true to make actual http request
         //return true;
     }
 
@@ -87,7 +87,7 @@ public class CommunicationServiceImpl {
      */
     public boolean existsBook(Long bookId) {
         //TODO make http request to endpoint for book
-        return getResponse(bookMicroUrl, bookId, false, false);
+        return getResponse(bookMicroUrl, bookId, false, true);
         //return true;
     }
 
@@ -99,7 +99,7 @@ public class CommunicationServiceImpl {
      */
     public boolean existsUser(Long userId) {
         //TODO make http request to endpoint for user
-        return getResponse(userMicroUrl, userId, false, false);
+        return getResponse(userMicroUrl, userId, false, true);
         //return true;
     }
 
