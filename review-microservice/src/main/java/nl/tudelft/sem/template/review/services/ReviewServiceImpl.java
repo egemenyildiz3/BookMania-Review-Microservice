@@ -152,6 +152,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         updateExistingBookData(dataReview,review);
         handleText(review.getText());
+        handleText(review.getTitle());
         Review saved = updateReview(dataReview,review);
         return ResponseEntity.ok(saved);
     }

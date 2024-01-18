@@ -29,7 +29,7 @@ public class ReviewController implements ReviewApi {
                             ReviewServiceImpl service) {
         CommunicationServiceImpl communicationService = new CommunicationServiceImpl();
         CommentServiceImpl commentService = new CommentServiceImpl(cr, repo, communicationService);
-        GetReportServiceImpl getReportService = new GetReportServiceImpl(bookDataRepository, repo,
+        GetReportServiceImpl getReportService = new GetReportServiceImpl(bookDataRepository,
                 communicationService, commentService);
 
         this.service = service != null ? service : new ReviewServiceImpl(getReportService, repo, communicationService);

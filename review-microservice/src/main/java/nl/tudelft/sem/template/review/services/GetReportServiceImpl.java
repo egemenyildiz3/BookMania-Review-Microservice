@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 public class GetReportServiceImpl implements GetReportService {
 
     private final BookDataRepository bookDataRepository;
-    private final ReviewRepository reviewRepository;
     private final CommunicationServiceImpl communicationService;
     private final CommentService commentService;
 
@@ -23,16 +22,13 @@ public class GetReportServiceImpl implements GetReportService {
      * Constructor for the GetReportServiceImpl.
      *
      * @param bdr - the bookDataRepository
-     * @param rr - the reviewRepository
      * @param cs - the communicationService
      * @param co - the commentService
      */
     public GetReportServiceImpl(BookDataRepository bdr,
-                                ReviewRepository rr,
                                 CommunicationServiceImpl cs,
                                 CommentService co) {
         this.bookDataRepository = bdr;
-        this.reviewRepository = rr;
         this.communicationService = cs;
         this.commentService = co;
     }
@@ -91,15 +87,11 @@ public class GetReportServiceImpl implements GetReportService {
     }
 
     private ResponseEntity<BookData> getReportFromBook(Long bookId, BookData result) {
-        List<Long> reviewIds = reviewRepository.findMostUpvotedReviewId(bookId, PageRequest.of(0, 1));
 
-        if (!reviewIds.isEmpty()) {
-            result.setMostUpvotedReview(reviewIds.get(0));
-        }
-        var comments = commentService.findMostUpvotedComment(bookId);
-        if (comments.getStatusCode().is2xxSuccessful()) {
-            result.setMostUpvotedComment(comments.getBody());
-        }
+        List<Long> comments = commentService.findMostUpvotedCommentAndReview(bookId);
+        result.setMostUpvotedReview(comments.get(0));
+        result.setMostUpvotedComment(comments.get(1));
+
         return ResponseEntity.ok(result);
     }
 
